@@ -1,0 +1,95 @@
+.cartLeft,
+.cartRight {
+    height: fit-content;
+}
+
+.cartLeft {
+    box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
+}
+
+.cartRight p:last-child {
+    color: #539E31;
+    font-weight: bold;
+}
+
+.voucher {
+    margin-bottom: 10px;
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 4px;
+    background-color: white;
+    box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
+}
+
+.voucherGroup {
+    position: relative;
+}
+
+.voucher input {
+    border-radius: 0;
+    height: 40px;
+}
+
+.voucher button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 6px;
+    font-size: 14px;
+    height: 40px;
+    border: none;
+
+    background-color: #539E31;
+    color: white;
+}
+
+.cartInfo {
+    background-color: white;
+    box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
+}
+
+.voucherCode {
+    background-color: #49a7c3;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.btnCheckout {
+    width: 100%;
+    border: none;
+    margin-top: 10px;
+    border-radius: 2px;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 10px;
+    background-color: #539E31;
+    color: white;
+    box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
+}
+
+.empty {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    padding: 50px;
+    background-color: white;
+}
+
+.empty img {
+    width: 150px;
+}
+
+.backHome {
+    background-color: #17a2b8;
+    color: white;
+    font-size: 16px;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+.backHome:hover {
+    color: white;
+    opacity: 0.9;
+}

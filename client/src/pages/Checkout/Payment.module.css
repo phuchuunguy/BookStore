@@ -1,0 +1,78 @@
+.payment_info {
+    display: flex;
+    flex-direction: column;
+    border-radius: 5px;
+    padding: 25px 20px;
+    margin: 10px auto;
+    background-color: white;
+    box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
+}
+
+.payment_form {
+    background-color: white;
+    box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
+    border-radius: 5px;
+    margin: 10px auto;
+    padding: 25px 20px;
+    font-size: 18px;
+    line-height: 40px;
+    height:fit-content;
+}
+
+.form_right {
+    float: right;
+    color: #539E31;
+    font-weight: bold;
+}
+.form_right1 {
+    float: right;
+}
+.payment_form p {
+    border-bottom: 1px solid gray;
+}
+.payment_form button {
+    width: 100%;
+    border: none;
+    margin-top: 10px;
+    background-color: #539E31;
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.formGroup {
+    margin-bottom: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.formControl {
+    width: 80%;
+}
+
+.formLabel {
+    color: #555;
+    min-width: 100px;
+}
+
+.feedback {
+    margin-left: 100px;
+}
+
+.shippingAddress {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    background-color: rgba(58, 180, 58, 0.376);
+    padding: 8px 12px;
+    border-radius: 5px;
+}
+
+.shippingAddress svg {
+    color: green;
+    margin-left: 8px;
+    font-size: 22px;
+}
+

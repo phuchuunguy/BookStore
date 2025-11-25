@@ -1,0 +1,91 @@
+.bookItem {
+    margin-top: 16px;
+    background-color: white;
+    vertical-align: middle;
+    overflow: hidden;
+    padding: 2px;
+    position: relative;
+}
+
+.bookItem.shadow {
+  box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
+}
+
+.bookItem .card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.bookItem .discount {
+    position: absolute;
+    background-color: #ee4c7e;
+    color: white;
+    font-size: 14px;
+    top: 10px;
+    right: 10px;
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
+    text-align: center;
+    border-radius: 50%;
+    z-index: 99;
+    box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
+}
+
+.bookItem:hover {
+    cursor: pointer;
+}
+
+.bookItem:hover img {
+    transform: scale(1.05);
+    transition: all ease 0.4s;
+}
+
+.bookInfo {
+    height: 275px;
+}
+
+.name {
+    margin: auto 0px;
+    text-align: center;
+    padding-top: 10px;
+}
+
+.bookItem img {
+    margin: 0 auto;
+    max-height: 216px;
+    object-fit: contain;
+}
+
+.name {
+    font-size: 15px;
+    margin: 0;
+
+    /* word-break: break-all; */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cardFooter {
+    padding: 6px;
+    text-align: center;
+    background-color: white;
+    margin-top: auto;
+}
+
+.price {
+    font-weight: 600;
+    color: #539E31;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.oldPrice {
+    text-decoration: line-through;
+    color: #666;
+    margin-left: 10px;
+}

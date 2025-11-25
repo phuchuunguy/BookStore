@@ -1,0 +1,15 @@
+.accountSideBar,
+.contentWrapper {
+    background-color: rgba(106, 189, 69, 0.12);
+    background-color: white;
+    box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.contentWrapperAdmin {
+    margin-left: 240px;
+    background-color: #f4f6f9;
+    overflow: hidden;
+    padding: 20px;
+}

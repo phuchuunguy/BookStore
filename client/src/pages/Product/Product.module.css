@@ -1,0 +1,40 @@
+.orderItem {
+    display: flex;
+    align-items: center;
+}
+
+.orderItem select {
+    width: fit-content;
+    margin-left: 10px;
+}
+
+.pagination {
+    margin-top: 20px;
+}
+
+.filterGroupTitle {
+    display: block;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 40px;
+    margin-bottom: 10px;
+    color: #555;
+    border-bottom: 1px solid #333;
+}
+
+.filterGroupItem {
+    padding: 2px;
+}
+
+.filterGroup label {
+    display: inline-block;
+    width: 100%;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 20px;
+    cursor: pointer;
+}
+
+.chk {
+    margin-right: 8px;
+}

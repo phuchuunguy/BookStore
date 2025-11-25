@@ -1,0 +1,100 @@
+.discount_item {
+    width: 800px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin:0 auto 16px;
+    overflow: hidden;
+    background-color: #fff;
+}
+
+.discount_item_left {
+    width: 120px;
+    height: 120px;
+    background-color: #539E31
+}
+
+.discount_item_left img {
+    width: 100%;
+}
+
+.discount_item_right {
+    flex: 1;
+    padding: 8px 16px;
+    margin: auto;
+}
+
+.discount_item_right > div {
+    display: flex;
+    justify-content: space-between;
+    background-color: rgba(136, 217, 255, 0.2);
+    padding: 8px 4px;
+    border-radius: 4px;
+    position: relative;
+}
+
+.discount_item_right > div::before {
+    content: "";
+    position: absolute;
+    left: -8px; top: 0; bottom: 0;
+    border-left: 1px dashed #ccc;
+}
+
+.info h6{
+    color: #555;
+}
+
+.info p {
+    display: flex;
+    align-items: center;
+    padding-top: 8px;
+    color: #539E31;
+    font-weight: 400;
+}
+
+.info p svg{
+    margin-right: 4px;
+    transform: translateY(1px);
+    font-size: 16px
+}
+
+.actions {
+    display: flex;
+    flex-direction: column;
+}
+
+.actions button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    background: #539E31;
+    padding: 4px 8px;
+    width: 140px;
+    border-radius: 4px;
+    color: #fff;
+    font-weight: 500;
+    font-size: 14px
+}
+
+.actions button:first-child {
+    margin-bottom: 10px;
+}
+.actions button svg {
+    margin-right: 4px;
+}
+
+.actions a {
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+button.unactive {
+    pointer-events: none;
+    background-color: #ccc;
+}
+
+.actions button svg {
+    font-size:18px
+}

@@ -1,0 +1,26 @@
+.dashboardCard {
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 4px;
+    box-shadow: 0 0 5px 1px rgb(0 0 0 / 15%);
+    color: white;
+}
+
+.dashboardCard .icon {
+  font-size: 65px;
+  color: rgba(0, 0, 0, .15);
+}
+
+.dashboardCard .info {
+  font-weight: 600;
+
+}
+
+.dashboardCard .info .title {
+  color: white;
+  font-size: 32px;
+  font-weight: 700;
+}
+  

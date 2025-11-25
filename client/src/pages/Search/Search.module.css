@@ -1,0 +1,44 @@
+.main{
+    --primary-color: #539E31;
+    margin-top: 165px;
+    padding-top: 32px
+}
+
+.carousels {
+    overflow: hidden;
+}
+
+.booksList {
+    margin: 32px;
+}
+
+.title {
+    display: flex;
+    justify-content: center;
+}
+
+.titleHeading {
+    position: relative;
+    padding-bottom: 6px;
+}
+
+.titleHeading::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    display: block;
+    width: 80%;
+    height: 2px;
+    background-color: var(--primary-color);
+}
+.notfound {
+    font-size: 30px;
+    text-align: center;
+    font-style: italic;
+    padding: 20px;
+    background-color: rgb(228, 228, 228);
+}
+.keyword {
+    font-weight: bold;
+}

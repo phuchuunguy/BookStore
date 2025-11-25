@@ -1,0 +1,60 @@
+.footer {
+    background-color: #252932;
+    height:fit-content;
+    padding: 20px 0;
+}
+
+.footer .footerGroup p,
+.footer .footerGroup a {
+    color: #ccc;
+    font-weight: 300;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.footer .bookstoreHighlight {
+    font-weight: 700;
+    color: #539E31;
+    margin-top: -10px;
+}
+
+.footer .footerGroup .title {
+    font-weight: 600;
+    font-size: 17px;
+    color: white;
+}
+
+.footer .formGroup {
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.footer .subscribeBtn {
+    position: absolute;
+    right: 8px;
+    color: #0FA958;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.footer .boxSocial .bookstoreBtn {
+    color: #A4A4A4;
+    font-size: 28px;
+    margin-right: 12px;
+}
+
+@media (max-width: 576px) {
+
+    .footer {
+        font-size: 14px;
+    }
+
+    .footerGroup {
+        margin-top: 10px;
+    }
+
+    .cateList {
+        display: none;
+    }
+    
+ }

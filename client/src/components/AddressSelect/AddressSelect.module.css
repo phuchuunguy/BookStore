@@ -1,0 +1,12 @@
+.boxSelect {
+    display: flex;
+    justify-content: space-between;
+}
+
+.boxSelect select:not(:last-child) {
+    margin-right: 10px;
+}
+
+.addressDetail {
+    margin-top: 10px;
+}

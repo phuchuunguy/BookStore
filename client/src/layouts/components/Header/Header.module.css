@@ -1,0 +1,164 @@
+.header {
+    /* position: fixed; */
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    background-color: white;
+    /* height: 135px; */
+    box-shadow: 0 1px 4px 1px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
+}
+
+.headerRow {
+    display: flex;
+    align-items: center;
+}
+
+.navigateAdmin {
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.header .bookstoreHighlight {
+    font-weight: 700;
+    color: #539E31;
+    font-size: 36px;
+}
+
+.header .headerCenter {
+    display: flex;
+    align-items: center;
+    height: 80px;
+}
+
+.headerCenter .headerCenterRight {
+    margin-left: auto;
+}
+
+.headerCenter .headerCenterRight svg {
+    font-size: 24px;
+}
+
+.headerCenter .headerCenterRight .headerIcon:not(:first-child) {
+    margin-left: 10px;
+}
+
+.headerCenter .headerIcon {
+    text-align: center;
+}
+
+.headerIcon a {
+    position: relative;
+}
+
+.header .headerBottom {
+    height: 50px;
+}
+
+.account {
+    position: relative;
+    cursor: pointer;
+}
+
+.account .avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+.account .accountPopup {
+    position: absolute;
+    z-index: 100;
+    text-align: left;
+    top: 100%;
+    right: 0;
+    width: 200px;
+    box-shadow: 0 0 4px 2px rgba(0, 0, 0, 0.1);
+    color: black;
+    background-color: white;
+    display: none;
+}
+
+.account:hover .accountPopup {
+    display: block;
+}
+
+.accountPopup .item {
+    border-bottom: 1px solid #eee;
+}
+
+.accountPopup .popupLink {
+    display: block;
+    padding: 8px;
+}
+
+.accountPopup .popupLink:hover {
+    background-color: #fafafa;
+}
+
+.count {
+    position: absolute;
+    top: -15px;
+    right: 10px;
+    background: orange;
+    color: white;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 15px;
+}
+
+.searchMobile {
+    display: none;
+}
+
+@media (max-width: 576px) {
+
+
+    .header {
+        padding: 4px 0;
+    }
+
+    .headerRow {
+        justify-content: space-between;
+    }
+
+    .header .headerCenter {
+        height: 60px;
+    }
+
+    .headerCenter .headerCenterRight {
+        margin-left: 0;
+    }
+
+    .header .bookstoreHighlight {
+        font-size: 30px;
+        margin-right: 10px !important;
+    }
+
+    .headerCenter .headerIcon svg {
+        font-size: 32px;
+    }
+
+    .headerCenter .headerIcon p {
+        display: none;
+    }
+
+    .search {
+        display: none;
+    }
+
+    .searchMobile {
+        display: block;
+    }
+    
+    .count {
+        top: -18px;
+        right: -5px;
+        width: 18px;
+        height: 18px;
+        font-size: 15px;
+    }
+}

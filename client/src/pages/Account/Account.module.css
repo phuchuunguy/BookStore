@@ -1,0 +1,72 @@
+.formGroup {
+    margin-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.formControl {
+    width: 75%;
+}
+
+.formLabel {
+    color: #555;
+    min-width: 150px;
+}
+
+.feedback {
+    margin-left: 150px;
+}
+
+.radioItem {
+    margin-right: 36px;
+}
+
+.submitBtn {
+    padding: 8px 20px;
+    width: auto;
+    background-color: #539E31;
+    color: white;
+    font-weight: 500;
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+input[type="radio"] {
+    margin-right: 4px;
+}
+
+/* Address */
+
+.addressWrapper {
+    background-color: white;
+}
+
+.addAddressBtn,
+.submitBtn {
+    padding: 8px 20px;
+    width: auto;
+    background-color: #539E31;
+    color: white;
+    font-weight: 500;
+    font-size: 16px;
+    margin: 10px 0;
+    border-radius: 4px;
+}
+
+.submitBtn {
+    background-color: #dc3545;
+}
+
+.addressWrapper table {
+    text-align: center;
+}
+
+.addressWrapper table tr td:nth-child(2) {
+    text-align: justify;
+}
+
+.btnCheck {
+    color: #539E31;
+    vertical-align: text-bottom;
+}

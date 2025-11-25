@@ -1,0 +1,12 @@
+.container {
+    font-size: medium;
+    color: black;
+}
+.name {
+    color: gray;
+}
+.right {
+    float: right;
+    color: #539E31;
+    font-weight: bold;
+}

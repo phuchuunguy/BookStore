@@ -1,0 +1,69 @@
+.formGroup {
+    margin-bottom: 16px;
+}
+
+.submitBtn {
+    padding: 8px 12px;
+    width: 100%;
+    background-color: #539E31;
+    color: white;
+    font-weight: 500;
+    margin: 10px 0;
+}
+
+.boxLoginThirdParty {
+    display: flex;
+    justify-content: center;
+    border: 1px solid #ccc;
+    width: 220px;
+    padding: 6px;
+    border-radius: 4px;
+}
+
+.boxLoginThirdParty:hover {
+    background-color: #f3f2f2;
+}
+
+.boxLoginThirdParty button {
+    margin-left: 8px;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.boxLoginThirdParty img {
+    width: 30px;
+    height: 30px;
+}
+
+.forgotPassword {
+    color: red;
+}
+
+.sent {
+    background-color: #f6f8fa;
+}
+
+.info {
+    font-weight: 500;
+}
+
+@media (max-width: 576px) {
+
+    .boxLoginThirdParty {
+        border: 1px solid #ccc;
+        width: calc(50% - 10px);
+        padding: 6px 2px;
+    }
+    
+   
+    .boxLoginThirdParty button {
+        margin-left: 4px;
+        font-size: 12px;
+    }
+    
+    .boxLoginThirdParty img {
+        width: 20px;
+        height: 20px;
+    }
+    
+  }
