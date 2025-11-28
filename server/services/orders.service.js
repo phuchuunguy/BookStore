@@ -96,18 +96,26 @@ const orderService = {
         return orderData;
     },
 
-    create: async({ userId, products, delivery, voucherId, cost, method, paymentId }) => {
+    create: async(data) => { // Nhận cả cục data cho gọn
+        // Xử lý voucherId: Nếu là chuỗi rỗng "" hoặc undefined thì chuyển thành null
+        const voucherId = data.voucherId ? data.voucherId : null;
+
+        // Đảm bảo các trường JSON được stringify nếu cần (Sequelize tự lo nhưng cẩn thận vẫn hơn)
+        // Nếu cột DB là JSON thì truyền Object/Array. Nếu là LONGTEXT thì JSON.stringify
+        
         return await Order.create({
-            userId,
-            products,
-            delivery,
-            voucherId,
-            cost,
-            method,
-            paymentId
+            ...data,
+            voucherId: voucherId, // Gán giá trị đã xử lý
+            
+            // Đảm bảo các trường này là object/array (Sequelize sẽ tự stringify nếu cột là JSON)
+            products: data.products, 
+            delivery: data.delivery,
+            cost: data.cost,
+            method: data.method,
+            address: data.address
         });
     },
-    
+
     updatePaymentStatusByPaymentId: async(paymentId, { paymentStatus, method }) => {
         const order = await Order.findOne({ where: { paymentId } });
         if (order) {
