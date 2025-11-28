@@ -7,6 +7,15 @@ const voucherService = require('../services/vouchers.service')
 const { paymentStatusEnum, methodEnum, orderStatusEnum } = require('../utils/enum')
 const { orderSuccess } = require('../utils/sendMail')
 
+const steps = [
+    { code: 0, text: "Chờ cửa hàng xác nhận" },
+    { code: 1, text: "Đã xác nhận đơn hàng" },
+    { code: 2, text: "Đã đóng gói. Chuẩn bị giao" },
+    { code: 3, text: "Đang trên đường vận chuyển" },
+    { code: 4, text: "Kiện hàng sắp đến" },
+    { code: 5, text: "Giao hàng thành công" }
+];
+
 const orderController = {
     getAll: async(req, res) => {
         try {
@@ -15,10 +24,15 @@ const orderController = {
             const sort = req.query.sort ? req.query.sort : { createdAt: -1 }
             const userId = req.query.userId
 
-            let query = {}
-            if (userId) query.user = { $in : userId}
+            const { Op } = require('sequelize');
+            const where = {};
+            if (userId) {
+                // support single userId or array
+                if (Array.isArray(userId)) where.userId = { [Op.in]: userId };
+                else where.userId = userId;
+            }
 
-            const [count, data] = await orderService.getAll({query, page, limit, sort})
+            const [count, data] = await orderService.getAll({query: where, page, limit, sort})
             const totalPage = Math.ceil(count / limit)
 
             res.status(200).json({
@@ -227,48 +241,41 @@ const orderController = {
     updateOrderStatus: async(req, res) => {
         try {
             const { id } = req.params
-            const { orderStatusCode } = req.body
-            const { user: { userId } } = req
-            const order = await orderService.getById(id)
+            const { orderStatusCode } = req.body // Nhận code mới từ Frontend (ví dụ: 1, 2...)
 
-            const { method, paymentStatus, orderStatus: { code: oldCode } } = order
-
-            if (method?.code !== methodEnum?.cash?.code && paymentStatus?.code !== paymentStatusEnum?.Paid?.code) {
-                return res.status(400).json({error: 1, message: "Khách hàng chưa thanh toán! Không thể thực hiện!"})
+            // 1. Tìm object trạng thái tương ứng với code
+            const newStatusObj = steps.find(s => s.code === parseInt(orderStatusCode));
+            
+            if (!newStatusObj) {
+                return res.status(400).json({ message: 'Mã trạng thái không hợp lệ!', error: 1 });
             }
 
-            const orderStatus = (Object.entries(orderStatusEnum).find(([a, b]) => +b.code === +orderStatusCode))?.[1]
+            // 2. Cập nhật trạng thái mới vào DB
+            await orderService.updateStatus(id, { 
+                orderStatus: newStatusObj,
+                // Nếu giao thành công (code 5) thì set thanh toán thành công (code 2) luôn (tuỳ logic shop bạn)
+                paymentStatus: newStatusObj.code === 5 ? { code: 2, text: "Đã thanh toán" } : undefined 
+            });
 
-            if (!orderStatus) return res.status(400).json({error: 1, message: "Trạng thái không hợp lệ!"})
-                
-            const { code } = orderStatus
+            // 3. Thêm lịch sử (Tracking) - Dùng hàm addTracking trong Service đã fix lỗi JSON
+            const updatedOrder = await orderService.addTracking(id, {
+                status: newStatusObj.text,
+                time: new Date(),
+                userId: req.user.id // Lưu lại ai là người cập nhật
+            });
 
-            if (code <= oldCode) {
-                return res.status(400).json({error: 1, message: "Trạng thái không hợp lệ!"})
-            }
+            // Trả về đơn hàng mới nhất
+            const finalData = await orderService.getById(id);
 
-            let newPaymentStatus = { ...paymentStatus }
-
-            if (method?.code === methodEnum?.cash?.code && code === orderStatusEnum?.delivered?.code) {
-                newPaymentStatus = paymentStatusEnum?.Paid
-            }
-
-            const data = await orderService.updateStatus(id, {
-                orderStatus, paymentStatus: newPaymentStatus
-            })
-            if (data) {
-                await orderService.addTracking(id, { status: orderStatus?.text, time: new Date(), userId })
-            }
             res.status(200).json({
                 message: 'success',
                 error: 0,
-                data: data
+                data: finalData // Trả về data đã update
             })
+
         } catch (error) {
-            res.status(500).json({
-                message: `Có lỗi xảy ra! ${error.message}`,
-                error: 1,
-            })
+            console.log("Lỗi Update Order:", error);
+            res.status(500).json({ message: error.message, error: 1 })
         }
     },
 }

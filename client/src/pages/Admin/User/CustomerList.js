@@ -88,7 +88,7 @@ export default function CustomerList() {
       <Modal size="lg" dialogClassName="modal-w1100" show={showOrderDetailModal} onHide={() => setShowOrderDetailModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>
-            Hóa đơn <Badge bg="secondary">{orderDetail?._id}</Badge>
+            Hóa đơn <Badge bg="secondary">{orderDetail?.id}</Badge>
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -124,7 +124,7 @@ export default function CustomerList() {
                   ) : orderList && orderList.length > 0 ? (
                     orderList.map((item, index) => {
                       return (
-                        <tr key={item?._id}>
+                        <tr key={item?.id}>
                           <td>{(1 && page - 1) * 10 + (index + 1)}</td>
                           <td className="text-start">
                             <p>Người nhận: <b>{item?.delivery?.fullName}</b></p>
@@ -145,7 +145,7 @@ export default function CustomerList() {
                           <td>
                             <button
                               className="btn btn-primary"
-                              onClick={() => handleGetOrderDetail(item?._id)}
+                              onClick={() => handleGetOrderDetail(item?.id)}
                             >
                               <FaEye />
                             </button>
@@ -205,7 +205,7 @@ export default function CustomerList() {
                 ) : customerData?.list && customerData?.list?.length > 0 ? (
                   customerData.list.map((item, index) => {
                     return (
-                      <tr key={item._id}>
+                      <tr key={item.id}>
                         <td>{(1 && page - 1) * 10 + (index + 1)}</td>
                         <td className="text-start">
                           <div className="d-flex align-items-center">
@@ -220,7 +220,7 @@ export default function CustomerList() {
                         <td><p>{item?.serviceId ? item?.service : "Tài khoản BookStore"}</p></td>
                         <td><Badge bg={item?.status === 1 ? "success" : "danger"}>{item?.status === 1 ? "Đã xác minh" : "Chưa xác minh"}</Badge></td>
                         <td>
-                          <Button variant="warning" onClick={() => getOrderHistory(item?._id)} >
+                          <Button variant="warning" onClick={() => getOrderHistory(item?.id)} >
                             Lịch sử mua hàng
                           </Button>
                         </td>

@@ -30,10 +30,12 @@ function Home() {
           </div>
           <Row className={styles.row}>
             {books && books.length > 0 ? (
-               books.map(book => 
-                <Col xl={2} xs={6} key={book._id}>
-                  <BookItem data={book} />
-                </Col>)
+               books.map(book => (
+                <Col xl={2} xs={6} key={book.id}>
+                  {/* --- SỬA TẠI ĐÂY: data={book} -> item={book} --- */}
+                  <BookItem item={book} />
+                </Col>
+               ))
             ) : <Loading />}
           </Row>
         </div>

@@ -3,7 +3,9 @@ import axiosClient from "./axiosClient"
 const userApi = {
     getAll: ({page = 1, limit, sort = { createdAt: -1 }, query = null}) => {
         const url = 'users/'
-        return axiosClient.get(url, { params: {page, limit, sort, query}})
+        const params = { page, limit, sort }
+        if (query) params.query = typeof query === 'string' ? query : JSON.stringify(query)
+        return axiosClient.get(url, { params })
     },
     addAddress: (id, data) => {
         const url = `users/${id}/address`

@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom"
+import { Link } from "react-router-dom";
 import { toast } from 'react-toastify';
 import PaginationBookStore from "../../../../components/PaginationBookStore";
-import { FaEdit, FaTrashAlt, FaSearch } from "react-icons/fa"
-
+import { FaEdit, FaTrashAlt, FaSearch } from "react-icons/fa";
 
 import { Row, Col, Table, Spinner, Modal, Button } from "react-bootstrap";
 import bookApi from "../../../../api/bookApi";
@@ -12,24 +11,30 @@ import format from "../../../../helper/format";
 function BookList() {
   const [bookData, setBookData] = useState({});
   const [page, setPage] = useState(1);
-
   const [loading, setLoading] = useState(false);
-
-  const [bookDelete, setBookDelete] = useState({})
-
+  const [bookDelete, setBookDelete] = useState({});
   const [showModal, setShowModal] = useState(false);
 
-  const [searchInput, setSearchInput] = useState("")
-  const [searchString, setSearchString] = useState("")
+  // State cho ô tìm kiếm
+  const [searchInput, setSearchInput] = useState("");
+  const [searchString, setSearchString] = useState(""); // Biến này thay thế cho 'keyword'
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const query = {
-          name: { "$regex": searchString, "$options": "i" }
+        
+        // 1. Tạo object query
+        const queryObj = {};
+        if (searchString && searchString.trim() !== '') {
+          queryObj.name = searchString; // Gán tên cần tìm vào query
         }
-        console.log(query)
+
+        // 2. Chuyển thành chuỗi JSON để Backend (MySQL) đọc được
+        const query = JSON.stringify(queryObj);
+
+        console.log("Query gửi đi:", query);
+
         const res = await bookApi.getAll({ query, page: page, limit: 10 });
         setLoading(false);
         setBookData({ books: res.data, totalPage: res.pagination.totalPage });
@@ -39,35 +44,34 @@ function BookList() {
       }
     };
     fetchData();
-  }, [page, searchString]);
-
+  }, [page, searchString]); // Xóa 'keyword' khỏi dependency vì không tồn tại
 
   const handleChangePage = useCallback((page) => {
     setPage(page);
   }, []);
 
-  const handleCallApiDelete = async (e) => {
+  const handleCallApiDelete = async () => {
     try {
-      const { data: orders } = await bookApi.checkIsOrdered(bookDelete._id)
+      const { data: orders } = await bookApi.checkIsOrdered(bookDelete.id);
       if (orders.length > 0) {
-        toast.error('Sản phẩm đã được mua, không thể xóa!', {autoClose: 2000})
-        return
+        toast.error('Sản phẩm đã được mua, không thể xóa!', { autoClose: 2000 });
+        return;
       }
-      await bookApi.delete(bookDelete._id)
-      toast.success("Xóa thành công!", {autoClose: 2000})
-      setShowModal(false)
+      await bookApi.delete(bookDelete.id);
+      toast.success("Xóa thành công!", { autoClose: 2000 });
+      setShowModal(false);
       setBookData((preState) => {
         const newArray = [...preState.books];
         return {
           ...preState,
-          books: newArray.filter((item) => item._id !== bookDelete._id)
-        }
+          books: newArray.filter((item) => item.id !== bookDelete.id),
+        };
       });
     } catch (error) {
-      alert("Xóa thất bại!")
-      setShowModal(false)
+      alert("Xóa thất bại!");
+      setShowModal(false);
     }
-  }
+  };
 
   return (
     <Row>
@@ -75,7 +79,9 @@ function BookList() {
         <Modal.Header closeButton>
           <Modal.Title>Xóa sách</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Bạn có chắc xóa sách <b>{bookDelete && bookDelete?.name}</b> này không?</Modal.Body>
+        <Modal.Body>
+          Bạn có chắc xóa sách <b>{bookDelete && bookDelete?.name}</b> này không?
+        </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>
             Hủy
@@ -90,14 +96,28 @@ function BookList() {
           <div className="admin-content-header">Danh sách sản phẩm</div>
           <div className="admin-content-action">
             <div className="d-flex">
-              <input className="form-control search" placeholder="Tìm kiếm" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
-              <Button type="button" style={{color: "white"}} variant="info"
-                onClick={() => {
-                  setSearchString(searchInput)
-                  setPage(1)
+              <input
+                className="form-control search"
+                placeholder="Tìm kiếm theo tên sách..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                        setSearchString(searchInput);
+                        setPage(1);
+                    }
                 }}
-                >
-                  <FaSearch />
+              />
+              <Button
+                type="button"
+                style={{ color: "white", marginLeft: "10px" }}
+                variant="info"
+                onClick={() => {
+                  setSearchString(searchInput);
+                  setPage(1);
+                }}
+              >
+                <FaSearch />
               </Button>
             </div>
           </div>
@@ -118,22 +138,31 @@ function BookList() {
                 {loading ? (
                   <tr>
                     <td colSpan={7}>
-                      <Spinner
-                        animation="border"
-                        variant="success"
-                      />
+                      <div className="text-center py-4">
+                        <Spinner animation="border" variant="success" />
+                      </div>
                     </td>
                   </tr>
                 ) : bookData.books && bookData.books.length > 0 ? (
                   bookData.books.map((item, index) => {
                     return (
-                      <tr key={item._id}>
+                      <tr key={item.id}>
                         <td>{(1 && page - 1) * 10 + (index + 1)}</td>
-                        <td className="text-start" style={{width: 500}}>
-                          {item.name} - {format.arrayToString(item.author || [])}
+                        <td className="text-start" style={{ width: 400 }}>
+                          <b>{item.name}</b>
+                          <br />
+                          <small className="text-muted">
+                            {/* Xử lý hiển thị Tác giả an toàn */}
+                            Tác giả: {Array.isArray(item.author) 
+                                ? item.author.map(a => a.name).join(', ') 
+                                : 'Đang cập nhật'}
+                          </small>
                         </td>
                         <td>
-                          {format.arrayToString(item.genre || [])}
+                           {/* Xử lý hiển thị Thể loại an toàn */}
+                           {Array.isArray(item.genre) 
+                                ? item.genre.map(g => g.name).join(', ') 
+                                : 'Đang cập nhật'}
                         </td>
                         <td>
                           {item.publisher?.name} - {item.year}
@@ -142,9 +171,9 @@ function BookList() {
                         <td>{item.discount}</td>
                         <td>
                           <Link
-                            to={`/admin/book/update/${item._id}`}
+                            to={`/admin/book/update/${item.id}`}
                             className="btn btn-warning"
-                            data-id={item._id}
+                            data-id={item.id}
                           >
                             <FaEdit />
                           </Link>
@@ -153,8 +182,8 @@ function BookList() {
                           <button
                             className="btn btn-danger"
                             onClick={() => {
-                              setBookDelete(item)
-                              setShowModal(true)
+                              setBookDelete(item);
+                              setShowModal(true);
                             }}
                           >
                             <FaTrashAlt />
@@ -165,7 +194,7 @@ function BookList() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={7}>Không có sản phẩm nào!</td>
+                    <td colSpan={7} className="text-center">Không có sản phẩm nào!</td>
                   </tr>
                 )}
               </tbody>

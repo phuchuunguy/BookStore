@@ -24,7 +24,7 @@ export default function GenreDetail() {
         const sortArr = sortString.split('|')
         const { data, pagination } = await bookApi.getAll({
           query: {
-            genre: { "$in": genreData?._id}
+            genre: { "$in": genreData?.id}
           },
           limit: 8,
           page: page,
@@ -38,7 +38,7 @@ export default function GenreDetail() {
       }
     };
 
-    if (genreData?._id) {
+    if (genreData?.id) {
       fetchData();
     }
   }, [genreData, sortString, page]);
@@ -98,7 +98,7 @@ export default function GenreDetail() {
             <Row>
               {bookData.books && bookData.books.length > 0
                 ? bookData.books.map((book) => (
-                    <Col xl={3} key={book._id}>
+                    <Col xl={3} key={book.id}>
                       <BookItem data={book} />
                     </Col>
                   ))

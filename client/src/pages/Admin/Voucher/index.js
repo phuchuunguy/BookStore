@@ -54,14 +54,14 @@ function Voucher() {
 
   const handleCallApiDelete = async (e) => {
     try {
-      await voucherApi.deleteVoucher(voucherDelete._id);
+      await voucherApi.deleteVoucher(voucherDelete.id);
       setShowModal(false)
       alert("Xóa thành công!")
       setVoucherData((preState) => {
         const newArray = [...preState.vouchers];
         return {
           ...preState,
-          vouchers: newArray.filter((item) => item._id !== voucherDelete._id)
+          vouchers: newArray.filter((item) => item.id !== voucherDelete.id)
         }
       });
     } catch (error) {
@@ -91,11 +91,11 @@ function Voucher() {
   const handleSubmitUpdate = async (e) => {
     e.preventDefault()
     try {
-      const { start, end, _id } = selectedVoucher
+      const { start, end, id } = selectedVoucher
       if (new Date(start) > new Date(end)) {
         return alert("Ngày kết thúc phải lớn hơn ngày bắt đầu!")
       }
-      await voucherApi.updateVoucher(_id, { ...selectedVoucher, start: new Date(start), end: new Date(end) })
+      await voucherApi.updateVoucher(id, { ...selectedVoucher, start: new Date(start), end: new Date(end) })
       alert("Thành công!")
       setRerender(!rerender)
       setShowUpdateModal(false)
@@ -277,7 +277,7 @@ function Voucher() {
                 ) : voucherData.vouchers && voucherData.vouchers.length > 0 ? (
                   voucherData.vouchers.map((item, index) => {
                     return (
-                      <tr key={item._id}>
+                      <tr key={item.id}>
                         <td>{(1 && page - 1) * 10 + (index + 1)}</td>
                         <td>{item.name}</td>
                         <td>{item.code}</td>
@@ -302,9 +302,9 @@ function Voucher() {
                         <td>
                           <button
                             className="btn btn-danger"
-                            onClick={() => {
+                              onClick={() => {
                               setVoucherDelete({
-                                _id: item._id,
+                                id: item.id,
                                 code: item.code
                               })
                               setShowModal(true)

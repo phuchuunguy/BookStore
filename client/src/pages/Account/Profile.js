@@ -21,7 +21,7 @@ export default function Profile() {
           const res = await userApi.getById(currentUser.userId)
           const data = res.data
           setProfile({
-            _id: data._id,
+            id: data.id,
             email: data.email,
             fullName: data.fullName,
             phoneNumber: data.phoneNumber,
@@ -64,7 +64,7 @@ export default function Profile() {
       const  { fullName, gender, phoneNumber, birthday } = formik.values
 
       try {
-        const result = await userApi.updateById(profile._id, {
+        const result = await userApi.updateById(profile.id, {
           fullName, gender, phoneNumber, birthday
         })
         dispatch(updateFullName({fullName: result.data.fullName}))

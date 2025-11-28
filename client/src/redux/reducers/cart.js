@@ -1,7 +1,7 @@
 const initialState =  {
     list: [],
     voucher: {
-        _id: "",
+        id: "",
         code: "",
         value: 0,
         minimum: 0,
@@ -22,7 +22,7 @@ const cartReducer = (state = initialState, action) => {
             let isFind = false
             const { productId, quantity, price, ...data } = action.payload
             newList.forEach(item => {
-                if (item.product._id === productId) {
+                if (item.product.id === productId) {
                     isFind = true
                     item.quantity += parseInt(quantity)
                     item.totalPriceItem = item.quantity * price
@@ -30,7 +30,7 @@ const cartReducer = (state = initialState, action) => {
                 }
             })
             if (!isFind) {
-                newList.push({product: {_id: productId, price, ...data}, quantity: quantity, totalPriceItem: quantity * price })
+                newList.push({product: {id: productId, price, ...data}, quantity: quantity, totalPriceItem: quantity * price })
             }   
 
             const subTotal = newList.reduce((sum, product) => sum + product.totalPriceItem, 0)
@@ -61,7 +61,7 @@ const cartReducer = (state = initialState, action) => {
             const { voucher, shippingFee } = state
             const { value, by, minimum } = voucher
             newList.forEach(item => {
-                if (item.product._id === action.payload.productId) {
+                if (item.product.id === action.payload.productId) {
                     item.quantity = action.payload.quantity
                     item.totalPriceItem = item.quantity * item.product.price
                     return
@@ -102,7 +102,7 @@ const cartReducer = (state = initialState, action) => {
             const { voucher, shippingFee } = state
             const { minimum, value, by } = voucher
 
-            const newList = [...state.list].filter(item => item.product._id !== action.payload.productId)
+            const newList = [...state.list].filter(item => item.product.id !== action.payload.productId)
             const subTotal = newList.reduce((sum, product) => sum + product.totalPriceItem, 0)
 
             let updateVouhcer = voucher

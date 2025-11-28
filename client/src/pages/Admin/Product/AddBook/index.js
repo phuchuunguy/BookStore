@@ -27,7 +27,7 @@ function AddBook() {
     const fetchAuthors = async () => {
       try {
         const { data } = await authorApi.getAll({ limit: 0 })
-        const opts = data.map(item => { return {value: item._id, label: item.name} })
+        const opts = data.map(item => { return {value: item.id, label: item.name} })
         setAuthorList(opts)
       } catch (error) {
         console.log(error)
@@ -44,7 +44,7 @@ function AddBook() {
     const fetchGenres = async () => {
       try {
         const { data } = await genreApi.getAll({})
-        const opts = data.map(item => { return {value: item._id, label: item.name} })
+        const opts = data.map(item => { return {value: item.id, label: item.name} })
         setGenreList(opts)
       } catch (error) {
         console.log(error)
@@ -68,7 +68,7 @@ function AddBook() {
       description: "",
       author: [],
       genre: [],
-      publisher: publisherList[0] ? publisherList[0]._id : "",
+      publisher: publisherList[0] ? publisherList[0].id : "",
     },
     enableReinitialize: true,
     validateOnChange: false,
@@ -76,10 +76,10 @@ function AddBook() {
     validationSchema: Yup.object({
       bookId: Yup.string()
         .required("Không được bỏ trống trường này!")
-        .test("is-use", "Mã sách đã tồn tại!", async function (value) {
+            .test("is-use", "Mã sách đã tồn tại!", async function (value) {
           try {
             const res = await bookApi.getByBookId(value);
-            return res?.data?._id ? false : true;
+            return res?.data?.id ? false : true;
           } catch (error) {
             console.log(error)
           }
@@ -220,9 +220,9 @@ function AddBook() {
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                     >
-                      {publisherList.length > 0 &&
+                          {publisherList.length > 0 &&
                         publisherList.map((publisher) => (
-                          <option key={publisher._id} value={publisher._id}>
+                          <option key={publisher.id} value={publisher.id}>
                             {publisher.name}
                           </option>
                         ))}

@@ -34,7 +34,7 @@ export default function ProductDetail() {
       try {
         const { list } = cartData
         const newList = list.map(item => {
-          return { product: item.product._id, quantity: item.quantity }
+          return { product: item.product.id, quantity: item.quantity }
         })
         await userApi.updateCart(currentUser.userId, {cart: newList})
       } catch (error) {
@@ -87,7 +87,7 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (currentUser && currentUser.userId) {
-      const { _id: productId, name, imageUrl, slug, price, discount } = bookData
+      const { id: productId, name, imageUrl, slug, price, discount } = bookData
       let newPrice = price
       if (discount > 0) {
         newPrice = price - price * discount / 100
@@ -104,7 +104,7 @@ export default function ProductDetail() {
 
   const handleBuyNow = () => {
     if (currentUser && currentUser.userId) {
-      const { _id: productId, name, imageUrl, slug, price, discount } = bookData
+      const { id: productId, name, imageUrl, slug, price, discount } = bookData
       let newPrice = price
       if (discount > 0) {
         newPrice = price - price * discount / 100

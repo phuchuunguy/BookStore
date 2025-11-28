@@ -108,7 +108,7 @@ function AnalyticsPage() {
           }
         }
         setRevenueChartData({
-          labels: chartData.map((item) => item._id),
+          labels: chartData.map((item) => item.id),
           datasets: [
             {
               label: "Doanh thu",
@@ -131,7 +131,7 @@ function AnalyticsPage() {
       try {
         const { data: chartData } = await analyticApi.getCountOrderLifeTime();
         setOrderCountLifeTimeChartData({
-          labels: chartData.map((item) => item?._id),
+          labels: chartData.map((item) => item?.id),
           datasets: [
             {
               label: "Số lượng đơn hàng",

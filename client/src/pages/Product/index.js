@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Container, Row, Col, NavLink, Breadcrumb } from "react-bootstrap";
 import PaginationBookStore from "../../components/PaginationBookStore";
 import BookItem from "../../components/Shop/BookItem";
-import Loading from "../../components/Loading/"
+import Loading from "../../components/Loading/";
 
 import bookApi from "../../api/bookApi";
 import genreApi from "../../api/genreApi";
@@ -10,36 +10,41 @@ import genreApi from "../../api/genreApi";
 import styles from "./Product.module.css";
 
 export default function Product() {
-
-  const [bookData, setBookData] = useState({})
-  const [genreList, setGenreList] = useState([])
+  const [bookData, setBookData] = useState({});
+  const [genreList, setGenreList] = useState([]);
   const [page, setPage] = useState(1);
-  
-  const [sortString, setSortString] = useState("createdAt|-1")
-  const [genresChecked, setGenresChecked] = useState([])
 
-  const [loading, setLoading] = useState(false)
+  const [sortString, setSortString] = useState("createdAt|-1");
+  const [genresChecked, setGenresChecked] = useState([]);
+
+  // State quản lý việc đóng/mở danh sách thể loại
+  const [isGenreOpen, setIsGenreOpen] = useState(true);
+
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const sortArr = sortString.split('|')
-        const query = {
-          genre: { "$in": genresChecked}
-        }
-        setLoading(true)
+        const sortArr = sortString.split("|");
+
+        // Tạo query object
+        const queryObj = { genre: { $in: genresChecked } };
+        // Chuyển thành chuỗi JSON để gửi đi (giúp Backend parse dễ dàng)
+        const query = JSON.stringify(queryObj);
+
+        setLoading(true);
         const { data, pagination } = await bookApi.getAll({
           limit: 8,
           page: page,
           query,
           sort: {
-            [sortArr[0]]: parseInt(sortArr[1])
-          }
+            [sortArr[0]]: parseInt(sortArr[1]),
+          },
         });
         setBookData({ books: data, totalPage: pagination.totalPage });
-        setLoading(false)
+        setLoading(false);
       } catch (error) {
-        setLoading(false)
+        setLoading(false);
         console.log(error);
       }
     };
@@ -64,47 +69,79 @@ export default function Product() {
   }, []);
 
   const handleChangeGenre = (e) => {
-    const id = e.target.value
-    setPage(1)
-    setGenresChecked(pre => {
+    // Ép kiểu ID về số nguyên (vì DB lưu số)
+    const id = parseInt(e.target.value);
+    
+    setPage(1); // Reset về trang 1 khi lọc
+
+    // Logic chọn 1 (Single Select) - Bấm cái mới thì bỏ cái cũ
+    setGenresChecked((pre) => {
       if (pre.includes(id)) {
-        return pre.filter(genre => genre !== id)
+        return []; // Bấm lại vào cái đang chọn -> Bỏ chọn
       } else {
-        return [...pre, id]
+        return [id]; // Chọn cái mới -> Chỉ lấy cái mới
       }
-    })
-  } 
+    });
+  };
 
   return (
     <div className="main">
       <Container>
         <Breadcrumb>
-          <Breadcrumb.Item linkAs={NavLink} linkProps={{ to: "/" }}>Trang chủ</Breadcrumb.Item>
-          <Breadcrumb.Item active linkAs={NavLink} linkProps={{ to: "/san-pham" }}>Sản phẩm</Breadcrumb.Item>
+          <Breadcrumb.Item linkAs={NavLink} linkProps={{ to: "/" }}>
+            Trang chủ
+          </Breadcrumb.Item>
+          <Breadcrumb.Item active linkAs={NavLink} linkProps={{ to: "/san-pham" }}>
+            Sản phẩm
+          </Breadcrumb.Item>
         </Breadcrumb>
         <div className={styles.genre_body}>
           <Row>
+            {/* Cột Danh mục (Bên trái) */}
             <Col xl={3}>
               <div className={styles.filterGroup}>
-                <p className={styles.filterGroupTitle}>Thể loại</p>
-                {genreList &&
-                  genreList.length > 0 &&
-                  genreList.map((genre) => (
-                    <div className={styles.filterGroupItem} key={genre._id}>
-                      <label>
-                        <input
-                          type="checkbox"
-                          className={styles.chk}
-                          checked={genresChecked.includes(genre._id)}
-                          value={genre._id}
-                          onChange={handleChangeGenre}
-                        />
-                        <span>{genre.name}</span>
-                      </label>
-                    </div>
-                  ))}
+                
+                {/* Tiêu đề có thể click để đóng/mở */}
+                <p 
+                  className={styles.filterGroupTitle} 
+                  onClick={() => setIsGenreOpen(!isGenreOpen)}
+                >
+                  Thể loại
+                  {/* Mũi tên chỉ hướng */}
+                  <span className={`${styles.arrow} ${isGenreOpen ? styles.open : ''}`}>
+                    ▼
+                  </span>
+                </p>
+
+                {/* Danh sách cuộn thả (Accordion) */}
+                <div className={`${styles.filterList} ${isGenreOpen ? styles.open : ''}`}>
+                  {genreList &&
+                    genreList.length > 0 &&
+                    genreList.map((genre) => (
+                      <div
+                        key={genre.id}
+                        // Thêm class 'active' nếu đang chọn -> CSS sẽ tô màu đỏ
+                        className={`${styles.filterGroupItem} ${
+                          genresChecked.includes(genre.id) ? styles.active : ""
+                        }`}
+                      >
+                        <label>
+                          <input
+                            type="checkbox"
+                            className={styles.chk}
+                            checked={genresChecked.includes(genre.id)}
+                            value={genre.id}
+                            onChange={handleChangeGenre}
+                          />
+                          <span>{genre.name}</span>
+                        </label>
+                      </div>
+                    ))}
+                </div>
               </div>
             </Col>
+
+            {/* Cột Sản phẩm (Bên phải) */}
             <Col xl={9}>
               <div className={styles.genreOrder}>
                 <Row>
@@ -127,17 +164,31 @@ export default function Product() {
                   </Col>
                 </Row>
               </div>
+
+              {/* Danh sách sản phẩm */}
               <div className={styles.products}>
-                <Row>
-                  {!loading && bookData.books && bookData.books.length > 0
-                    ? bookData.books.map((book) => (
-                        <Col xl={3} key={book._id}>
-                          <BookItem data={book} />
+                {loading ? (
+                  <Loading />
+                ) : (
+                  <Row>
+                    {bookData.books && bookData.books.length > 0 ? (
+                      bookData.books.map((book) => (
+                        <Col xl={3} key={book.id}>
+                          {/* Đã sửa data={book} thành item={book} */}
+                          <BookItem item={book} />
                         </Col>
                       ))
-                    : <Loading />}
-                </Row>
+                    ) : (
+                      <div style={{ textAlign: "center", width: "100%", padding: "50px" }}>
+                        <h4>Không tìm thấy sản phẩm nào!</h4>
+                        <p>Vui lòng thử chọn danh mục khác.</p>
+                      </div>
+                    )}
+                  </Row>
+                )}
               </div>
+
+              {/* Phân trang */}
               <div className={styles.pagination}>
                 <Row>
                   <Col xl={12}>

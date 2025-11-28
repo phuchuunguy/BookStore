@@ -10,7 +10,7 @@
 
 - **Front-End:** ReactJS
 - **Back-End:** NodeJS(Express)
-- **Database:** NoSQL(MongoDB)
+- **Database:** MySQL
 
 
 ## CHỨC NĂNG

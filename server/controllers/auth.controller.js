@@ -28,9 +28,9 @@ const authController = {
                     const user = await userService.getByServiceId(id)
                     
                     if (user) {
-                        const { fullName, email, avatar, phoneNumber, role, _id } = user
-                        const token = generateAccessToken({ userId: _id, role })
-                        const refreshToken = generateRefreshToken(_id)
+                        const { fullName, email, avatar, phoneNumber, role, id } = user
+                        const token = generateAccessToken({ userId: id, role })
+                        const refreshToken = generateRefreshToken(id)
                         res.cookie('refreshToken', refreshToken, {
                             httpOnly: true,
                             secure: false,
@@ -38,7 +38,7 @@ const authController = {
                         })
                         return res.status(200).json({
                             token,
-                            user: { fullName, email, avatar, phoneNumber, userId: _id, role }
+                            user: { fullName, email, avatar, phoneNumber, userId: id, role }
                         })
                     } else {
                         const newUser = await userService.create({
@@ -47,8 +47,8 @@ const authController = {
                             service: "Google", serviceId: id,
                             status: 1,
                         })
-                        const token = generateAccessToken({ userId: newUser?._id, role: 0 })
-                        const refreshToken = generateRefreshToken({ userId: newUser?._id, role: 0 })
+                        const token = generateAccessToken({ userId: newUser?.id, role: 0 })
+                        const refreshToken = generateRefreshToken(newUser?.id)
                         res.cookie('refreshToken', refreshToken, {
                             httpOnly: true,
                             secure: false,
@@ -81,9 +81,9 @@ const authController = {
             const { email, name, avatar, id } = req.body
             const user = await userService.getByServiceId(id)
             if (user) {
-                const { fullName, email, avatar, role, _id } = user
-                const token = generateAccessToken({ userId: _id, role })
-                const refreshToken = generateRefreshToken(_id)
+                const { fullName, email, avatar, role, id: userId } = user
+                const token = generateAccessToken({ userId, role })
+                const refreshToken = generateRefreshToken(userId)
                 res.cookie('refreshToken', refreshToken, {
                     httpOnly: true,
                     secure: false,
@@ -91,7 +91,7 @@ const authController = {
                 })
                 return res.status(200).json({
                     token,
-                    user: { fullName, email, avatar, userId: _id, role }
+                    user: { fullName, email, avatar, userId, role }
                 })
             } else {
                 const newUser = await userService.create({
@@ -100,8 +100,8 @@ const authController = {
                     service: "Facebook", serviceId: id, 
                     status: 1
                 })
-                const token = generateAccessToken({ userId: newUser?._id, role: 0 })
-                const refreshToken = generateRefreshToken({ userId: newUser?._id, role: 0 })
+                const token = generateAccessToken({ userId: newUser?.id, role: 0 })
+                const refreshToken = generateRefreshToken(newUser?.id)
                 res.cookie('refreshToken', refreshToken, {
                     httpOnly: true,
                     secure: false,
@@ -198,7 +198,7 @@ const authController = {
             if (!email) res.status(400).json({error: "Token không hợp lệ!"})
             const user = await userService.getByEmail(email)
             if (user) {
-                await userService.updateStatus(user._id, { status: 1 })
+                await userService.updateStatus(user.id, { status: 1 })
                 return res.status(200).json({message: "Xác minh tài khoản thành công!!"})
                 
             }
@@ -218,7 +218,7 @@ const authController = {
 
             if (!user) return res.status(400).json({error: 1, message: 'Tài khoản, mật khẩu không đúng!'})
 
-            const { password: passwordDB, status,  fullName, phoneNumber, avatar, role, _id } = user
+            const { password: passwordDB, status,  fullName, phoneNumber, avatar, role, id: userId } = user
 
             const checkPassword = await bcrypt.compare(password, passwordDB)
             if (!checkPassword) return res.status(400).json({error: 1, message: 'Tài khoản, mật khẩu không đúng!'})
@@ -226,8 +226,8 @@ const authController = {
             if (status === 0 && role === 0)  return res.status(400).json({ error: 2, message: "Tài khoản của bạn chưa được kích hoạt!" })
             if (status === 0 && role === 2)  return res.status(400).json({ error: 3, message: "Tài khoản của bạn đã bị khóa!" })
             
-            const token = generateAccessToken({ userId: _id, role })
-            const refreshToken = generateRefreshToken(_id)
+            const token = generateAccessToken({ userId, role })
+            const refreshToken = generateRefreshToken(userId)
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: false,
@@ -235,7 +235,7 @@ const authController = {
             })
             return res.status(200).json({
                 token,
-                user: {fullName, phoneNumber, email, avatar, userId: _id, role}
+                user: {fullName, phoneNumber, email, avatar, userId, role}
             })
             
         } catch (error) {
@@ -256,7 +256,7 @@ const authController = {
                     error: 1,
                 })
             }
-            const tokenReset = generateAccessToken({userId: user._id})
+            const tokenReset = generateAccessToken({userId: user.id})
             const host = req.get('origin')
             const link = `${host}/dat-lai-mat-khau/${tokenReset}`
             const resultSendMail = await transporter.sendMail({

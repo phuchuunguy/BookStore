@@ -4,284 +4,283 @@ const Author = require('../models/authors.model')
 const Genre = require('../models/genres.model')
 const Publisher = require('../models/publishers.model')
 const { Op } = require('sequelize');
-const { sequelize } = require('../db');
+const Sequelize = require('sequelize');
+const { sequelize } = require('../db'); // Kiểm tra lại đường dẫn này (../db hay ../config/db)
+
+// Hàm phụ trợ: Chuyển chuỗi JSON thành Mảng an toàn
+const safeParseJSON = (data) => {
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    if (typeof data === 'string') {
+        try {
+            return JSON.parse(data);
+        } catch (error) {
+            return [];
+        }
+    }
+    return [];
+};
 
 const bookService = {
     getAll: async({query, page, limit, sort}) => {
         const offset = (page - 1) * limit;
         const order = [];
         
-        // Convert sort object to Sequelize order format
         if (sort) {
             Object.keys(sort).forEach(key => {
-                order.push([key, sort[key] === 1 ? 'ASC' : 'DESC']);
+                order.push([key, sort[key] === 1 || sort[key] === '1' ? 'ASC' : 'DESC']);
             });
         }
         
-        const where = query || {};
-        
-        return await Promise.all([
-            Book.count({ where }),
-            Book.findAll({
+        // --- XỬ LÝ QUERY ---
+        const where = { ...query };
+
+        // 1. Dọn dẹp rác (Lọc bỏ chuỗi rỗng)
+        Object.keys(where).forEach(key => {
+            if (where[key] && where[key]['$in']) {
+                let values = where[key]['$in'];
+                if (!Array.isArray(values)) values = [values];
+                const validValues = values.filter(v => v && v !== '');
+                if (validValues.length === 0) delete where[key];
+                else where[key]['$in'] = validValues;
+            }
+        });
+
+        // 2. Xử lý Logic lọc GENRE (SỬA LẠI: ÉP KIỂU JSON TUYỆT ĐỐI)
+        if (where.genre && where.genre['$in']) {
+            const gIds = where.genre['$in'];
+            if (gIds.length > 0) {
+                const jsonConditions = gIds.map(id => {
+                    // Ép cột genreIds về dạng JSON và ép ID tìm kiếm về dạng JSON (Số)
+                    // Câu lệnh này nghĩa là: Tìm số 1 trong mảng [1, 2]
+                    return `JSON_CONTAINS(CAST(Book.genreIds AS JSON), CAST('${id}' AS JSON))`;
+                }).join(' OR ');
+
+                where[Op.and] = [
+                    ...(where[Op.and] || []),
+                    Sequelize.literal(`(${jsonConditions})`)
+                ];
+            }
+            delete where.genre; 
+        }
+
+        try {
+            const count = await Book.count({ where });
+
+            const rawBooks = await Book.findAll({
                 where,
-                include: [
-                    {
-                        model: Publisher,
-                        as: 'publisher',
-                        required: false
-                    }
-                ],
+                include: [{ model: Publisher, as: 'publisher', required: false }],
                 offset: limit > 0 ? offset : undefined,
                 limit: limit > 0 ? limit : undefined,
-                order: order.length > 0 ? order : [['createdAt', 'DESC']]
-            }).then(async (books) => {
-                // Populate genre và author từ JSON arrays
-                const allGenreIds = [];
-                const allAuthorIds = [];
-                books.forEach(book => {
-                    if (book.genreIds) allGenreIds.push(...book.genreIds);
-                    if (book.authorIds) allAuthorIds.push(...book.authorIds);
-                });
-                
-                const genres = await Genre.findAll({
-                    where: { id: { [Op.in]: [...new Set(allGenreIds)] } }
-                });
-                const authors = await Author.findAll({
-                    where: { id: { [Op.in]: [...new Set(allAuthorIds)] } }
-                });
-                
-                const genreMap = {};
-                const authorMap = {};
-                genres.forEach(g => genreMap[g.id] = g.toJSON());
-                authors.forEach(a => authorMap[a.id] = a.toJSON());
-                
-                return books.map(book => {
-                    const bookJson = book.toJSON();
-                    bookJson.genre = (bookJson.genreIds || []).map(id => genreMap[id]).filter(Boolean);
-                    bookJson.author = (bookJson.authorIds || []).map(id => authorMap[id]).filter(Boolean);
-                    return bookJson;
-                });
-            })
-        ]);
+                order: order.length > 0 ? order : [['createdAt', 'DESC']],
+                nest: true,
+                logging: console.log 
+            });
+
+            if (rawBooks.length === 0) return [0, []];
+
+            const allGenreIds = [];
+            const allAuthorIds = [];
+            
+            rawBooks.forEach(book => {
+                allGenreIds.push(...safeParseJSON(book.genreIds));
+                allAuthorIds.push(...safeParseJSON(book.authorIds));
+            });
+            
+            const genres = await Genre.findAll({ where: { id: { [Op.in]: [...new Set(allGenreIds)] } }, raw: true });
+            const authors = await Author.findAll({ where: { id: { [Op.in]: [...new Set(allAuthorIds)] } }, raw: true });
+            
+            const genreMap = {};
+            const authorMap = {};
+            genres.forEach(g => genreMap[g.id] = g);
+            authors.forEach(a => authorMap[a.id] = a);
+            
+            const processedBooks = rawBooks.map(book => {
+                const bookJson = book.toJSON();
+                const gIds = safeParseJSON(bookJson.genreIds);
+                const aIds = safeParseJSON(bookJson.authorIds);
+                bookJson.genre = gIds.map(id => genreMap[id]).filter(Boolean);
+                bookJson.author = aIds.map(id => authorMap[id]).filter(Boolean);
+                return bookJson;
+            });
+
+            return [count, processedBooks];
+
+        } catch (error) {
+            console.error("Lỗi Service:", error);
+            throw error;
+        }
     },
+    
     getByBookId: async(bookId) => {
         const book = await Book.findOne({
             where: { bookId },
-            include: [
-                {
-                    model: Publisher,
-                    as: 'publisher',
-                    required: false
-                }
-            ]
+            include: [{ model: Publisher, as: 'publisher', required: false }]
         });
         
         if (book) {
             const bookJson = book.toJSON();
-            // Populate genre và author
-            if (bookJson.genreIds && bookJson.genreIds.length > 0) {
-                const genres = await Genre.findAll({
-                    where: { id: { [Op.in]: bookJson.genreIds } }
-                });
-                bookJson.genre = genres.map(g => g.toJSON());
-            } else {
-                bookJson.genre = [];
-            }
+            const gIds = safeParseJSON(bookJson.genreIds);
+            const aIds = safeParseJSON(bookJson.authorIds);
+
+            if (gIds.length > 0) {
+                bookJson.genre = await Genre.findAll({ where: { id: { [Op.in]: gIds } }, raw: true });
+            } else { bookJson.genre = []; }
             
-            if (bookJson.authorIds && bookJson.authorIds.length > 0) {
-                const authors = await Author.findAll({
-                    where: { id: { [Op.in]: bookJson.authorIds } }
-                });
-                bookJson.author = authors.map(a => a.toJSON());
-            } else {
-                bookJson.author = [];
-            }
+            if (aIds.length > 0) {
+                bookJson.author = await Author.findAll({ where: { id: { [Op.in]: aIds } }, raw: true });
+            } else { bookJson.author = []; }
             
             return bookJson;
         }
         return null;
     },
+
     getById: async(id) => {
         const book = await Book.findByPk(id, {
-            include: [
-                {
-                    model: Publisher,
-                    as: 'publisher',
-                    required: false
-                }
-            ]
+            include: [{ model: Publisher, as: 'publisher', required: false }]
         });
         
         if (book) {
             const bookJson = book.toJSON();
-            // Populate genre và author
-            if (bookJson.genreIds && bookJson.genreIds.length > 0) {
-                const genres = await Genre.findAll({
-                    where: { id: { [Op.in]: bookJson.genreIds } }
-                });
-                bookJson.genre = genres.map(g => g.toJSON());
-            } else {
-                bookJson.genre = [];
-            }
+            const gIds = safeParseJSON(bookJson.genreIds);
+            const aIds = safeParseJSON(bookJson.authorIds);
+
+            if (gIds.length > 0) {
+                bookJson.genre = await Genre.findAll({ where: { id: { [Op.in]: gIds } }, raw: true });
+            } else { bookJson.genre = []; }
             
-            if (bookJson.authorIds && bookJson.authorIds.length > 0) {
-                const authors = await Author.findAll({
-                    where: { id: { [Op.in]: bookJson.authorIds } }
-                });
-                bookJson.author = authors.map(a => a.toJSON());
-            } else {
-                bookJson.author = [];
-            }
+            if (aIds.length > 0) {
+                bookJson.author = await Author.findAll({ where: { id: { [Op.in]: aIds } }, raw: true });
+            } else { bookJson.author = []; }
             
             return bookJson;
         }
         return null;
     },
+
     getBySlug: async(slug) => {
         const book = await Book.findOne({
             where: { slug },
-            include: [
-                {
-                    model: Publisher,
-                    as: 'publisher',
-                    required: false
-                }
-            ]
+            include: [{ model: Publisher, as: 'publisher', required: false }]
         });
         
         if (book) {
             const bookJson = book.toJSON();
-            // Populate genre và author
-            if (bookJson.genreIds && bookJson.genreIds.length > 0) {
-                const genres = await Genre.findAll({
-                    where: { id: { [Op.in]: bookJson.genreIds } }
-                });
-                bookJson.genre = genres.map(g => g.toJSON());
-            } else {
-                bookJson.genre = [];
-            }
+            const gIds = safeParseJSON(bookJson.genreIds);
+            const aIds = safeParseJSON(bookJson.authorIds);
+
+            if (gIds.length > 0) {
+                bookJson.genre = await Genre.findAll({ where: { id: { [Op.in]: gIds } }, raw: true });
+            } else { bookJson.genre = []; }
             
-            if (bookJson.authorIds && bookJson.authorIds.length > 0) {
-                const authors = await Author.findAll({
-                    where: { id: { [Op.in]: bookJson.authorIds } }
-                });
-                bookJson.author = authors.map(a => a.toJSON());
-            } else {
-                bookJson.author = [];
-            }
+            if (aIds.length > 0) {
+                bookJson.author = await Author.findAll({ where: { id: { [Op.in]: aIds } }, raw: true });
+            } else { bookJson.author = []; }
             
             return bookJson;
         }
         return null;
     },
+
     checkIsOrdered: async(id) => {
-        // Kiểm tra xem sách có trong đơn hàng nào không
         const [results] = await sequelize.query(`
             SELECT DISTINCT JSON_EXTRACT(products, '$[*].product') as product_ids
             FROM orders
         `);
-        
         const allProductIds = [];
         results.forEach(row => {
-            const productIds = JSON.parse(row.product_ids || '[]');
+            const productIds = safeParseJSON(row.product_ids);
             allProductIds.push(...productIds);
         });
-        
-        return allProductIds.includes(parseInt(id)) ? [{ _id: parseInt(id) }] : [];
+        return allProductIds.includes(parseInt(id)) ? [{ id: parseInt(id) }] : [];
     },
+
     search: async({key, page, limit}) => {
         const offset = (page - 1) * limit;
         
-        // Tìm sách theo tên hoặc tên tác giả
         const books = await Book.findAll({
             where: {
                 [Op.or]: [
                     { name: { [Op.like]: `%${key}%` } }
                 ]
             },
-            include: [
-                {
-                    model: Publisher,
-                    as: 'publisher',
-                    required: false
-                }
-            ],
+            include: [{ model: Publisher, as: 'publisher', required: false }],
             offset: limit > 0 ? offset : undefined,
             limit: limit > 0 ? limit : undefined
         });
         
-        // Lọc thêm theo tên tác giả
         const allAuthorIds = [];
         books.forEach(book => {
-            if (book.authorIds) allAuthorIds.push(...book.authorIds);
+            const aIds = safeParseJSON(book.authorIds);
+            allAuthorIds.push(...aIds);
         });
         
         const authors = await Author.findAll({
             where: {
                 id: { [Op.in]: [...new Set(allAuthorIds)] },
                 name: { [Op.like]: `%${key}%` }
-            }
+            },
+            raw: true
         });
         
         const matchingAuthorIds = authors.map(a => a.id);
         const filteredBooks = books.filter(book => {
             if (book.name.toLowerCase().includes(key.toLowerCase())) return true;
-            if (book.authorIds && book.authorIds.some(id => matchingAuthorIds.includes(id))) return true;
+            const aIds = safeParseJSON(book.authorIds);
+            if (aIds.some(id => matchingAuthorIds.includes(id))) return true;
             return false;
         });
         
-        // Populate authors và genres
         const genreIds = [];
         const authorIds = [];
         filteredBooks.forEach(book => {
-            if (book.genreIds) genreIds.push(...book.genreIds);
-            if (book.authorIds) authorIds.push(...book.authorIds);
+            const gIds = safeParseJSON(book.genreIds);
+            const aIds = safeParseJSON(book.authorIds);
+            genreIds.push(...gIds);
+            authorIds.push(...aIds);
         });
         
         const genres = await Genre.findAll({
-            where: { id: { [Op.in]: [...new Set(genreIds)] } }
+            where: { id: { [Op.in]: [...new Set(genreIds)] } },
+            raw: true
         });
         const allAuthors = await Author.findAll({
-            where: { id: { [Op.in]: [...new Set(authorIds)] } }
+            where: { id: { [Op.in]: [...new Set(authorIds)] } },
+            raw: true
         });
         
         const genreMap = {};
         const authorMap = {};
-        genres.forEach(g => genreMap[g.id] = g.toJSON());
-        allAuthors.forEach(a => authorMap[a.id] = a.toJSON());
+        genres.forEach(g => genreMap[g.id] = g);
+        allAuthors.forEach(a => authorMap[a.id] = a);
         
         return filteredBooks.map(book => {
             const bookJson = book.toJSON();
-            bookJson.genre = (bookJson.genreIds || []).map(id => genreMap[id]).filter(Boolean);
-            bookJson.author = (bookJson.authorIds || []).map(id => authorMap[id]).filter(Boolean);
+            const gIds = safeParseJSON(bookJson.genreIds);
+            const aIds = safeParseJSON(bookJson.authorIds);
+            
+            bookJson.genre = gIds.map(id => genreMap[id]).filter(Boolean);
+            bookJson.author = aIds.map(id => authorMap[id]).filter(Boolean);
             return bookJson;
         });
     },
+
     create: async(body) => {
         const { bookId, name, year, genre, author, publisher, description,
             pages, size, price, discount, imageUrl, publicId } = body;
         
-        // Convert genre và author arrays to IDs
-        const genreIds = Array.isArray(genre) ? genre.map(g => parseInt(g)) : [];
-        const authorIds = Array.isArray(author) ? author.map(a => parseInt(a)) : [];
+        // Chuyển về mảng trước khi lưu, Sequelize sẽ tự stringify nếu cần
+        const genreIds = safeParseJSON(genre).map(g => parseInt(g));
+        const authorIds = safeParseJSON(author).map(a => parseInt(a));
         const publisherId = publisher ? parseInt(publisher) : null;
         
         return await Book.create({
-            bookId,
-            name,
-            year,
-            genreIds,
-            authorIds,
-            publisherId,
-            description,
-            pages,
-            size,
-            price,
-            discount,
-            imageUrl,
-            publicId
+            bookId, name, year, genreIds, authorIds, publisherId,
+            description, pages, size, price, discount, imageUrl, publicId
         });
     },
+
     updateById: async(id, body) => {
         const { name, year, genre, author, publisher, description,
             pages, size, price, discount, imageUrl, publicId } = body;
@@ -293,15 +292,9 @@ const bookService = {
             name, year, description, pages, size, price, discount
         };
         
-        if (genre) {
-            updateData.genreIds = Array.isArray(genre) ? genre.map(g => parseInt(g)) : [];
-        }
-        if (author) {
-            updateData.authorIds = Array.isArray(author) ? author.map(a => parseInt(a)) : [];
-        }
-        if (publisher) {
-            updateData.publisherId = parseInt(publisher);
-        }
+        if (genre) updateData.genreIds = safeParseJSON(genre).map(g => parseInt(g));
+        if (author) updateData.authorIds = safeParseJSON(author).map(a => parseInt(a));
+        if (publisher) updateData.publisherId = parseInt(publisher);
         if (imageUrl && publicId) {
             updateData.imageUrl = imageUrl;
             updateData.publicId = publicId;
@@ -310,9 +303,10 @@ const bookService = {
         await book.update(updateData);
         return book;
     },
+
     deleteById: async(id) => {
         return await Book.destroy({ where: { id } });
     }
 }
 
-module.exports = bookService
+module.exports = bookService;

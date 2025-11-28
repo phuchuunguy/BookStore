@@ -9,7 +9,7 @@ const sequelize = new Sequelize(
         host: process.env.MYSQL_HOST || 'localhost',
         port: process.env.MYSQL_PORT || 3306,
         dialect: 'mysql',
-        logging: process.env.NODE_ENV === 'development' ? console.log : false,
+        logging: false, // <<< TẮT LOG SQL TẠI ĐÂY
         pool: {
             max: 5,
             min: 0,
@@ -30,8 +30,6 @@ const connectMySQL = async () => {
         await sequelize.authenticate();
         console.log("Kết nối MySQL thành công!");
         
-        // Đồng bộ models với database (sync: false để không tự động tạo/xóa bảng)
-        // Nếu muốn tự động tạo bảng, đổi thành sequelize.sync({ alter: true })
         if (process.env.SYNC_DB === 'true') {
             await sequelize.sync({ alter: true });
             console.log("Đã đồng bộ models với database!");

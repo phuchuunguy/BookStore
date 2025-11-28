@@ -1,40 +1,111 @@
+/* --- Các class cũ giữ nguyên --- */
 .orderItem {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .orderItem select {
-    width: fit-content;
-    margin-left: 10px;
+  width: fit-content;
+  margin-left: 10px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
 }
 
 .pagination {
-    margin-top: 20px;
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
 }
 
+/* --- PHẦN BỘ LỌC ĐÃ NÂNG CẤP --- */
+
+.filterGroup {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee; /* Đổi màu viền nhạt hơn cho hiện đại */
+  padding-bottom: 10px;
+}
+
+/* Tiêu đề: Thêm Flex để căn chỉnh mũi tên */
 .filterGroupTitle {
-    display: block;
-    font-weight: 700;
-    font-size: 18px;
-    line-height: 40px;
-    margin-bottom: 10px;
-    color: #555;
-    border-bottom: 1px solid #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 40px;
+  color: #333;
+  cursor: pointer; /* Con trỏ tay */
+  user-select: none; /* Chống bôi đen khi click */
+  transition: color 0.2s;
 }
 
+.filterGroupTitle:hover {
+  color: #C92127;
+}
+
+/* Mũi tên xoay */
+.arrow {
+  font-size: 12px;
+  transition: transform 0.3s ease; /* Hiệu ứng xoay mượt */
+}
+
+/* Class này được thêm vào khi state mở */
+.arrow.open {
+  transform: rotate(180deg);
+}
+
+/* Khung chứa danh sách: Mặc định ẩn */
+.filterList {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.3s ease-in-out; /* Hiệu ứng trượt xuống */
+}
+
+/* Khi mở ra */
+.filterList.open {
+  max-height: 1000px; /* Đủ lớn để chứa hết item */
+  opacity: 1;
+  margin-top: 5px;
+}
+
+/* Từng dòng item */
 .filterGroupItem {
-    padding: 2px;
+  margin-bottom: 2px;
+  border-radius: 4px;
+  transition: all 0.2s;
 }
 
-.filterGroup label {
-    display: inline-block;
-    width: 100%;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    padding-left: 20px;
-    cursor: pointer;
+/* Hiệu ứng khi di chuột vào dòng */
+.filterGroupItem:hover {
+  background-color: #f8f8f8;
+  color: #C92127;
 }
 
+/* --- TRẠNG THÁI ĐANG CHỌN (ACTIVE) --- */
+/* Class này được React thêm vào khi id có trong mảng checked */
+.filterGroupItem.active {
+  background-color: #fff0f1; /* Nền hồng nhạt */
+  color: #C92127; /* Chữ đỏ */
+  font-weight: 600;
+}
+
+/* Label bao quanh input */
+.filterGroupItem label {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 10px; /* Tăng vùng click cho dễ bấm */
+  cursor: pointer;
+  margin: 0;
+}
+
+/* Checkbox */
 .chk {
-    margin-right: 8px;
+  margin-right: 10px;
+  width: 16px;
+  height: 16px;
+  accent-color: #C92127; /* Đổi màu ô tích sang Đỏ cho đồng bộ */
+  cursor: pointer;
 }

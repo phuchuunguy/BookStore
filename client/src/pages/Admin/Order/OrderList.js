@@ -12,20 +12,22 @@ import orderApi from "../../../api/orderApi";
 import format from "../../../helper/format";
 
 export default function OrderList() {
- 
+  
   const [orderData, setOrderData] = useState({});
   const [page, setPage] = useState(1);
 
   const [loading, setLoading] = useState(false);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
+  const [loadingModal, setLoadingModal] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [showModalUpdate, setShowModalUpdate] = useState(false);
 
   const [orderDetail, setOrderDetail] = useState({});
+  const [selectedStatus, setSelectedStatus] = useState(0);
 
-  useEffect(() => {
-    const fetchData = async () => {
+  // Fetch danh sách đơn hàng
+  const fetchData = async () => {
       try {
         setLoading(true);
         const { data, pagination } = await orderApi.getAll({
@@ -38,7 +40,9 @@ export default function OrderList() {
         setLoading(false);
         console.log(error);
       }
-    };
+  };
+
+  useEffect(() => {
     fetchData();
   }, [page]);
 
@@ -46,55 +50,67 @@ export default function OrderList() {
     setPage(page);
   }, []);
 
-  const handleGetOrderDetail = async (orderId) => {
-    try {
-      if (!(orderDetail._id === orderId)) {
-        const { data } = await orderApi.getById(orderId, {});
-        setOrderDetail(data);
+  // Lấy chi tiết đơn hàng
+  const getOrderDetails = async (orderId) => {
+      try {
+          const res = await orderApi.getById(orderId);
+          return res.data || res; 
+      } catch (error) {
+          console.log("Lỗi lấy chi tiết đơn:", error);
+          return null;
       }
-      setShowModal(true);
-    } catch (error) {
-      console.log(error);
+  }
+
+  const handleGetOrderDetail = async (orderId) => {
+    setOrderDetail(null);
+    setShowModal(true);
+    setLoadingModal(true);
+
+    const data = await getOrderDetails(orderId);
+    if (data) {
+        setOrderDetail(data);
     }
+    setLoadingModal(false);
   };
 
   const handleUpdateOrder = async (orderId) => {
-    try {
-      if (!(orderDetail._id === orderId)) {
-        const { data } = await orderApi.getById(orderId, {});
+    setOrderDetail(null);
+    setShowModalUpdate(true);
+    setLoadingModal(true);
+
+    const data = await getOrderDetails(orderId);
+    if (data) {
         setOrderDetail(data);
-      }
-      setShowModalUpdate(true);
-    } catch (error) {
-      console.log(error);
+        setSelectedStatus(data.orderStatus?.code || 0);
     }
+    setLoadingModal(false);
   };
 
   const handleCallApiChangeStatus = async () => {
     try {
       setLoadingUpdate(true)
-      const { data } = await orderApi.updateOrderStatus(orderDetail?._id, { orderStatusCode: +orderDetail?.orderStatus?.code + 1});
+      
+      // Lấy status từ Dropdown
+      const nextStatusCode = parseInt(selectedStatus); 
+      
+      const { data } = await orderApi.updateOrderStatus(orderDetail?.id, { orderStatusCode: nextStatusCode});
+      
       setLoadingUpdate(false)
-      const { orderStatus, paymentStatus } = data
-      setOrderDetail((pre) => {
-        return {
-          ...pre,
-          orderStatus,
-          paymentStatus
-        };
-      });
-      setOrderData((pre) => {
-        const newArray = [...pre.orders];
-        return {
-          ...pre,
-          orders: newArray.map((item) => {
-            return item?._id === orderDetail?._id
-              ? { ...item, orderStatus, paymentStatus }
-              : item;
-          }),
-        };
-      });
-      alert("Cập nhật thành công!");
+      
+      const { orderStatus, paymentStatus } = data || {}; 
+      
+      if (orderStatus) {
+          setOrderDetail((pre) => ({ ...pre, orderStatus, paymentStatus }));
+          setOrderData((pre) => {
+            const newArray = [...(pre.orders || [])];
+            const updatedOrders = newArray.map((item) => 
+               item.id === orderDetail.id ? { ...item, orderStatus, paymentStatus } : item
+            );
+            return { ...pre, orders: updatedOrders };
+          });
+          alert("Cập nhật thành công!");
+          setShowModalUpdate(false); 
+      }
     } catch (error) {
       alert("Cập nhật thất bại!");
       setLoadingUpdate(false)
@@ -104,6 +120,7 @@ export default function OrderList() {
 
   return (
     <Row>
+      {/* Modal Cập nhật trạng thái */}
       <Modal
         dialogClassName="modal-w1100"
         size="lg"
@@ -111,22 +128,62 @@ export default function OrderList() {
         onHide={() => setShowModalUpdate(false)}
       >
         <Modal.Header closeButton>
-          <Modal.Title>Hóa đơn</Modal.Title>
+          <Modal.Title>Cập nhật trạng thái đơn hàng #{orderDetail?.id}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {showModalUpdate && orderDetail && orderDetail?.orderStatus?.text && (
-            <div>
-              <p className="mb-4">Trạng thái đơn hàng: <b>{orderDetail?.orderStatus?.text}</b></p>
-              <OrderProgress current={orderDetail?.orderStatus?.code} />
-              {orderDetail?.orderStatus?.code < steps?.length - 1 && (
-                <Button variant="success" disabled={loadingUpdate} className="mt-4 d-flex" style={{margin: "0 auto"}} onClick={handleCallApiChangeStatus}>
-                  Chuyển sang trạng thái tiếp theo
-                </Button>
-              )}
-            </div>
+          {loadingModal ? (
+             <div className="text-center p-5">
+                <Spinner animation="border" variant="primary" />
+                <p>Đang tải thông tin đơn hàng...</p>
+             </div>
+          ) : (
+             showModalUpdate && orderDetail && (
+                <div className="p-3">
+                  <h5 className="mb-4 text-center">
+                      Trạng thái hiện tại: <Badge bg="primary">{orderDetail?.orderStatus?.text}</Badge>
+                  </h5>
+                  
+                  <OrderProgress current={orderDetail?.orderStatus?.code} />
+                  
+                  <hr className="my-4"/>
+
+                  <div className="form-group">
+                      <label className="fw-bold mb-2">Chọn trạng thái mới:</label>
+                      <select 
+                        className="form-select" 
+                        value={selectedStatus} 
+                        onChange={(e) => setSelectedStatus(e.target.value)}
+                        style={{ padding: '10px', fontSize: '16px' }}
+                      >
+                          <option value="0">0. Chờ cửa hàng xác nhận</option>
+                          <option value="1">1. Đã xác nhận đơn hàng</option>
+                          <option value="2">2. Đã đóng gói / Chờ lấy hàng</option>
+                          <option value="3">3. Đang vận chuyển</option>
+                          <option value="4">4. Kiện hàng sắp đến</option>
+                          <option value="5">5. Giao hàng thành công</option>
+                          <option value="6">⛔ ĐÃ HỦY ĐƠN</option> 
+                      </select>
+                  </div>
+
+                  <div className="mt-4 d-flex justify-content-end gap-2">
+                      <Button variant="secondary" onClick={() => setShowModalUpdate(false)}>
+                          Hủy
+                      </Button>
+                      <Button 
+                          variant="primary" 
+                          disabled={loadingUpdate} 
+                          onClick={handleCallApiChangeStatus}
+                      >
+                        {loadingUpdate ? "Đang lưu..." : "Cập nhật trạng thái"}
+                      </Button>
+                  </div>
+                </div>
+             )
           )}
         </Modal.Body>
       </Modal>
+
+      {/* Modal Xem chi tiết */}
       <Modal
         size="lg"
         dialogClassName="modal-w1100"
@@ -135,74 +192,87 @@ export default function OrderList() {
       >
         <Modal.Header closeButton>
           <Modal.Title>
-            Hóa đơn <Badge bg="secondary">{orderDetail?._id}</Badge>
+            Chi tiết đơn hàng <Badge bg="secondary">#{orderDetail?.id}</Badge>
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {showModal && orderDetail && (
-              <OrderDetail data={orderDetail} />
+          {loadingModal ? (
+             <div className="text-center p-5">
+                <Spinner animation="border" variant="primary" />
+             </div>
+          ) : (
+             showModal && orderDetail && <OrderDetail data={orderDetail} />
           )}
         </Modal.Body>
+        <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>Đóng</Button>
+        </Modal.Footer>
       </Modal>
+
       <Col xl={12}>
         <div className="admin-content-wrapper">
-          <div className="admin-content-header">Danh sách đơn hàng</div>
+          <div className="admin-content-header">Quản lý đơn hàng</div>
           <div className="admin-content-body">
-            <Table hover>
+            <Table hover responsive>
               <thead>
                 <tr>
                   <th>STT</th>
-                  <th>Thông tin giao hàng</th>
-                  <th>Ngày đặt hàng</th>
+                  <th>Thông tin người nhận</th>
+                  <th>Ngày đặt</th>
                   <th>Tổng tiền</th>
-                  <th>Tình trạng</th>
+                  <th>Trạng thái</th>
                   <th colSpan="2">Hành động</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={7}>
+                    <td colSpan={7} className="text-center py-4">
                       <Spinner animation="border" variant="success" />
                     </td>
                   </tr>
                 ) : orderData.orders && orderData.orders.length > 0 ? (
                   orderData.orders.map((item, index) => {
                     return (
-                      <tr key={item?._id}>
+                      <tr key={item?.id}>
                         <td>{(1 && page - 1) * 10 + (index + 1)}</td>
                         <td className="text-start">
-                          <p>Người nhận: <b>{item?.delivery?.fullName}</b></p>
-                          <p>Email: <b>{item?.delivery?.email}</b></p>
-                          <p>Điện thoại: <b>{item?.delivery?.phoneNumber}</b></p>
-                          <p>Địa chỉ: <b>{item?.delivery?.address}</b> </p>
+                          <strong>{item?.delivery?.fullName}</strong>
+                          <br/>
+                          <small>{item?.delivery?.phoneNumber}</small>
+                          <br/>
+                          <small className="text-muted">{item?.delivery?.address}</small>
                         </td>
                         <td>
-                          <p>{moment(item?.createdAt).format('DD-MM-yyyy HH:mm:ss')}</p>
+                          {moment(item?.createdAt).format('DD/MM/YYYY HH:mm')}
+                          <br/>
                           {moment(item.createdAt).isSame(moment(), 'day') && (
-                             <span style={{backgroundColor: "#ff709e"}} className="badge">{moment(item?.createdAt).fromNow()}</span>
+                             <Badge bg="danger" className="mt-1">Mới</Badge>
                           )}
                         </td>
-                        <td className="price fw-bold">
+                        <td className="fw-bold text-danger">
                           {format.formatPrice(item?.cost?.total)}
                         </td>
-                        <td><span className="badge" style={{backgroundColor: steps[item?.orderStatus?.code]?.color}}>{item?.orderStatus?.text}</span></td>
+                        <td>
+                            <Badge 
+                                bg={item?.orderStatus?.code === 6 ? 'danger' : 'success'} 
+                                style={{backgroundColor: steps[item?.orderStatus?.code]?.color}}
+                            >
+                                {item?.orderStatus?.text}
+                            </Badge>
+                        </td>
                         <td>
                           <button
-                            className="btn btn-success"
-                            onClick={() => handleUpdateOrder(item?._id)}
-                            disabled={
-                              item?.method?.code !== 0 &&
-                              item?.paymentStatus?.code !== 2
-                            }
+                            className="btn btn-warning btn-sm me-2"
+                            title="Cập nhật trạng thái"
+                            onClick={() => handleUpdateOrder(item?.id)}
                           >
                             <FaEdit />
                           </button>
-                        </td>
-                        <td>
                           <button
-                            className="btn btn-primary"
-                            onClick={() => handleGetOrderDetail(item?._id)}
+                            className="btn btn-info btn-sm text-white"
+                            title="Xem chi tiết"
+                            onClick={() => handleGetOrderDetail(item?.id)}
                           >
                             <FaEye />
                           </button>
@@ -212,7 +282,7 @@ export default function OrderList() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={6}>Không có đơn hàng nào!</td>
+                    <td colSpan={7} className="text-center">Chưa có đơn hàng nào!</td>
                   </tr>
                 )}
               </tbody>

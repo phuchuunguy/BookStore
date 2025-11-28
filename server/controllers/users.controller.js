@@ -13,7 +13,39 @@ const usersController = {
             const sort = req.query.sort ? req.query.sort : { createdAt: -1 }
             const { query } = req.query
 
-            const [count, data] = await userService.getAll({query, page, limit, sort})
+            // Parse query if it's a JSON string
+            let queryObj = {};
+            if (query) {
+                try {
+                    queryObj = typeof query === 'string' ? JSON.parse(query) : query;
+                } catch (err) {
+                    queryObj = query;
+                }
+            }
+
+            // Convert Mongo-style $or/$regex to Sequelize Op.like
+            const { Op } = require('sequelize');
+            const where = {};
+            if (queryObj) {
+                // role or other direct fields
+                Object.keys(queryObj).forEach(key => {
+                    if (key !== '$or') where[key] = queryObj[key];
+                });
+
+                if (queryObj['$or'] && Array.isArray(queryObj['$or'])) {
+                    where[Op.or] = queryObj['$or'].map(cond => {
+                        const field = Object.keys(cond)[0];
+                        const valueObj = cond[field];
+                        if (valueObj && valueObj['$regex']) {
+                            const regex = valueObj['$regex'];
+                            return { [field]: { [Op.like]: `%${regex}%` } };
+                        }
+                        return cond;
+                    });
+                }
+            }
+
+            const [count, data] = await userService.getAll({query: where, page, limit, sort})
             const totalPage = Math.ceil(count / limit)
 
             res.status(200).json({
@@ -155,7 +187,7 @@ const usersController = {
                 error: 0,
                 data: {
                     ...address,
-                    _id: addressId
+                    id: addressId
                 }
             })
             
@@ -255,7 +287,7 @@ const usersController = {
         try {
             const { userId, addressId } = req.params
             const result = await userService.updateDefaultAddressById(userId, addressId)
-            if (result.modifiedCount === 1) {
+            if (result) {
                 return res.status(200).json({
                     message: 'success',
                     error: 0,
@@ -278,7 +310,7 @@ const usersController = {
         try {
             const { userId, addressId } = req.params
             const result = await userService.deleteAddressById(userId, addressId)
-            if (result.modifiedCount === 1) {
+            if (result) {
                 return res.status(200).json({
                     message: 'success',
                     error: 0,

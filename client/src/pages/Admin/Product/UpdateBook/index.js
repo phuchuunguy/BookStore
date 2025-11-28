@@ -34,18 +34,8 @@ function UpdateBook() {
     const fetchBook = async () => {
       try {
         const { data } = await bookApi.getById(id)
-        const genres = data.genre.map(item => {
-          return {
-            value: item._id,
-            label: item.name
-          }
-        })
-        const authors = data.author.map(item => {
-          return {
-            value: item._id,
-            label: item.name
-          }
-        })
+        const genres = data.genre.map(item => ({ value: item.id, label: item.name }))
+        const authors = data.author.map(item => ({ value: item.id, label: item.name }))
         setBookData({...data, genre: genres, author: authors})
       } catch (error) {
         console.log(error);
@@ -59,7 +49,7 @@ function UpdateBook() {
     const fetchAuthors = async () => {
       try {
         const { data } = await authorApi.getAll({ limit: 0 })
-        const opts = data.map(item => { return {value: item._id, label: item.name} })
+        const opts = data.map(item => { return {value: item.id, label: item.name} })
         setAuthorList(opts)
       } catch (error) {
         console.log(error)
@@ -76,7 +66,7 @@ function UpdateBook() {
     const fetchGenres = async () => {
       try {
         const { data } = await genreApi.getAll({})
-        const opts = data.map(item => { return {value: item._id, label: item.name} })
+        const opts = data.map(item => { return {value: item.id, label: item.name} })
         setGenreList(opts)
       } catch (error) {
         console.log(error)
@@ -100,7 +90,7 @@ function UpdateBook() {
       description: bookData.description ? bookData.description : "",
       author: bookData.author ? bookData.author : [],
       genre: bookData?.genre ? bookData.genre : [],
-      publisher: bookData?.publisher?._id ? bookData.publisher._id : "",
+      publisher: bookData?.publisher?.id ? bookData.publisher.id : "",
     },
     enableReinitialize: true,
     validateOnChange: false,
@@ -122,7 +112,7 @@ function UpdateBook() {
       const { bookId, name, author, genre, publisher, description, 
         year, pages, size, price, discount, image } = formik.values;
       try {
-        if (image) {
+          if (image) {
           const formData = new FormData();
           formData.append("file", image);
           formData.append("upload_preset", "fti6du11");
@@ -131,9 +121,9 @@ function UpdateBook() {
           if (secure_url && public_id) {
             await bookApi.update(id, { 
               bookId, name, year, pages, size, price, discount, description,
-              author: author._id,
-              genre: genre._id,
-              publisher: publisher._id,
+              author: Array.isArray(author) ? author.map(a => a.value) : author,
+              genre: Array.isArray(genre) ? genre.map(g => g.value) : genre,
+              publisher: publisher,
               imageUrl: secure_url,
               publicId: public_id
             })
@@ -141,9 +131,9 @@ function UpdateBook() {
         } else {
             await bookApi.update(id, { 
               bookId, name, year, pages, size, price, discount, description,
-              author: author._id,
-              genre: genre._id,
-              publisher: publisher._id,
+              author: Array.isArray(author) ? author.map(a => a.value) : author,
+              genre: Array.isArray(genre) ? genre.map(g => g.value) : genre,
+              publisher: publisher,
           })
         }
         alert("Lưu thay đổi thành công!")
@@ -248,7 +238,7 @@ function UpdateBook() {
                     >
                       {publisherList.length > 0 &&
                         publisherList.map((publisher) => (
-                          <option key={publisher._id} value={publisher._id}>
+                          <option key={publisher.id} value={publisher.id}>
                             {publisher.name}
                           </option>
                         ))}

@@ -39,7 +39,7 @@ function Search() {
           <Row>
             {books && books.length > 0 ? (
                books.map(book => 
-                <Col xl={3} key={book._id}>
+                <Col xl={3} key={book.id}>
                   <BookItem boxShadow={true} data={book} />
                 </Col>)
             ) :

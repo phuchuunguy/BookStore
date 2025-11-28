@@ -50,7 +50,7 @@ function Address() {
       setAddressList((preState) => {
         const newArray = [...preState];
         newArray.push({
-          _id: data?._id,
+          id: data?.id,
           address: data?.address,
           isDefault: false,
         });
@@ -63,11 +63,11 @@ function Address() {
 
   const handleCallApiDelete = async () => {
     try {
-      await userApi.deleteById(userId, addressDelete?._id);
+      await userApi.deleteById(userId, addressDelete?.id);
       setShowModal(false)
       setAddressList((preState) => {
         const newArray = [...preState];
-        return newArray.filter((item) => item._id !== addressDelete?._id);
+        return newArray.filter((item) => item.id !== addressDelete?.id);
       });
     } catch (error) {
       setShowModal(false)
@@ -84,7 +84,7 @@ function Address() {
       setAddressList((preState) => {
         const newArray = [...preState];
         return newArray.map((item) => {
-          return item._id === addressId
+          return item.id === addressId
             ? { ...item, isDefault: true }
             : { ...item, isDefault: false };
         });
@@ -127,7 +127,7 @@ function Address() {
             {addressList && addressList?.length > 0 ? (
               addressList.map((item, index) => {
                 return (
-                  <tr key={item._id}>
+                  <tr key={item.id}>
                     <td>{index + 1}</td>
                     <td>
                       {item.address}{" "} {item.isDefault ? (
@@ -138,7 +138,7 @@ function Address() {
                     </td>
                     <td>
                       {!item.isDefault ? (
-                        <Button onClick={() => handleUpdateDefaultAddress(item?._id)} >
+                        <Button onClick={() => handleUpdateDefaultAddress(item?.id)} >
                           Đặt làm mặc định
                         </Button>
                       ) : ("")}

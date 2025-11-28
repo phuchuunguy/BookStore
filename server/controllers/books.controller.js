@@ -8,10 +8,26 @@ const bookController = {
             const page = req.query.page ? parseInt(req.query.page) : 1
             const limit = req.query.limit ? parseInt(req.query.limit) : 0
             const sort = req.query.sort ? req.query.sort : { createdAt: -1 }
-            const { query } = req.query
+            
+            // --- XỬ LÝ QUAN TRỌNG TẠI ĐÂY ---
+            // Frontend gửi lên: ?query={"genre":{"$in":["1"]}} (Dạng chuỗi)
+            // Backend cần đổi nó thành Object để dùng được.
+            let queryObj = {};
+            if (req.query.query) {
+                try {
+                    // Nếu là chuỗi thì Parse, nếu là Object rồi thì giữ nguyên
+                    queryObj = typeof req.query.query === 'string' 
+                        ? JSON.parse(req.query.query) 
+                        : req.query.query;
+                    
+                } catch (err) {
+                    console.log('Lỗi parse query params:', err.message);
+                    queryObj = {}; // Nếu lỗi format thì coi như không lọc
+                }
+            }
+            // --------------------------------
 
-            const queryObj = !!query ? query : {}
-
+            // Tạo Key Redis dựa trên Object đã được làm sạch
             const key = `Book::${JSON.stringify({queryObj, page, limit, sort})}`
 
             let count, data, totalPage
@@ -24,20 +40,23 @@ const bookController = {
                     count = json.count
                     data = json.data
                 } else {
+                    // Truyền queryObj (đã là Object) vào Service
                     const [countNum, bookList] = await bookService.getAll({query: queryObj, page, limit, sort})
                     count = countNum
                     data = bookList
+                    // Lưu vào Redis
                     redis.setex(key, 600, JSON.stringify({count, data}))
                 }
 
             } catch (error) {
+                // Nếu Redis lỗi hoặc Service lỗi, gọi trực tiếp Service để lấy data (Fallback)
+                console.log('Cache/Service error, fetching direct:', error.message)
                 const [countNum, bookList] = await bookService.getAll({query: queryObj, page, limit, sort})
                 count = countNum
                 data = bookList
-                console.log('Redis error::::' + error.message)
             }
 
-            totalPage = Math.ceil(count / limit)
+            totalPage = Math.ceil(count / (limit || 1)) // Tránh chia cho 0 nếu limit = 0
             
             res.status(200).json({
                 message: 'success',
@@ -51,12 +70,14 @@ const bookController = {
                 }
             })
         } catch (error) {
+            console.error("Controller Global Error:", error);
             res.status(500).json({
                 message: `Có lỗi xảy ra! ${error.message}`,
                 error: 1,
             })
         }
     },
+
     getByBookId: async(req, res) => {
         try {
             const { bookId } = req.params
@@ -82,6 +103,7 @@ const bookController = {
             })
         }
     },
+
     getById: async(req, res) => {
         try {
             const { id } = req.params
@@ -107,24 +129,21 @@ const bookController = {
             })
         }
     },
+
     getBySlug: async(req, res) => {
         try {
             const { slug } = req.params
-
             let response
-
             const key = `Book::${slug}`
 
             try {
                 const cache = await redis.get(key)
-
                 if (cache) {
                     response = JSON.parse(cache).response
                 } else {
                     response = await bookService.getBySlug(slug)
                     redis.setex(key, 600, JSON.stringify({response}))
                 }
-
             } catch (error) {
                 response = await bookService.getBySlug(slug)
                 console.log('Redis error::::' + error.message)
@@ -150,6 +169,7 @@ const bookController = {
             })
         }
     },
+
     checkIsOrdered: async(req, res) => {
         try {
             const { bookId } = req.params
@@ -175,6 +195,7 @@ const bookController = {
             })
         }
     },
+
     searchBook: async(req, res) => {
         try {
             const { key } = req.query
@@ -195,12 +216,18 @@ const bookController = {
             })
         }
     },
+
     create: async(req, res) => {
         try {
             const { bookId } = req.body
             const isExist = await bookService.getByBookId(bookId)
             if (isExist) return res.status(400).json({message: "bookId đã tồn tại!", error: 1}) 
             const data = await bookService.create(req.body)
+            
+            // Xóa cache khi có dữ liệu mới để user thấy ngay
+            const keys = await redis.keys('Book::*')
+            if (keys.length > 0) redis.del(keys)
+
             return res.status(201).json({
                 message: 'success',
                 error: 0,
@@ -213,6 +240,7 @@ const bookController = {
             })
         }
     },
+
     updateById: async(req, res) => {
         try {
             const { id } = req.params
@@ -230,10 +258,9 @@ const bookController = {
             }
          
             if (data) {
-                
+                // Xóa cache khi update
                 const keys = await redis.keys('Book::*')
-                if (keys.length > 0)
-                    redis.del(keys)
+                if (keys.length > 0) redis.del(keys)
                 
                 return res.status(200).json({
                     message: 'success',
@@ -255,6 +282,7 @@ const bookController = {
             })
         }
     },
+
     deleteById: async(req, res) => {
         try {
             const { id } = req.params
@@ -263,6 +291,10 @@ const bookController = {
             const data = await bookService.deleteById(id)
             if (data) {
                 await cloudinary.uploader.destroy(data?.publicId)
+
+                // Xóa cache khi xóa
+                const keys = await redis.keys('Book::*')
+                if (keys.length > 0) redis.del(keys)
 
                 return res.status(200).json({
                     message: 'success',

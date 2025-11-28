@@ -62,10 +62,10 @@ export default function StaffList() {
     }
   }
 
-  const handleUpdateStatus = async ({  _id: userId, status }) => {
+  const handleUpdateStatus = async ({ id, status }) => {
     const newStatus = status === 1 ? 0 : 1
     try {
-      await userApi.updateStatus(userId, { status:  newStatus })
+      await userApi.updateStatus(id, { status: newStatus })
       alert("Thành công!")
       setRerender(!rerender)
     } catch (error) {
@@ -152,7 +152,7 @@ export default function StaffList() {
                 ) : staffData?.list && staffData?.list?.length > 0 ? (
                   staffData.list.map((item, index) => {
                     return (
-                      <tr key={item._id}>
+                      <tr key={item.id}>
                         <td>{(1 && page - 1) * 10 + (index + 1)}</td>
                         <td className="text-start">
                           <div className="d-flex align-items-center">

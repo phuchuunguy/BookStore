@@ -2,15 +2,19 @@ const express = require('express')
 const router = express.Router()
 
 const genreController = require('../controllers/genres.controller')
-const { verifyToken, checkRole } = require('../middlewares/auth')
-const { RoleEnum } = require('../utils/enum')
 
+// Import middleware mới
+const { verifyTokenAndStaff } = require('../middlewares/auth')
+
+// --- PUBLIC ROUTES (Ai cũng xem được) ---
 router.get('/', genreController.getAll)
 router.get('/:id', genreController.getById)
 router.get('/slug/:slug', genreController.getBySlug)
-router.post('/', verifyToken, checkRole([RoleEnum.Staff, RoleEnum.Admin]), genreController.create)
-router.put('/:id', verifyToken, checkRole([RoleEnum.Staff, RoleEnum.Admin]), genreController.updateById)
-router.delete('/:id', verifyToken, checkRole([RoleEnum.Staff, RoleEnum.Admin]), genreController.deleteById)
 
+// --- PROTECTED ROUTES (Chỉ Staff/Admin) ---
+// Thay thế checkRole cũ bằng verifyTokenAndStaff
+router.post('/', verifyTokenAndStaff, genreController.create)
+router.put('/:id', verifyTokenAndStaff, genreController.updateById)
+router.delete('/:id', verifyTokenAndStaff, genreController.deleteById)
 
 module.exports = router;

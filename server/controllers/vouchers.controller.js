@@ -1,4 +1,5 @@
 const voucherService = require('../services/vouchers.service')
+const { Op } = require('sequelize');
 
 const voucherController = {
     getAll: async(req, res) => {
@@ -9,18 +10,19 @@ const voucherController = {
             const valid = req.query.valid
 
             let sort = {}
-            let query = {}
+            let where = {}
             if (sortByDate) sort.createdAt = sortByDate === "asc" ? 1 : -1
             const now = new Date()
-          
+
             if (valid) {
-                query["$or"] = [
-                    { end: { $gte: now }, start : { $lte: now }  },
-                    { start: { $gte: now } }
-                ]
+                // Build Sequelize where clause for valid vouchers
+                where[Op.or] = [
+                    { [Op.and]: [ { end: { [Op.gte]: now } }, { start: { [Op.lte]: now } } ] },
+                    { start: { [Op.gte]: now } }
+                ];
             }
 
-            const [count, data] = await voucherService.getAll({query, page, limit, sort})
+            const [count, data] = await voucherService.getAll({query: where, page, limit, sort})
             const totalPage = Math.ceil(count / limit)
 
             res.status(200).json({

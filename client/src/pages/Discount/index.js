@@ -38,7 +38,7 @@ export default function Discount() {
           voucherData &&
           voucherData.length > 0 ?
           voucherData.map((item) => (
-            <DiscountItem key={item._id} item={item} />
+            <DiscountItem key={item.id} item={item} />
           )) : <p>Hiện tại không có mã giảm giá nào!</p>
         )}
       </Container>

@@ -14,11 +14,11 @@ export default function OrderDetail({ data }) {
         <div className="d-flex">
           <div>
             <h4>BOOKSTORE</h4>
-            <p>Khu phố 6, P.Linh Trung, Tp.Thủ Đức, Tp.Hồ Chí Minh</p>
+            <p>Số 2 Vương Thừa Vũ, Thanh Xuân, Hà Nội</p>
           </div>
           <div style={{ marginLeft: "auto", minWidth: 330 }}>
             <p>
-              Hóa đơn: <b>#{data?._id}</b>
+              Hóa đơn: <b>#{data?.id}</b>
             </p>
             <p>
               {" "}
@@ -28,7 +28,7 @@ export default function OrderDetail({ data }) {
               </b>
             </p>
             <p>
-              Tài khoản: <b>{data?.user?._id}</b>
+              Tài khoản: <b>{data?.user?.id}</b>
             </p>
             <p>
               Tên khách hàng: <b>{data?.user?.fullName}</b>
@@ -79,7 +79,7 @@ export default function OrderDetail({ data }) {
             <p>Tracking:</p>
             {data?.tracking.map(item => {
               return (
-                <div key={item?._id} className="d-flex align-items-center mb-2">
+                <div key={item?.id} className="d-flex align-items-center mb-2">
                   <p style={{ width: 200, fontWeight: "bold" }}>{moment(item?.time).format("DD-MM-yyyy HH:mm:ss")}</p>
                   <div>
                     <p>{item?.status}</p>
@@ -131,11 +131,11 @@ export default function OrderDetail({ data }) {
           {data &&
           data?.products &&
           data?.products?.length > 0 ? (
-            data?.products.map((items, index) => {
+                data?.products.map((items, index) => {
               return (
-                <tr key={items._id}>
+                <tr key={items.id}>
                   <td>{index + 1}</td>
-                  <td>{items?.product?._id}</td>
+                  <td>{items?.product?.id}</td>
                   <td>{items?.product?.name}</td>
                   <td>
                     <img src={items?.product?.imageUrl} alt="" />

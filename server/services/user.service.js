@@ -86,7 +86,7 @@ const userService = {
         if (!user) return null;
         
         const addresses = user.address || [];
-        addresses.push({ ...address, _id: addressId });
+        addresses.push({ ...address, id: addressId });
         await user.update({ address: addresses });
         return user;
     },
@@ -172,7 +172,7 @@ const userService = {
         });
         
         // Set address được chọn về isDefault = true
-        const targetAddress = addresses.find(addr => addr._id === addressId);
+        const targetAddress = addresses.find(addr => addr.id === addressId);
         if (targetAddress) {
             targetAddress.isDefault = true;
         }
@@ -184,7 +184,7 @@ const userService = {
         const user = await User.findByPk(userId);
         if (!user) return null;
         
-        const addresses = (user.address || []).filter(addr => addr._id !== addressId);
+        const addresses = (user.address || []).filter(addr => addr.id !== addressId);
         await user.update({ address: addresses });
         return user;
     },

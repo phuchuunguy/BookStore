@@ -3,7 +3,9 @@ import axiosClient from "./axiosClient"
 const bookApi = {
     getAll: ({page = 1, limit, sort = { createdAt: -1 }, query = null}) => {
         const url = 'books/'
-        return axiosClient.get(url, { params: {page, limit, sort, query}})
+        const params = { page, limit, sort }
+        if (query) params.query = typeof query === 'string' ? query : JSON.stringify(query)
+        return axiosClient.get(url, { params })
     },
     getById: (id) => {
         const url = `books/${id}`

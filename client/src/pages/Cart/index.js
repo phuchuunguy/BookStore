@@ -30,7 +30,7 @@ function Cart() {
       try {
         const { list } = cartData
         const newList = list.map(item => {
-          return { product: item?.product._id, quantity: item?.quantity }
+          return { product: item?.product.id, quantity: item?.quantity }
         })
         await userApi.updateCart(currentUser.userId, {cart: newList})
       } catch (error) {
@@ -54,9 +54,9 @@ function Cart() {
 
   const handleApplyVoucher = async () => {
     try {
-      if (!voucherInput) {
+        if (!voucherInput) {
         dispatch(updateVoucher({
-          _id: "",
+          id: "",
           code: "",
           value: 0,
           by: "",
@@ -66,12 +66,12 @@ function Cart() {
       }
       if (voucherInput === cartData?.voucher?.code) return 
       const { data: voucherData } = await voucherApi.getByCode(voucherInput)
-      const { minimum, _id, value, by, start, end } = voucherData
+      const { minimum, id, value, by, start, end } = voucherData
 
-      if (!_id) {
+      if (!id) {
         toast.info("Voucher này không tồn tại!", {autoClose: 2000})
         dispatch(updateVoucher({
-          _id: "",
+          id: "",
           code: "",
           value: 0,
           by: ""
@@ -92,7 +92,7 @@ function Cart() {
     
       dispatch(
         updateVoucher({
-          _id: _id,
+          id: id,
           code: voucherInput,
           value: value,
           by: by,
@@ -128,8 +128,8 @@ function Cart() {
                   <tbody>
                     {cartData.list.map((item) => (
                       <CartItem
-                        key={item.product._id}
-                        productId={item.product._id}
+                        key={item.product.id}
+                        productId={item.product.id}
                         name={item.product.name}
                         imageUrl={item.product.imageUrl}
                         price={item.product.price}

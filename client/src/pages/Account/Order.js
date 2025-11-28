@@ -56,7 +56,7 @@ export default function Order() {
 
   const handleGetOrderDetail = async (orderId) => {
     try {
-      if (!(orderDetail?._id === orderId)) {
+      if (orderDetail?.id !== orderId) {
         const { data } = await orderApi.getById(orderId, { userId: userId });
         setOrderDetail(data);
       }
@@ -69,10 +69,10 @@ export default function Order() {
   const handleCheckout = async () => {
     if (selectedMethod === 1) {
       try {
-          const { cost: { total }, _id } = selectedOrder
+          const { cost: { total }, id } = selectedOrder
           const paymentId = uuidv4()
           setLoadingCheckout(true)
-          await orderApi.updatePaymentId(_id, { paymentId })
+          await orderApi.updatePaymentId(id, { paymentId })
           const { payUrl } = await orderApi.getPayUrlMoMo({ amount: total, paymentId })
           setLoadingCheckout(false)
           window.location.href = payUrl
@@ -151,7 +151,7 @@ export default function Order() {
             ) : orderData?.orders && orderData?.orders?.length > 0 ? (
               orderData.orders.map((item, index) => {
                 return (
-                  <tr key={item._id}>
+                  <tr key={item.id}>
                     <td>{(1 && page - 1) * 10 + (index + 1)}</td>
                     <td className="text-start" style={{ fontSize: 14 }}>
                       <p>
@@ -203,7 +203,7 @@ export default function Order() {
                     <td>
                       <button
                         className="btn btn-primary small"
-                        onClick={() => handleGetOrderDetail(item?._id)}
+                        onClick={() => handleGetOrderDetail(item?.id)}
                       >
                         <FaEye />
                       </button>

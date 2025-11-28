@@ -45,7 +45,7 @@ function AuthorList() {
 
   const handleCallApiDelete = async (e) => {
     try {
-      await authorApi.delete(authorDelete._id);
+      await authorApi.delete(authorDelete.id);
       setShowModal(false)
       alert("Xóa thành công!")
       setRerender(!rerender)
@@ -76,7 +76,7 @@ function AuthorList() {
 
     try {
       setLoading(true)
-      await authorApi.update(selectedAuthor?._id, selectedAuthor)
+      await authorApi.update(selectedAuthor?.id, selectedAuthor)
       setLoading(false)
       alert("Cập nhật thành công!")
       setRerender(!rerender)
@@ -196,7 +196,7 @@ function AuthorList() {
                 ) : authorData.authors && authorData.authors.length > 0 ? (
                   authorData.authors.map((item, index) => {
                     return (
-                      <tr key={item._id}>
+                      <tr key={item.id}>
                         <td>{(1 && page - 1) * 10 + (index + 1)}</td>
                         <td>
                           {item.name} {item.year && "-"} {item?.year}
@@ -218,7 +218,7 @@ function AuthorList() {
                             className="btn btn-danger"
                             onClick={() => {
                               setAuthorDelete({
-                                _id: item._id,
+                                id: item.id,
                                 name: item.name
                               })
                               setShowModal(true)

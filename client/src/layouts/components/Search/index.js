@@ -81,7 +81,7 @@ function Search() {
           <div className={styles.resultSearch} onMouseDown={(e) => {e.preventDefault()}}
             onClick={() => setShowResult(false)}
           >
-            {searchResult.map(book => <SearchResultItem key={book._id} data={book} />)}
+            {searchResult.map(book => <SearchResultItem key={book.id} data={book} />)}
           </div>
         )}
       </div>

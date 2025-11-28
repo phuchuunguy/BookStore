@@ -63,8 +63,8 @@ function App() {
     const fetchData = async () => {
       try {
         const data = await authApi.me()
-        const { email, fullName, phoneNumber, avatar, _id, role } = data?.user
-        dispatch(login({email, fullName, phoneNumber, avatar, userId: _id, role}))
+        const { email, fullName, phoneNumber, avatar, id, role } = data?.user
+        dispatch(login({email, fullName, phoneNumber, avatar, userId: id, role}))
       } catch (error) {
         if (error.response.status === 403 || error.response.status === 401) {
           localStorage.removeItem('accessToken')
