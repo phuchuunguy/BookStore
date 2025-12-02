@@ -33,16 +33,18 @@ function Footer() {
                     <div className={styles.footerBoxLink}>
                         <p className={styles.title}>DANH MỤC</p>
                         <Link to="/">Trang chủ</Link>
-                        <Link to="/">Giới thiệu</Link>
+                        <Link to="/gioi-thieu">Giới thiệu</Link>
                         <Link to="/lien-he">Liên hệ</Link>
-                        <Link to="/">Danh mục sản phẩm</Link>
+                        <Link to="/san-pham">Danh mục sản phẩm</Link>
                     </div>
                   </Col>
                   <Col xl={4} xs={6}>
                     <div className={styles.footerBoxLink}>
                         <p className={styles.title}>CHÍNH SÁCH</p>
-                        <Link to="/">Chính sách đổi trả</Link>
-                        <Link to="/">Chính sách vận chuyển</Link>
+                        <Link to="/chinh-sach-doi-tra">Chính sách đổi trả</Link>
+                        <Link to="/chinh-sach-van-chuyen">Chính sách vận chuyển</Link>
+                        <Link to="/chinh-sach-bao-mat">Chính sách bảo mật</Link>
+                        <Link to="/dieu-khoan-dich-vu">Điều khoản dịch vụ</Link>
                     </div>
                   </Col>
                 </Row>
