@@ -1,0 +1,82 @@
+.container {
+  width: 100%;
+  max-width: 1200px; /* rộng như khung nội dung của trang chủ */
+  margin: 40px auto; 
+  padding: 40px 50px;
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.05);
+  line-height: 1.75;
+  font-size: 17px;
+  color: #333;
+}
+
+/* Tiêu đề chính */
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 32px;
+  font-weight: 600;
+  color: #2b2b2b;
+}
+
+/* Tiêu đề cấp 2 */
+h2 {
+  margin-top: 30px;
+  margin-bottom: 10px;
+  color: #1d1d1d;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* Tiêu đề cấp 3 */
+h3 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 20px;
+  color: #333;
+  font-weight: 600;
+}
+
+/* Danh sách */
+ul {
+  margin-top: 10px;
+  margin-left: 20px;
+  padding-left: 20px;
+}
+
+ul li {
+  margin-bottom: 8px;
+  list-style-type: disc;
+}
+
+/* Đoạn văn */
+p {
+  margin-bottom: 15px;
+  color: #444;
+}
+
+/* Nhấn mạnh chữ */
+strong {
+  color: #0d722e; /* màu xanh giống theme */
+}
+/* Fix hiển thị bullet bị nằm cùng dòng */
+ul {
+  margin-top: 10px;
+  margin-left: 20px;
+  padding-left: 20px;
+  display: block; /* bắt ul hiển thị dạng khối chuẩn */
+}
+
+ul li {
+  display: list-item !important;  /* ép từng item xuống dòng */
+  list-style-type: disc;
+  margin-bottom: 10px;
+  white-space: normal; /* cho phép text tự xuống dòng */
+}
+
+/* Nếu có nhiều bullet trong cùng 1 đoạn p, tách chúng ra dòng riêng */
+p ul,
+p li {
+  display: list-item !important;
+}

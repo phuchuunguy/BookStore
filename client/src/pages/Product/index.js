@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom"; // 1. Import thêm useLocation
 import { Container, Row, Col, NavLink, Breadcrumb } from "react-bootstrap";
 import PaginationBookStore from "../../components/PaginationBookStore";
 import BookItem from "../../components/Shop/BookItem";
@@ -10,6 +11,8 @@ import genreApi from "../../api/genreApi";
 import styles from "./Product.module.css";
 
 export default function Product() {
+  const location = useLocation(); // 2. Khai báo hook location
+
   const [bookData, setBookData] = useState({});
   const [genreList, setGenreList] = useState([]);
   const [page, setPage] = useState(1);
@@ -17,10 +20,22 @@ export default function Product() {
   const [sortString, setSortString] = useState("createdAt|-1");
   const [genresChecked, setGenresChecked] = useState([]);
 
-  // State quản lý việc đóng/mở danh sách thể loại
   const [isGenreOpen, setIsGenreOpen] = useState(true);
-
   const [loading, setLoading] = useState(false);
+
+  // 3. THÊM ĐOẠN NÀY: Tự động chọn danh mục khi có URL params
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const genreId = params.get("genre"); // Lấy ?genre=... trên thanh địa chỉ
+
+    if (genreId) {
+      const id = parseInt(genreId);
+      if (!isNaN(id)) {
+        setGenresChecked([id]); // Tự động tích vào ô đó
+      }
+    }
+  }, [location.search]);
+  // -----------------------------------------------------------
 
   useEffect(() => {
     const fetchData = async () => {
@@ -28,8 +43,9 @@ export default function Product() {
         const sortArr = sortString.split("|");
 
         // Tạo query object
-        const queryObj = { genre: { $in: genresChecked } };
-        // Chuyển thành chuỗi JSON để gửi đi (giúp Backend parse dễ dàng)
+        // Nếu genresChecked rỗng thì không lọc (lấy hết)
+        const queryObj = genresChecked.length > 0 ? { genre: { $in: genresChecked } } : {};
+        
         const query = JSON.stringify(queryObj);
 
         setLoading(true);
@@ -69,17 +85,15 @@ export default function Product() {
   }, []);
 
   const handleChangeGenre = (e) => {
-    // Ép kiểu ID về số nguyên (vì DB lưu số)
     const id = parseInt(e.target.value);
+    setPage(1); 
     
-    setPage(1); // Reset về trang 1 khi lọc
-
-    // Logic chọn 1 (Single Select) - Bấm cái mới thì bỏ cái cũ
+    // Logic chọn 1 (Single Select) - Hoặc bạn có thể đổi thành Multi Select tùy ý
     setGenresChecked((pre) => {
       if (pre.includes(id)) {
-        return []; // Bấm lại vào cái đang chọn -> Bỏ chọn
+        return []; 
       } else {
-        return [id]; // Chọn cái mới -> Chỉ lấy cái mới
+        return [id]; 
       }
     });
   };
@@ -97,30 +111,21 @@ export default function Product() {
         </Breadcrumb>
         <div className={styles.genre_body}>
           <Row>
-            {/* Cột Danh mục (Bên trái) */}
+            {/* Cột Danh mục */}
             <Col xl={3}>
               <div className={styles.filterGroup}>
-                
-                {/* Tiêu đề có thể click để đóng/mở */}
                 <p 
                   className={styles.filterGroupTitle} 
                   onClick={() => setIsGenreOpen(!isGenreOpen)}
                 >
                   Thể loại
-                  {/* Mũi tên chỉ hướng */}
-                  <span className={`${styles.arrow} ${isGenreOpen ? styles.open : ''}`}>
-                    ▼
-                  </span>
+                  <span className={`${styles.arrow} ${isGenreOpen ? styles.open : ''}`}>▼</span>
                 </p>
 
-                {/* Danh sách cuộn thả (Accordion) */}
                 <div className={`${styles.filterList} ${isGenreOpen ? styles.open : ''}`}>
-                  {genreList &&
-                    genreList.length > 0 &&
-                    genreList.map((genre) => (
+                  {genreList && genreList.map((genre) => (
                       <div
                         key={genre.id}
-                        // Thêm class 'active' nếu đang chọn -> CSS sẽ tô màu đỏ
                         className={`${styles.filterGroupItem} ${
                           genresChecked.includes(genre.id) ? styles.active : ""
                         }`}
@@ -141,7 +146,7 @@ export default function Product() {
               </div>
             </Col>
 
-            {/* Cột Sản phẩm (Bên phải) */}
+            {/* Cột Sản phẩm */}
             <Col xl={9}>
               <div className={styles.genreOrder}>
                 <Row>
@@ -165,7 +170,6 @@ export default function Product() {
                 </Row>
               </div>
 
-              {/* Danh sách sản phẩm */}
               <div className={styles.products}>
                 {loading ? (
                   <Loading />
@@ -174,7 +178,6 @@ export default function Product() {
                     {bookData.books && bookData.books.length > 0 ? (
                       bookData.books.map((book) => (
                         <Col xl={3} lg={4} md={6} xs={6} key={book.id}>
-                          {/* Đã sửa data={book} thành item={book} */}
                           <BookItem item={book} />
                         </Col>
                       ))
@@ -188,7 +191,6 @@ export default function Product() {
                 )}
               </div>
 
-              {/* Phân trang */}
               <div className={styles.pagination}>
                 <Row>
                   <Col xl={12}>

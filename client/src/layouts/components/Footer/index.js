@@ -22,27 +22,40 @@ function Footer() {
                   <Col xl={4} xs={6}>
                     <div className={styles.footerBoxLink}>
                         <p className={styles.title}>SẢN PHẨM</p>
-                        <Link to="/san-pham/the-loai/van-hoc">Văn học</Link>
-                        <Link to="/san-pham/the-loai/tam-ly-ky-nang-song">Tâm lý - Kỹ năng sống</Link>
-                        <Link to="/san-pham/the-loai/cong-nghe-thong-tin">Công nghệ thông tin</Link>
-                        <Link to="/san-pham/the-loai/kinh-te">Kinh tế</Link>
-                        <Link to="/san-pham/the-loai/sach-giao-khoa">Sách giáo khoa</Link>
+                        <li>
+                            {/* Khi bấm vào đây, nó sẽ nhảy sang trang Product và tự tích vào ô Văn học (ID 12) */}
+                            <Link to="/san-pham?genre=12">Văn học</Link>
+                        </li>
+                        <li>
+                            <Link to="/san-pham?genre=8">Tâm lý - Kỹ năng sống</Link>
+                        </li>
+                        <li>
+                            <Link to="/san-pham?genre=14">Công nghệ thông tin</Link>
+                        </li>
+                        <li>
+                            <Link to="/san-pham?genre=9">Kinh tế</Link>
+                        </li>
+                        <li>
+                            <Link to="/san-pham?genre=10">Sách giáo khoa</Link>
+                        </li>
                     </div>
                   </Col>
                   <Col xl={4} xs={4} className={styles.cateList}>
                     <div className={styles.footerBoxLink}>
                         <p className={styles.title}>DANH MỤC</p>
                         <Link to="/">Trang chủ</Link>
-                        <Link to="/">Giới thiệu</Link>
+                        <Link to="/gioi-thieu">Giới thiệu</Link>
                         <Link to="/lien-he">Liên hệ</Link>
-                        <Link to="/">Danh mục sản phẩm</Link>
+                        <Link to="/san-pham">Danh mục sản phẩm</Link>
                     </div>
                   </Col>
                   <Col xl={4} xs={6}>
                     <div className={styles.footerBoxLink}>
                         <p className={styles.title}>CHÍNH SÁCH</p>
-                        <Link to="/">Chính sách đổi trả</Link>
-                        <Link to="/">Chính sách vận chuyển</Link>
+                        <Link to="/chinh-sach-doi-tra">Chính sách đổi trả</Link>
+                        <Link to="/chinh-sach-van-chuyen">Chính sách vận chuyển</Link>
+                        <Link to="/chinh-sach-bao-mat">Chính sách bảo mật</Link>
+                        <Link to="/dieu-khoan-dich-vu">Điều khoản dịch vụ</Link>
                     </div>
                   </Col>
                 </Row>

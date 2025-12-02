@@ -1,0 +1,139 @@
+/* Container chính căn giữa trang */
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #333;
+}
+
+/* --- Cấu trúc chung cho từng Section (Phần 1 và 2) --- */
+.section {
+  display: flex;
+  align-items: flex-start; /* THAY ĐỔI: Căn đỉnh trên (thay vì center) */
+  gap: 40px; 
+  margin-bottom: 80px;
+}
+
+/* Class đảo ngược cho phần 2 (Chữ trái - Ảnh phải) */
+.reverse {
+  flex-direction: row-reverse;
+}
+
+/* Cột chứa ảnh */
+.imageCol {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+/* Cột chứa chữ */
+.textCol {
+  flex: 1;
+}
+
+/* Tiêu đề */
+.heading {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-top: 0; /* THAY ĐỔI: Đảm bảo tiêu đề sát mép trên cùng */
+  margin-bottom: 20px;
+  line-height: 1.2; /* THAY ĐỔI: Giảm chiều cao dòng một chút để khít với ảnh hơn */
+  color: #222;
+}
+
+.centerHeading {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+/* Đoạn văn */
+.paragraph {
+  margin-bottom: 16px;
+  line-height: 1.6;
+  font-size: 1rem;
+  color: #555;
+  text-align: justify;
+}
+
+/* --- Style riêng cho các loại ảnh (GIỮ NGUYÊN MAX-WIDTH = 400PX) --- */
+.bookImageVertical {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  object-fit: cover;
+}
+
+.bookImageSquare {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  object-fit: cover;
+}
+
+.bookImageGroup {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* --- Phần 3: Lợi ích --- */
+.sectionLast {
+  margin-bottom: 40px;
+}
+
+.benefitContainer {
+  display: flex;
+  align-items: flex-start; /* Đã căn đỉnh trên sẵn */
+  gap: 50px;
+}
+
+.benefitList {
+  list-style-type: disc;
+  padding-left: 20px;
+  margin-top: 0; /* Đảm bảo list bắt đầu sát mép trên */
+}
+
+.benefitList li {
+  margin-bottom: 12px;
+  line-height: 1.5;
+  color: #444;
+}
+
+.benefitList li strong {
+  color: #222;
+  font-weight: 600;
+}
+
+/* --- Responsive cho Mobile --- */
+@media (max-width: 768px) {
+  .section, 
+  .section.reverse, 
+  .benefitContainer {
+    flex-direction: column; 
+    gap: 20px;
+    align-items: center; /* Trên mobile thì quay về căn giữa cho đẹp */
+    text-align: center;
+  }
+
+  /* Đảm bảo thứ tự trên mobile: Ảnh trước, Chữ sau */
+  .section.reverse {
+    flex-direction: column; 
+  }
+
+  .textCol {
+    padding: 0 10px;
+  }
+  
+  .paragraph {
+    text-align: center;
+  }
+
+  .benefitList {
+    text-align: left;
+    padding-left: 20px;
+  }
+}

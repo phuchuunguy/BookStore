@@ -1,0 +1,271 @@
+/* --- CẤU TRÚC CHUNG --- */
+.pageWrapper {
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #ffffff;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* --- HEADER PAGE (Phần Tiêu đề) --- */
+.pageHeader {
+  background-color: #fafaf6;
+  padding: 60px 20px 40px;
+  text-align: center;
+  position: relative;
+  margin-bottom: 40px;
+  
+
+  border-top: 2px solid #e5e7eb; 
+
+}
+
+.headerContent {
+  position: relative;
+  z-index: 1;
+  color: #1f2937;
+}
+
+.pageTitle {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  letter-spacing: -0.5px;
+}
+
+.pageDesc {
+  font-size: 1.1rem;
+  max-width: 700px;
+  margin: 0 auto;
+  opacity: 0.8;
+  color: #4b5563;
+}
+
+/* --- GRID LAYOUT --- */
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  margin-bottom: 100px;
+}
+
+/* --- CỘT TRÁI: THÔNG TIN --- */
+.leftColumn {
+  padding-top: 20px;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  color: #111;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.sectionDesc {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 40px;
+}
+
+.infoList {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.infoItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.iconBox {
+  width: 50px;
+  height: 50px;
+  background-color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #539E31;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  flex-shrink: 0;
+}
+
+.infoContent {
+  padding-top: 5px;
+}
+
+.infoTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 5px;
+}
+
+.infoText, .infoLink {
+  color: #555;
+  font-size: 1rem;
+  margin: 0;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.infoLink:hover {
+  color: #539E31;
+}
+
+/* --- CỘT PHẢI: FORM --- */
+.formCard {
+  background: #fff;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+}
+
+.formTitle {
+  font-size: 1.8rem;
+  margin-bottom: 30px;
+  color: #111;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.inputWrapper {
+  width: 100%;
+}
+
+.formInput {
+  width: 100%;
+  padding: 15px 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #f9fafb;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+textarea.formInput {
+  resize: vertical;
+}
+
+.formInput:focus {
+  background-color: #fff;
+  border-color:  #539E31;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+/* --- NÚT BẤM --- */
+.submitBtn {
+  margin-top: 10px;
+  padding: 16px 32px;
+  background-color: #539E31;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s;
+  text-transform: uppercase;
+}
+
+.submitBtn:hover {
+  background-color: #539E31;
+  transform: translateY(-2px);
+}
+
+.submitBtn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Hiệu ứng icon trượt */
+.btnIcon {
+  display: flex;
+  flex-direction: column;
+  height: 10px;
+  overflow: hidden;
+}
+
+.btnIcon svg {
+  display: block;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btnIcon svg:nth-child(2) {
+  transform: translateY(100%);
+}
+
+.submitBtn:hover .btnIcon svg:first-child {
+  transform: translateY(-150%);
+}
+
+.submitBtn:hover .btnIcon svg:nth-child(2) {
+  transform: translateY(-100%);
+}
+
+/* --- THÔNG BÁO THÀNH CÔNG --- */
+.successMessage {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.checkIcon {
+  width: 60px;
+  height: 60px;
+  background: #dcfce7;
+  color:#539E31;
+  border-radius: 50%;
+  font-size: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+/* --- BẢN ĐỒ --- */
+.mapSection {
+  width: 100%;
+  height: 450px;
+  background-color: #e5e5e5;
+  margin-top: 60px;
+}
+
+.mapFrame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .pageTitle {
+    font-size: 2rem;
+  }
+  
+  .pageHeader {
+    padding: 40px 20px;
+  }
+}
