@@ -170,10 +170,10 @@ export default function Product() {
                 {loading ? (
                   <Loading />
                 ) : (
-                  <Row>
+                  <Row className="g-3">
                     {bookData.books && bookData.books.length > 0 ? (
                       bookData.books.map((book) => (
-                        <Col xl={3} key={book.id}>
+                        <Col xl={3} lg={4} md={6} xs={6} key={book.id}>
                           {/* Đã sửa data={book} thành item={book} */}
                           <BookItem item={book} />
                         </Col>

@@ -38,8 +38,8 @@
 
 1. Git clone
 ```
-    https://github.com/ngonhan71/bookstore-v2
-    cd bookstore-v2
+    https://github.com/phuchuunguy/BookStore.git
+    cd Book
 ```
 
 2. cd server, tạo file .env

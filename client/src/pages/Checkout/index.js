@@ -404,15 +404,25 @@ export default function Checkout() {
                   ))}
                 </div>
 
-                <button 
-                    type="button" 
-                    className="bookstore-btn mt-3 w-100 btn btn-danger" 
-                    onClick={formik.handleSubmit} 
-                    disabled={!canSubmit} // Nút chỉ sáng khi đủ thông tin
-                    style={{ opacity: !canSubmit ? 0.6 : 1 }}
-                >
-                  {loading ? "ĐANG XỬ LÝ..." : "ĐẶT HÀNG"}
-                </button>
+                {/* Hiển thị PayPal component khi chọn PayPal */}
+                {parseInt(formik.values.method) === 2 && (
+                  <div className="mt-3">
+                    <PayPal amount={cartData?.total + shippingFee} onSuccess={() => {}} />
+                  </div>
+                )}
+
+                {/* Ẩn nút đặt hàng khi chọn PayPal */}
+                {parseInt(formik.values.method) !== 2 && (
+                  <button 
+                      type="button" 
+                      className="bookstore-btn mt-3 w-100 btn btn-danger" 
+                      onClick={formik.handleSubmit} 
+                      disabled={!canSubmit} // Nút chỉ sáng khi đủ thông tin
+                      style={{ opacity: !canSubmit ? 0.6 : 1 }}
+                  >
+                    {loading ? "ĐANG XỬ LÝ..." : "ĐẶT HÀNG"}
+                  </button>
+                )}
               </div>
             </Col>
           </Row>

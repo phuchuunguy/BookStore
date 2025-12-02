@@ -3,11 +3,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Container, Form } from "react-bootstrap";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { useDispatch } from "react-redux";
 import authApi from "../../api/authApi";
+import { logout } from "../../redux/actions/auth";
 import styles from "./Auth.module.css";
 function ResetPassword() {
   const params = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const { token } = params;
 
@@ -36,6 +39,8 @@ function ResetPassword() {
         const res = await authApi.resetPassword({password, token: tokenValue})
         if (!res.error) {
           alert("Đổi mật khẩu thành công")
+          localStorage.removeItem('accessToken')
+          dispatch(logout())
           navigate({ pathname: "/dang-nhap" });
           return
         } else {

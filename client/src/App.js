@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify"
@@ -57,25 +57,27 @@ import { roleEnum } from  "./layouts/components/SideBar/routes"
 function App() {
 
   const currentUser = useSelector((state) => state.auth)
+  const [isAuthChecked, setIsAuthChecked] = useState(false)
 
   const dispatch = useDispatch()
   useEffect(() => {
-    const fetchData = async () => {
+    const initApp = async () => {
+      const token = localStorage.getItem('accessToken')
+      if (!token) {
+        setIsAuthChecked(true)
+        return
+      }
+      
       try {
+        // Fetch user data first
         const data = await authApi.me()
         const { email, fullName, phoneNumber, avatar, id, role } = data?.user
         dispatch(login({email, fullName, phoneNumber, avatar, userId: id, role}))
-      } catch (error) {
-        if (error.response.status === 403 || error.response.status === 401) {
-          localStorage.removeItem('accessToken')
-          dispatch(logout())
-        }
-      }
-    }
-    const getCart = async () => {
-      try {
-          const { data } = await userApi.getCart(currentUser.userId)
-          const newList = data.cart.map(item => {
+        
+        // Then fetch cart
+        try {
+          const { data: cartData } = await userApi.getCart(id)
+          const newList = cartData.cart.map(item => {
             const { price, discount } = item.product
             const newPrice = price - price * ((discount > 0 ? discount : 0) / 100)
             return {
@@ -85,23 +87,31 @@ function App() {
             }
           })
           dispatch(setCart(newList))
+        } catch (error) {
+          console.log(error)
+        }
       } catch (error) {
-        console.log(error)
+        if (error.response?.status === 403 || error.response?.status === 401) {
+          localStorage.removeItem('accessToken')
+          dispatch(logout())
+        }
+      } finally {
+        setIsAuthChecked(true)
       }
     }
-    const token = localStorage.getItem('accessToken')
-    if (token && !currentUser.userId) {
-      fetchData()
-    }
-    if (token && currentUser.userId) {
-      getCart()
-    }
-  },[dispatch, currentUser])
+    
+    initApp()
+  },[dispatch])
 
 
   return (
     <div className="App">
       <ToastContainer />
+      {!isAuthChecked ? (
+        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>
+          <div>Loading...</div>
+        </div>
+      ) : (
       <Routes>
         <Route path="/" element={<DefaultLayout />}>
           <Route path="/" element={<Home />} />
@@ -177,7 +187,8 @@ function App() {
 
         <Route path="*" element={<NotFound />} />
 
-      </Routes> 
+      </Routes>
+      )}
     </div>
   );
 }

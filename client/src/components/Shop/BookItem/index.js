@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 
 function BookItem({ item, boxShadow }) {
   
-  // 1. Chặn lỗi Crash
   if (!item) return null;
 
   const { price, discount } = item;
@@ -26,16 +25,19 @@ function BookItem({ item, boxShadow }) {
       
       <div className={styles.card}>
         <Link to={`/chi-tiet-san-pham/${item.slug}`} className={styles.bookInfo}>
-          <img 
-            // Đã xóa variant="top" vì img thường không cần
-            className={styles.bookImage} // Bạn nên thêm class này để CSS chiều cao ảnh cho đều
-            src={item.imageUrl ? item.imageUrl : fallbackImage} 
-            alt={item.name} 
-            onError={(e) => {e.target.onerror = null; e.target.src = fallbackImage;}}
-            style={{ width: '100%', height: '280px', objectFit: 'cover' }} // Mẹo: Set cứng chiều cao để các thẻ không bị lệch
-          />
-          <p className={styles.name}>
-            {item.name} - {Array.isArray(item.author) && item.author[0] ? item.author[0].name : "Tác giả"}
+          <div className={styles.imgWrapper}>
+              <img 
+                className={styles.bookImage} 
+                src={item.imageUrl ? item.imageUrl : fallbackImage} 
+                alt={item.name} 
+                onError={(e) => {e.target.onerror = null; e.target.src = fallbackImage;}}
+              />
+          </div>
+          <p className={styles.name} title={item.name}>
+            {item.name}
+          </p>
+          <p className={styles.author}>
+             {Array.isArray(item.author) && item.author[0] ? item.author[0].name : "Đang cập nhật"}
           </p>
         </Link>
         

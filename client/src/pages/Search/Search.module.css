@@ -12,6 +12,10 @@
     margin: 32px;
 }
 
+.booksList .row {
+    --bs-gutter-x: 1.5rem;
+}
+
 .title {
     display: flex;
     justify-content: center;

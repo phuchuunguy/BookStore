@@ -32,6 +32,7 @@ const bookService = {
             });
         }
         
+        order.push(['id', 'DESC']);
         // --- XỬ LÝ QUERY ---
         const where = { ...query };
 
@@ -74,7 +75,7 @@ const bookService = {
                 limit: limit > 0 ? limit : undefined,
                 order: order.length > 0 ? order : [['createdAt', 'DESC']],
                 nest: true,
-                logging: console.log 
+                // logging: console.log 
             });
 
             if (rawBooks.length === 0) return [0, []];

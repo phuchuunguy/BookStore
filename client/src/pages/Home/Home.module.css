@@ -8,7 +8,7 @@
 }
 
 .booksList .row {
-    --bs-gutter-x: 0
+    --bs-gutter-x: 1.5rem;
 }
 
 .title {

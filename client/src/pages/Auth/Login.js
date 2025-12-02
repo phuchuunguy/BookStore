@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import OAuth2Login from 'react-simple-oauth2-login';
 
 import authApi from '../../api/authApi';
-import { login } from '../../redux/actions/auth';
-import { useDispatch } from "react-redux";
+import jwtDecode from 'jwt-decode';
+import { login, logout } from '../../redux/actions/auth';
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from "react";
 
@@ -16,11 +17,11 @@ function Login() {
   const [password, setPassword] = useState("")
 
   const [loading, setLoading] = useState(false)
-
   const [showModal, setShowModal] = useState(false)
   
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const currentUser = useSelector((state) => state.auth)
 
   const responseSuccessGoogle = async (response) => {
    try {
@@ -62,11 +63,34 @@ function Login() {
   }
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken')
-    if (token) {
-      navigate({ pathname: '/' })
+    const checkToken = async () => {
+      const token = localStorage.getItem('accessToken')
+      if (!token) return
+      try {
+        const decoded = jwtDecode(token)
+        if (decoded && decoded.exp && decoded.exp * 1000 > Date.now()) {
+          // Token is structurally valid, verify it with server
+          try {
+            const response = await authApi.me()
+            const { email, fullName, phoneNumber, avatar, id, role } = response?.user
+            dispatch(login({email, fullName, phoneNumber, avatar, userId: id, role}))
+            navigate({ pathname: '/' })
+          } catch (err) {
+            // Token invalid on server, remove it
+            localStorage.removeItem('accessToken')
+            dispatch(logout())
+          }
+        } else {
+          localStorage.removeItem('accessToken')
+          dispatch(logout())
+        }
+      } catch (err) {
+        localStorage.removeItem('accessToken')
+        dispatch(logout())
+      }
     }
-  }, [navigate])
+    checkToken()
+  }, [navigate, dispatch])
 
   const handleLogin = async (e) => {
     e.preventDefault()

@@ -18,6 +18,12 @@
   justify-content: center;
 }
 
+/* Khoảng cách giữa các sản phẩm */
+.products {
+    margin-top: 20px; /* Chỉ giữ lại khoảng cách trên dưới */
+    width: 100%;
+}
+
 /* --- PHẦN BỘ LỌC ĐÃ NÂNG CẤP --- */
 
 .filterGroup {

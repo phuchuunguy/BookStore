@@ -59,6 +59,10 @@
     padding: 20px 10px;
 } */
 
+.products {
+    --bs-gutter-x: 1.5rem;
+}
+
 .pagination {
     margin-top: 20px;
 }
