@@ -5,6 +5,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
+
 import authApi from "../../api/authApi";
 import { logout } from "../../redux/actions/auth";
 import styles from "./Auth.module.css";
@@ -16,11 +17,11 @@ function ResetPassword() {
 
   const { token } = params;
 
-  const [tokenValue, setTokenValue] = useState("")
+  const [tokenValue, setTokenValue] = useState("");
 
   useEffect(() => {
-    if (token) setTokenValue(token)
-  }, [token])
+    if (token) setTokenValue(token);
+  }, [token]);
 
   const formik = useFormik({
     initialValues: {
@@ -38,43 +39,42 @@ function ResetPassword() {
     onSubmit: async () => {
       const { password } = formik.values;
       try {
-        const res = await authApi.resetPassword({password, token: tokenValue})
-        
-        // --- LOGIC MỚI VỚI SWEETALERT2 ---
+        const res = await authApi.resetPassword({ password, token: tokenValue });
+
         if (!res.error) {
+
           localStorage.removeItem('accessToken')
           dispatch(logout())
           // Popup thành công
+
           Swal.fire({
-            icon: 'success',
-            title: 'Thành công!',
-            text: 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại.',
-            confirmButtonColor: '#28a745'
+            icon: "success",
+            title: "Thành công!",
+            text: "Đổi mật khẩu thành công. Vui lòng đăng nhập lại.",
+            confirmButtonColor: "#28a745",
           }).then(() => {
-             // Chuyển trang sau khi tắt popup
-             navigate({ pathname: "/dang-nhap" });
+            localStorage.removeItem("accessToken");
+            dispatch(logout());
+            navigate("/dang-nhap");
           });
           return;
         } else {
-          // Popup lỗi từ server trả về
           Swal.fire({
-            icon: 'error',
-            title: 'Thất bại',
-            text: res.message || 'Không thể đổi mật khẩu.',
-            confirmButtonColor: '#d33'
+            icon: "error",
+            title: "Thất bại",
+            text: res.message || "Không thể đổi mật khẩu.",
+            confirmButtonColor: "#d33",
           });
         }
       } catch (error) {
-        // Popup lỗi hệ thống/mạng
         console.error(error);
         Swal.fire({
-            icon: 'error',
-            title: 'Lỗi hệ thống',
-            text: 'Có lỗi xảy ra, vui lòng thử lại sau!',
-            confirmButtonColor: '#d33'
+          icon: "error",
+          title: "Lỗi hệ thống",
+          text: "Có lỗi xảy ra, vui lòng thử lại sau!",
+          confirmButtonColor: "#d33",
         });
       }
-      // ---------------------------------
     },
   });
 

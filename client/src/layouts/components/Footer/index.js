@@ -38,7 +38,8 @@ function Footer() {
           <Col xl={6} xs={12}>
             <div className={styles.footerGroup}>
               <Row>
-                {/* SẢN PHẨM */}
+
+                {/* SẢN PHẨM – GIỮ DẠNG ?genre=ID */}
                 <Col xl={4} xs={6}>
                   <div className={styles.footerBoxLink}>
                     <p className={styles.title}>SẢN PHẨM</p>
@@ -48,7 +49,7 @@ function Footer() {
                       <li><Link to="/san-pham?genre=8">Tâm lý - Kỹ năng sống</Link></li>
                       <li><Link to="/san-pham?genre=14">Công nghệ thông tin</Link></li>
                       <li><Link to="/san-pham?genre=9">Kinh tế</Link></li>
-                    { /* <li><Link to="/san-pham?genre=10">Sách giáo khoa</Link></li> */ }
+                      <li><Link to="/san-pham?genre=10">Sách giáo khoa</Link></li>
                     </ul>
                   </div>
                 </Col>
@@ -74,6 +75,7 @@ function Footer() {
                     <Link to="/dieu-khoan-dich-vu">Điều khoản dịch vụ</Link>
                   </div>
                 </Col>
+
               </Row>
             </div>
           </Col>
@@ -136,10 +138,7 @@ function Footer() {
         aria-label="Scroll to top"
         title="Lên đầu trang"
       >
-        <img
-          src="/book.png"
-          alt="Mini Book Icon"
-        />
+        <img src="/book.png" alt="Mini Book Icon" />
       </button>
 
     </footer>

@@ -6,10 +6,15 @@
 }
 
 .container {
+  
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+  /* Thêm background */
+  background: url("") no-repeat center/cover;
+  border-radius: 16px;
 }
+
 
 /* --- HEADER PAGE (Phần Tiêu đề) --- */
 .pageHeader {

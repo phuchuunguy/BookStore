@@ -1,16 +1,15 @@
 import { Container, Modal, Button } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import OAuth2Login from 'react-simple-oauth2-login';
+import { Link, useNavigate } from "react-router-dom";
+import OAuth2Login from "react-simple-oauth2-login";
 
-import authApi from '../../api/authApi';
-import jwtDecode from 'jwt-decode';
-import { login, logout } from '../../redux/actions/auth';
+import authApi from "../../api/authApi";
+import jwtDecode from "jwt-decode";
+import { login, logout } from "../../redux/actions/auth";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from "react";
 import { swalInfo } from "../../helper/swal";
 
-import styles from './Auth.module.css';
+import styles from "./Auth.module.css";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -20,27 +19,26 @@ function Login() {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const currentUser = useSelector(state => state.auth);
+  const currentUser = useSelector((state) => state.auth);
 
   // --- Kiểm tra token khi load trang ---
   useEffect(() => {
     const checkToken = async () => {
-      const token = localStorage.getItem('accessToken');
+      const token = localStorage.getItem("accessToken");
       if (!token) return;
 
       try {
         const decoded = jwtDecode(token);
-        // Nếu token còn hạn và chưa có user info trong redux
         if (decoded?.exp && decoded.exp * 1000 > Date.now() && !currentUser.userId) {
           const { user } = await authApi.me();
           const { email, fullName, phoneNumber, avatar, id, role } = user;
           dispatch(login({ email, fullName, phoneNumber, avatar, userId: id, role }));
         } else if (decoded.exp * 1000 <= Date.now()) {
-          localStorage.removeItem('accessToken');
+          localStorage.removeItem("accessToken");
           dispatch(logout());
         }
       } catch (err) {
-        localStorage.removeItem('accessToken');
+        localStorage.removeItem("accessToken");
         dispatch(logout());
       }
     };
@@ -53,10 +51,10 @@ function Login() {
       const accessToken = response?.access_token;
       const { token, user } = await authApi.loginWithGoogle(accessToken);
 
-      localStorage.setItem('accessToken', token);
+      localStorage.setItem("accessToken", token);
       const { email, fullName, phoneNumber, userId, avatar, role } = user;
       dispatch(login({ email, fullName, phoneNumber, avatar, userId, role }));
-      navigate('/');
+      navigate("/");
     } catch (error) {
       console.error("Google login error:", error);
     }
@@ -70,18 +68,20 @@ function Login() {
   const responseSuccessFacebook = async (response) => {
     try {
       const accessToken = response.access_token;
-      const result = await fetch(`https://graph.facebook.com/me?fields=id,name,email,picture.type(large)&access_token=${accessToken}`);
+      const result = await fetch(
+        `https://graph.facebook.com/me?fields=id,name,email,picture.type(large)&access_token=${accessToken}`
+      );
       const data = await result.json();
-      
+
       const { email, id, name } = data;
       const avatarFB = data?.picture?.data?.url;
 
       const { token, user } = await authApi.loginWithFacebook({ email, id, name, avatar: avatarFB });
 
-      localStorage.setItem('accessToken', token);
+      localStorage.setItem("accessToken", token);
       const { userId, role, phoneNumber, avatar } = user;
       dispatch(login({ email, fullName: name, phoneNumber, avatar, userId, role }));
-      navigate('/');
+      navigate("/");
     } catch (error) {
       console.error("Facebook login error:", error);
     }
@@ -90,36 +90,6 @@ function Login() {
   const responseFailureFacebook = (response) => {
     console.error("Facebook login failed:", response);
   };
-
-  useEffect(() => {
-    const checkToken = async () => {
-      const token = localStorage.getItem('accessToken')
-      if (!token) return
-      try {
-        const decoded = jwtDecode(token)
-        if (decoded && decoded.exp && decoded.exp * 1000 > Date.now()) {
-          // Token is structurally valid, verify it with server
-          try {
-            const response = await authApi.me()
-            const { email, fullName, phoneNumber, avatar, id, role } = response?.user
-            dispatch(login({email, fullName, phoneNumber, avatar, userId: id, role}))
-            navigate({ pathname: '/' })
-          } catch (err) {
-            // Token invalid on server, remove it
-            localStorage.removeItem('accessToken')
-            dispatch(logout())
-          }
-        } else {
-          localStorage.removeItem('accessToken')
-          dispatch(logout())
-        }
-      } catch (err) {
-        localStorage.removeItem('accessToken')
-        dispatch(logout())
-      }
-    }
-    checkToken()
-  }, [navigate, dispatch])
 
   // --- Form login ---
   const handleLogin = async (e) => {
@@ -130,12 +100,12 @@ function Login() {
       setLoading(false);
 
       const { token, user } = res;
-      localStorage.setItem('accessToken', token);
+      localStorage.setItem("accessToken", token);
 
       const { fullName, phoneNumber, userId, avatar, role } = user;
       dispatch(login({ email, fullName, phoneNumber, avatar, userId, role }));
 
-      navigate('/');
+      navigate("/");
     } catch (error) {
       setLoading(false);
       console.error(error);
@@ -166,14 +136,19 @@ function Login() {
           </Modal.Header>
           <Modal.Body>Tài khoản của bạn chưa được xác minh.</Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>Hủy</Button>
-            <Button variant="danger" onClick={handleSendEmail}>Gửi lại Email</Button>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Hủy
+            </Button>
+            <Button variant="danger" onClick={handleSendEmail}>
+              Gửi lại Email
+            </Button>
           </Modal.Footer>
         </Modal>
 
         <Container>
           <div className="auth-wrapper">
             <h2 className="title text-center">ĐĂNG NHẬP</h2>
+
             <form className="form-login" onSubmit={handleLogin}>
               <div className={`form-group ${styles.formGroup}`}>
                 <input
@@ -186,6 +161,7 @@ function Login() {
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
+
               <div className={`form-group ${styles.formGroup}`}>
                 <input
                   required
@@ -198,20 +174,31 @@ function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-              <Link className={styles.forgotPassword} to="/quen-mat-khau">Quên mật khẩu?</Link>
+
+              <Link className={styles.forgotPassword} to="/quen-mat-khau">
+                Quên mật khẩu?
+              </Link>
+
               <button className={`bookstore-btn ${styles.submitBtn}`} disabled={loading}>
                 {loading ? "Đăng nhập..." : "Đăng nhập"}
               </button>
             </form>
 
-            <p style={{textAlign: 'center'}}>
-              Bạn chưa có tài khoản? <Link to="/dang-ki" style={{color: '#0074da'}}>Đăng ký tại đây</Link>
+            <p style={{ textAlign: "center" }}>
+              Bạn chưa có tài khoản?{" "}
+              <Link to="/dang-ki" style={{ color: "#0074da" }}>
+                Đăng ký tại đây
+              </Link>
             </p>
-            <p style={{color: '#ccc', textAlign: 'center'}}>HOẶC</p>
+
+            <p style={{ color: "#ccc", textAlign: "center" }}>HOẶC</p>
 
             <div className="d-flex justify-content-between">
               <div className={styles.boxLoginThirdParty}>
-                <img src="https://www.freepnglogos.com/uploads/google-logo-png/google-logo-icon-png-transparent-background-osteopathy-16.png" alt="google" />
+                <img
+                  src="https://www.freepnglogos.com/uploads/google-logo-png/google-logo-icon-png-transparent-background-osteopathy-16.png"
+                  alt="Google"
+                />
                 <OAuth2Login
                   className="bookstore-btn"
                   buttonText="Login with Google"
@@ -226,7 +213,10 @@ function Login() {
               </div>
 
               <div className={styles.boxLoginThirdParty}>
-                <img src="https://cdn.pixabay.com/photo/2015/05/17/10/51/facebook-770688_1280.png" alt="facebook" />
+                <img
+                  src="https://cdn.pixabay.com/photo/2015/05/17/10/51/facebook-770688_1280.png"
+                  alt="Facebook"
+                />
                 <OAuth2Login
                   className="bookstore-btn"
                   buttonText="Login with Facebook"

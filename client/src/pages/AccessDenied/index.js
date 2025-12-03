@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -30,4 +31,6 @@ function AccessDenied() {
     return null; // popup hiển thị khi component mount
 }
 
+
 export default AccessDenied;
+

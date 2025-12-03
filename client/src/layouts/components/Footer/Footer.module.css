@@ -13,9 +13,15 @@
 }
 
 .footer .bookstoreHighlight {
-    font-weight: 700;
+    font-weight: 1000;
     color: #539E31;
-    margin-top: -10px;
+    margin-top: 0;
+    margin-bottom: 6px;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
+    line-height: 1.2;
+    text-align: left;
 }
 
 /* BookStore Logo align */
@@ -89,4 +95,6 @@
     .cateList {
         display: none;
     }
+
 }
+

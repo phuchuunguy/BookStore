@@ -13,7 +13,9 @@ const contactInfo = [
     icon: FaLocationDot,
     title: "Địa chỉ tiệm sách",
     description: "Số 2 Vương Thừa Vũ, Thanh Xuân, Hà Nội",
+
     link: "https://www.google.com/maps/place/2+P.+V%C6%B0%C6%A1ng+Th%E1%BB%ABa+V%C5%A9,+Kh%C6%B0%C6%A1ng+Trung,+Thanh+Xu%C3%A2n,+H%C3%A0+N%E1%BB%99i",
+
   },
   {
     icon: FaPhone,
@@ -44,6 +46,7 @@ const formFields = [
 ];
 
 const mapUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.695896336494!2d105.82006137596918!3d21.004801188600055!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ac81a5c6c0e9%3A0x6b772412803730e1!2zMiBQLiBWxrDGoW5nIFRo4burYSBWxaksIEtoxrDGoW5nIFRydW5nLCBUaGFuaCBYdcOibiwgSMOgIE7huqlp!5e0!3m2!1svi!2svn!4v1701500000000!5m2!1svi!2svn";
+
 
 const Contact = () => {
   const form = useRef(); // Tạo tham chiếu đến thẻ <form>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Modal, Button } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import Swal from "sweetalert2";
+import { toast } from "react-toastify";
 
 import PreviewImage from "../../../components/PreviewImage";
 import { updateAvatar } from "../../../redux/actions/auth";
@@ -22,31 +22,23 @@ function AccountSideBar() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file)
-      return Swal.fire({
-        title: "Thông báo",
-        text: "Chưa chọn file!",
-        icon: "info",
-        confirmButtonColor: "#17a2b8",
-      });
+
+    if (!file) return toast.info("Chưa chọn file!", { autoClose: 2000 });
 
     if (!["image/png", "image/gif", "image/jpeg"].includes(file.type)) {
-      return Swal.fire({
-        title: "Thông báo",
-        text: "File không đúng định dạng!",
-        icon: "info",
-        confirmButtonColor: "#17a2b8",
-      });
+      return toast.info("File không đúng định dạng!", { autoClose: 2000 });
     }
 
     try {
       setLoading(true);
+
       const formData = new FormData();
       formData.append("file", file);
 
       const response = await userApi.updateAvatar(userId, formData);
 
       const updatedAvatar = response?.data?.avatar || response?.avatar;
+
       if (updatedAvatar) {
         dispatch(updateAvatar(updatedAvatar));
       }
@@ -54,21 +46,11 @@ function AccountSideBar() {
       setLoading(false);
       setShowModal(false);
 
-      Swal.fire({
-        title: "Thành công!",
-        text: "Cập nhật avatar thành công!",
-        icon: "success",
-        confirmButtonColor: "#28a745",
-      });
+      toast.success("Cập nhật avatar thành công!");
     } catch (error) {
       setLoading(false);
       console.log("Error update avatar:", error);
-
-      Swal.fire({
-        title: "Lỗi!",
-        text: "Cập nhật avatar thất bại!",
-        icon: "error",
-      });
+      toast.error("Cập nhật avatar thất bại!");
     }
   };
 
@@ -78,6 +60,7 @@ function AccountSideBar() {
         <Modal.Header closeButton>
           <Modal.Title>Cập nhật ảnh đại diện</Modal.Title>
         </Modal.Header>
+
         <Modal.Body>
           <form onSubmit={handleSubmit}>
             <input
@@ -102,7 +85,7 @@ function AccountSideBar() {
         </Modal.Body>
       </Modal>
 
-      {/* Avatar + tên */}
+      {/* Avatar + Tên */}
       <div
         className="d-flex align-items-center"
         onClick={() => setShowModal(true)}
@@ -119,6 +102,7 @@ function AccountSideBar() {
             marginRight: 10,
           }}
         />
+
         <span className={styles.sideBarTitle}>{fullName}</span>
       </div>
 

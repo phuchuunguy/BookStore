@@ -50,9 +50,7 @@ function Header() {
             <NavBarMobile />
 
             <Link to="/">
-              <h1 className={`${styles.bookstoreHighlight} me-5`}>
-                BookStore
-              </h1>
+              <h1 className={`${styles.bookstoreHighlight} me-5`}>BookStore</h1>
             </Link>
 
             <div className={styles.search}>
@@ -76,40 +74,28 @@ function Header() {
 
                     <div className={styles.accountPopup}>
 
-                      {/* -------- TÀI KHOẢN CỦA TÔI (ROLE 0 & 2) -------- */}
+                      {/* ROLE 0 = Customer, ROLE 2 = Admin */}
                       {[0, 2].includes(currentUser.role) && (
                         <div className={styles.item}>
-                          <Link
-                            className={styles.popupLink}
-                            to="/tai-khoan"
-                          >
+                          <Link className={styles.popupLink} to="/tai-khoan">
                             Tài khoản của tôi
                           </Link>
                         </div>
                       )}
 
-                      {/* -------- QUẢN LÝ BOOKSTORE (CHỈ ADMIN - ROLE 2) -------- */}
                       {currentUser.role === 2 && (
                         <div className={styles.item}>
-                          <Link
-                            className={styles.popupLink}
-                            to="/admin"
-                          >
+                          <Link className={styles.popupLink} to="/admin">
                             Quản lý BookStore
                           </Link>
                         </div>
                       )}
 
-                      {/* -------- ĐĂNG XUẤT -------- */}
                       <div className={styles.item}>
-                        <p
-                          className={styles.popupLink}
-                          onClick={handleLogout}
-                        >
+                        <p className={styles.popupLink} onClick={handleLogout}>
                           Đăng xuất
                         </p>
                       </div>
-
                     </div>
                   </div>
                 ) : (
@@ -125,12 +111,9 @@ function Header() {
                 <Link to="/gio-hang">
                   <BsCart2 />
                   <p>Giỏ hàng</p>
-                  <span className={styles.count}>
-                    {cart?.list?.length || 0}
-                  </span>
+                  <span className={styles.count}>{cart?.list?.length || 0}</span>
                 </Link>
               </div>
-
             </div>
           </div>
         </Container>
