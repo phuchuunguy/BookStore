@@ -13,6 +13,7 @@ import genreApi from "../../../../api/genreApi";
 import publisherApi from "../../../../api/publisherApi";
 import bookApi from "../../../../api/bookApi";
 import axios from "axios";
+import { swalSuccess, swalError } from "../../../../helper/swal";
 
 function AddBook() {
   const navigate = useNavigate();
@@ -117,13 +118,13 @@ function AddBook() {
           })
           setLoading(false)
           console.log(res)
-          alert("Thêm sách thành công!")
+          swalSuccess("Thêm sách thành công!")
           navigate({ pathname: "/admin/book" });
         }
         
       } catch (error) {
         setLoading(false)
-        alert("That bai! ", error)
+        swalError("Thất bại!", error?.message || String(error))
         console.log(error);
       }
     },

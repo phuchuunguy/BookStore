@@ -43,7 +43,7 @@ const authController = {
                     } else {
                         const newUser = await userService.create({
                             email, fullName: name, 
-                            avatar: { url: picture }, 
+                            avatar: { url: picture, publicId: null }, 
                             service: "Google", serviceId: id,
                             status: 1,
                         })
@@ -96,7 +96,7 @@ const authController = {
             } else {
                 const newUser = await userService.create({
                     email, fullName: name, 
-                    avatar: { url: avatar }, 
+                    avatar: { url: avatar, publicId: null }, 
                     service: "Facebook", serviceId: id, 
                     status: 1
                 })
@@ -335,17 +335,26 @@ const authController = {
             jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET, async (err, data) => {
                 if (err) return res.status(403).json({message: '403 Forbidden'})
                 const { userId } = data
-                const { role } = await userService.getById(userId)
-                const newToken = generateAccessToken({userId, role})
-                const newRefreshToken = generateRefreshToken(userId)
-                res.cookie('refreshToken', newRefreshToken, {
-                    httpOnly: true,
-                    secure: false,
-                    maxAge: 1000 * 60 * 60 * 24 * 7,
-                })
-                return res.status(200).json({
-                    token: newToken,
-                })
+                try {
+                    const user = await userService.getById(userId)
+                    if (!user) {
+                        return res.status(401).json({ message: 'User not found' })
+                    }
+                    const { role } = user
+                    const newToken = generateAccessToken({userId, role})
+                    const newRefreshToken = generateRefreshToken(userId)
+                    res.cookie('refreshToken', newRefreshToken, {
+                        httpOnly: true,
+                        secure: false,
+                        maxAge: 1000 * 60 * 60 * 24 * 7,
+                    })
+                    return res.status(200).json({
+                        token: newToken,
+                    })
+                } catch (e) {
+                    console.error('Error fetching user during token refresh', e)
+                    return res.status(500).json({ message: 'Internal server error' })
+                }
             })
             
         } catch (error) {

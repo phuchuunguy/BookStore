@@ -41,7 +41,8 @@ const userApi = {
     },
     updateAvatar: (id, data) => {
         const url = `users/${id}/avatar`
-        return axiosClient.put(url, data)
+        // When uploading a file as FormData, ensure multipart/form-data header
+        return axiosClient.put(url, data, { headers: { 'Content-Type': 'multipart/form-data' } })
     },
     updateDefaultAddressById: (id, addressId) => {
         const url = `users/${id}/address/status/${addressId}`

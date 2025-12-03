@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import { Col, Container, Row } from 'react-bootstrap'
 import { AiOutlineMinus, AiOutlinePlus, AiOutlineShoppingCart } from 'react-icons/ai'
-import { toast } from 'react-toastify';
+import Swal from "sweetalert2";
 
 import DetailedBookInfo from '../../components/Shop/DetailedBookInfo'
 import Loading from "../../components/Loading"
@@ -96,9 +96,19 @@ export default function ProductDetail() {
         price: newPrice, 
         totalPriceItem: newPrice * quantity})
       dispatch(action)
-      toast.success('Thêm sản phẩm vào giỏ hàng thành công!', {autoClose: 2000})
+      Swal.fire({
+        title: "Thành công!",
+        text: "Thêm sản phẩm vào giỏ hàng thành công!",
+        icon: "success",
+        confirmButtonColor: "#28a745",
+      });
     } else {
-      toast.info('Vui lòng đăng nhập để thực hiện!', {autoClose: 2000})
+      Swal.fire({
+        title: "Thông báo",
+        text: "Vui lòng đăng nhập để thực hiện!",
+        icon: "info",
+        confirmButtonColor: "#17a2b8",
+      });
     }
   }
 
@@ -115,7 +125,12 @@ export default function ProductDetail() {
       dispatch(action)
       navigate({ pathname: "/gio-hang" });
     } else {
-      toast.info('Vui lòng đăng nhập để thực hiện!', {autoClose: 2000})
+      Swal.fire({
+        title: "Thông báo",
+        text: "Vui lòng đăng nhập để thực hiện!",
+        icon: "info",
+        confirmButtonColor: "#17a2b8",
+      });
     }
   }
 

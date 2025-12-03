@@ -1,6 +1,6 @@
 import axios from 'axios'
 import jwt_decode from 'jwt-decode'
-import { toast } from 'react-toastify';
+import Swal from "sweetalert2";
 
 const axiosClient = axios.create({
   baseURL: process.env.REACT_APP_SERVER_URL,
@@ -69,11 +69,14 @@ axiosClient.interceptors.response.use(
         // Chuyển hướng về trang đăng nhập
         window.location.href = '/dang-nhap';
         
-        // Không cần toast lỗi ở đây vì chuyển trang rồi, hoặc toast nhẹ
-        // toast.error("Phiên đăng nhập hết hạn!");
+        // Không cần Swal lỗi ở đây vì chuyển trang rồi
     } else {
         // Các lỗi khác (500, 400...) thì hiện thông báo
-        toast.error(message, { autoClose: 2000 });
+        Swal.fire({
+          title: "Lỗi!",
+          text: message,
+          icon: "error",
+        });
     }
 
     return Promise.reject(error)

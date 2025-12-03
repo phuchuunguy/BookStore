@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Container, Form } from "react-bootstrap";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; 
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import OAuth2Login from "react-simple-oauth2-login";
+import Swal from "sweetalert2"; // 1. Import SweetAlert2
+
 import authApi from "../../api/authApi";
 import { login } from "../../redux/actions/auth";
 import styles from "./Auth.module.css";
@@ -15,6 +17,7 @@ export default function Register() {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation(); 
 
   const responseSuccessGoogle = async (response) => {
     const accessToken = response.access_token;
@@ -34,7 +37,6 @@ export default function Register() {
 
   const responseSuccessFacebook = async (response) => {
     const accessToken = response.access_token;
-    // Lay Profile Facebook thong qua AccessToken
 
     const result = await fetch(
       `https://graph.facebook.com/me?fields=id,name,email,picture.type(large)&access_token=${accessToken}`
@@ -64,7 +66,6 @@ export default function Register() {
 
 
   //Formik: register form
-
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -88,14 +89,44 @@ export default function Register() {
         setLoading(true)
         await authApi.register({ fullName, password, email})
         setLoading(false)
-        alert("Tạo tài khoản thành công! Vui lòng kiểm tra email để kích hoạt tài khoản")
-        navigate({ pathname: "/dang-nhap" });
+        
+        // Popup thông báo thành công khi đăng ký xong
+        Swal.fire({
+            icon: 'success',
+            title: 'Đăng ký thành công!',
+            text: 'Vui lòng kiểm tra email để kích hoạt tài khoản nhé!',
+            confirmButtonColor: '#28a745'
+        }).then(() => {
+            navigate({ pathname: "/dang-nhap" });
+        });
+
       } catch (error) {
         setLoading(false)
         console.log(error)
       }
     },
   });
+
+  // --- 3. LOGIC MỚI: Tự động điền email + Hiện Popup chào mừng ---
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const emailFromUrl = searchParams.get('email');
+
+    if (emailFromUrl) {
+      // 1. Điền email vào ô input
+      formik.setFieldValue('email', emailFromUrl);
+      
+      // 2. Hiện Popup thông báo dễ thương
+      Swal.fire({
+        title: 'Chào bạn mới!',
+        text: 'Còn một bước nữa thôi là chúng mình có thể kết nối với nhau rồi ❤️',
+        icon: 'info',
+        confirmButtonText: 'OK, điền tiếp nào!',
+        confirmButtonColor: '#45a536', // Màu xanh lá cây theo theme sách
+      });
+    }
+  }, [location.search]); 
+  // -------------------------------------------
 
   return (
     <div className="main">
@@ -130,7 +161,7 @@ export default function Register() {
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
                 />
-                 {formik.errors.fullName && (
+                  {formik.errors.fullName && (
                   <Form.Control.Feedback type="invalid">
                     {formik.errors.fullName}
                   </Form.Control.Feedback>

@@ -4,6 +4,7 @@ import { FaEdit, FaTrashAlt } from "react-icons/fa"
 
 import { Row, Col, Table, Spinner, Modal, Button } from "react-bootstrap";
 import format from "../../../helper/format";
+import { swalSuccess, swalError } from "../../../helper/swal";
 import voucherApi from "../../../api/voucherApi";
 import moment from "moment";
 
@@ -56,7 +57,7 @@ function Voucher() {
     try {
       await voucherApi.deleteVoucher(voucherDelete.id);
       setShowModal(false)
-      alert("Xóa thành công!")
+      swalSuccess("Xóa thành công!")
       setVoucherData((preState) => {
         const newArray = [...preState.vouchers];
         return {
@@ -65,7 +66,7 @@ function Voucher() {
         }
       });
     } catch (error) {
-      alert("Xóa thất bại!")
+      swalError("Xóa thất bại!")
       setShowModal(false)
     }
   }
@@ -76,11 +77,12 @@ function Voucher() {
       const { start, end } = addVoucher
 
       if (new Date(start) > new Date(end)) {
-        return alert("Ngày kết thúc phải lớn hơn ngày bắt đầu!")
+        swalError("Ngày kết thúc phải lớn hơn ngày bắt đầu!")
+        return
       }
 
       await voucherApi.createVoucher({ ...addVoucher, start: new Date(start), end: new Date(end) })
-      alert("Thêm thành công!")
+      swalSuccess("Thêm thành công!")
       setRerender(!rerender)
       setShowAddModal(false)
     } catch (error) {
@@ -93,10 +95,11 @@ function Voucher() {
     try {
       const { start, end, id } = selectedVoucher
       if (new Date(start) > new Date(end)) {
-        return alert("Ngày kết thúc phải lớn hơn ngày bắt đầu!")
+        swalError("Ngày kết thúc phải lớn hơn ngày bắt đầu!")
+        return
       }
       await voucherApi.updateVoucher(id, { ...selectedVoucher, start: new Date(start), end: new Date(end) })
-      alert("Thành công!")
+      swalSuccess("Thành công!")
       setRerender(!rerender)
       setShowUpdateModal(false)
     } catch (error) {

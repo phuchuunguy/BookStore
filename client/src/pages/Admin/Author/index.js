@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { swalSuccess, swalError } from "../../../helper/swal";
 import PaginationBookStore from "../../../components/PaginationBookStore";
 import { FaEdit, FaTrashAlt } from "react-icons/fa"
 import { Row, Col, Table, Spinner, Modal, Button } from "react-bootstrap";
@@ -47,10 +48,10 @@ function AuthorList() {
     try {
       await authorApi.delete(authorDelete.id);
       setShowModal(false)
-      alert("Xóa thành công!")
+      swalSuccess("Xóa thành công!")
       setRerender(!rerender)
     } catch (error) {
-      alert("Xóa thất bại!")
+      swalError("Xóa thất bại!")
       setShowModal(false)
     }
   }
@@ -61,12 +62,12 @@ function AuthorList() {
       setLoading(true)
       await authorApi.create(addAuthor)
       setLoading(false)
-      alert("Thêm tác giả thành công!")
+      swalSuccess("Thêm tác giả thành công!")
       setRerender(!rerender)
       setShowAddModal(false)
     } catch (error) {
       setLoading(false)
-      alert("That bai! ", error)
+      swalError("Thêm thất bại!", error?.message || String(error))
       console.log(error);
     }
   }
@@ -78,12 +79,12 @@ function AuthorList() {
       setLoading(true)
       await authorApi.update(selectedAuthor?.id, selectedAuthor)
       setLoading(false)
-      alert("Cập nhật thành công!")
+      swalSuccess("Cập nhật thành công!")
       setRerender(!rerender)
       setShowUpdateModal(false)
     } catch (error) {
       setLoading(false)
-      alert("That bai! ", error)
+      swalError("Cập nhật thất bại!", error?.message || String(error))
       console.log(error);
     }
   }

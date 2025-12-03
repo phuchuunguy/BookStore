@@ -12,6 +12,7 @@ import Search from "../Search";
 import authApi from "../../../api/authApi";
 import { logout } from '../../../redux/actions/auth';
 import { destroy } from '../../../redux/actions/cart';
+import { getAvatarUrl } from '../../../helper/avatar';
 
 import styles from './Header.module.css';
 
@@ -54,7 +55,7 @@ function Header() {
                   {
                     currentUser.email && currentUser.fullName ? 
                     <div className={styles.account}>
-                      <img className={styles.avatar} src={currentUser?.avatar?.url} alt="" />
+                      <img className={styles.avatar} src={getAvatarUrl(currentUser?.avatar)} alt="Avatar" />
                       <p>{currentUser.fullName}</p>
                       <div className={styles.accountPopup}>
                           {currentUser.role === 0 && (

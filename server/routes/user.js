@@ -2,6 +2,9 @@ const express = require('express')
 const router = express.Router()
 
 const userController = require('../controllers/users.controller')
+// Multer
+const multer = require('multer')
+const upload = multer({ storage: multer.memoryStorage() })
 
 // Import các middleware mới đã sửa ở bước trước
 const { 
@@ -36,7 +39,7 @@ router.get('/:userId', verifyTokenAndUserAuthorization, userController.getById)
 router.put('/:userId', verifyTokenAndUserAuthorization, userController.updateProfileById)
 
 // Cập nhật Avatar
-router.put('/:userId/avatar', verifyTokenAndUserAuthorization, userController.updateAvatar)
+router.put('/:userId/avatar', verifyTokenAndUserAuthorization, upload.single('file'), userController.updateAvatar)
 
 
 // --- 3. QUẢN LÝ ĐỊA CHỈ (User tự làm được) ---

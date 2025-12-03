@@ -21,10 +21,7 @@ const analyticApi = {
         const url = `analytics/product/bestseller`
         return axiosClient.get(url)
     },
-    getOrderCountLifeTime: () => {
-        const url = '/analytics/order/lifetime';
-        return axiosClient.get(url);
-    }
+    
 }
 
 export default analyticApi

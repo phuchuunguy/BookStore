@@ -3,10 +3,15 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Container, Form } from "react-bootstrap";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+<<<<<<< Updated upstream
 import { useDispatch } from "react-redux";
+=======
+import Swal from "sweetalert2"; // 1. Import SweetAlert2
+>>>>>>> Stashed changes
 import authApi from "../../api/authApi";
 import { logout } from "../../redux/actions/auth";
 import styles from "./Auth.module.css";
+
 function ResetPassword() {
   const params = useParams();
   const navigate = useNavigate();
@@ -37,18 +42,48 @@ function ResetPassword() {
       const { password } = formik.values;
       try {
         const res = await authApi.resetPassword({password, token: tokenValue})
+        
+        // --- LOGIC MỚI VỚI SWEETALERT2 ---
         if (!res.error) {
+<<<<<<< Updated upstream
           alert("Đổi mật khẩu thành công")
           localStorage.removeItem('accessToken')
           dispatch(logout())
           navigate({ pathname: "/dang-nhap" });
           return
+=======
+          // Popup thành công
+          Swal.fire({
+            icon: 'success',
+            title: 'Thành công!',
+            text: 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại.',
+            confirmButtonColor: '#28a745'
+          }).then(() => {
+             // Chuyển trang sau khi tắt popup
+             navigate({ pathname: "/dang-nhap" });
+          });
+          return;
+>>>>>>> Stashed changes
         } else {
-          alert(res.message)
+          // Popup lỗi từ server trả về
+          Swal.fire({
+            icon: 'error',
+            title: 'Thất bại',
+            text: res.message || 'Không thể đổi mật khẩu.',
+            confirmButtonColor: '#d33'
+          });
         }
       } catch (error) {
-        alert(error)
+        // Popup lỗi hệ thống/mạng
+        console.error(error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Lỗi hệ thống',
+            text: 'Có lỗi xảy ra, vui lòng thử lại sau!',
+            confirmButtonColor: '#d33'
+        });
       }
+      // ---------------------------------
     },
   });
 

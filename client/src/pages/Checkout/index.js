@@ -10,7 +10,7 @@ import PayPal from "../../components/PayPal"
 
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { toast } from 'react-toastify';
+import Swal from "sweetalert2";
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment'
 import format from "../../helper/format";
@@ -103,7 +103,11 @@ export default function Checkout() {
     onSubmit: async (values) => {
       // KIỂM TRA ĐỊA CHỈ TRƯỚC KHI SUBMIT
       if (!shippingAddress || !shippingAddress.fullAddress) {
-        return toast.error("Vui lòng chọn hoặc nhập địa chỉ giao hàng!");
+        return Swal.fire({
+          title: "Lỗi!",
+          text: "Vui lòng chọn hoặc nhập địa chỉ giao hàng!",
+          icon: "error",
+        });
       }
 
       const { email, fullName, phoneNumber, method } = values;
@@ -153,13 +157,22 @@ export default function Checkout() {
         } else { // COD hoặc khác
              await orderApi.create(body);
              await userApi.updateCart(currentUser?.userId, {cart: []});
-             toast.success("Đặt hàng thành công!");
+             Swal.fire({
+               title: "Thành công!",
+               text: "Đặt hàng thành công!",
+               icon: "success",
+               confirmButtonColor: "#28a745",
+             });
              dispatch(destroy());
              navigate({ pathname: '/don-hang' });
         }
       } catch (error) {
         console.log(error);
-        toast.error("Đặt hàng thất bại, vui lòng thử lại!");
+        Swal.fire({
+          title: "Lỗi!",
+          text: "Đặt hàng thất bại, vui lòng thử lại!",
+          icon: "error",
+        });
       } finally {
         setLoading(false);
       }

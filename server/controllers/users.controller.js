@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const userService = require('../services/user.service')
 const { transporter } = require('../config/nodemailer')
 const { cloudinary } = require('../config/cloudinary')
+const streamifier = require('streamifier')
 
 const { RoleEnum } = require('../utils/enum')
 
@@ -267,12 +268,41 @@ const usersController = {
     },
     updateAvatar: async (req, res) =>{
         try {
-            const { avatar } = req.body
             const { userId } = req.params
-            const { avatar: { publicId } } = await userService.getById(userId)
-            if  (publicId) {
-                await cloudinary.uploader.destroy(publicId)
+            const file = req.file
+
+            // get current user (we'll destroy previous avatar only after successful upload)
+            const currentUser = await userService.getById(userId)
+            if (!currentUser) return res.status(404).json({ message: 'User not found', error: 1 })
+            const prevPublicId = currentUser.avatar && currentUser.avatar.publicId
+            // We'll destroy prevPublicId after successful upload
+
+            // If file provided (form-data upload), upload it to Cloudinary
+            let avatar = null
+            if (file && file.buffer) {
+                const result = await new Promise((resolve, reject) => {
+                    const uploadStream = cloudinary.uploader.upload_stream({ folder: 'avatars', resource_type: 'image' }, (error, result) => {
+                        if (error) return reject(error)
+                        resolve(result)
+                    })
+                    streamifier.createReadStream(file.buffer).pipe(uploadStream)
+                })
+                avatar = { url: result.secure_url || result.url, publicId: result.public_id }
+                // Remove old image after success
+                if (prevPublicId) {
+                    await cloudinary.uploader.destroy(prevPublicId)
+                }
+            } else if (req.body.avatar) {
+                // In case client sent avatar object (stringified JSON in form-data)
+                try {
+                    avatar = typeof req.body.avatar === 'string' ? JSON.parse(req.body.avatar) : req.body.avatar
+                } catch (error) {
+                    avatar = req.body.avatar
+                }
+            } else {
+                return res.status(400).json({ message: 'No avatar file provided', error: 1 })
             }
+
             const data = await userService.updateAvatar(userId, { avatar })
             return res.status(200).json({
                 message: 'success',
@@ -280,6 +310,7 @@ const usersController = {
                 data
             })
         } catch (err) {
+            console.log('Error updateAvatar:', err)
             return res.status(500).json({message: err.message, error: 1})
         }
     },

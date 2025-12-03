@@ -209,7 +209,7 @@ export default function CustomerList() {
                         <td>{(1 && page - 1) * 10 + (index + 1)}</td>
                         <td className="text-start">
                           <div className="d-flex align-items-center">
-                            <img className="avatar" src={item?.avatar?.url} alt="" />
+                            <img className="avatar" src={item?.avatar?.url || "/avatar.jpg"} alt="" />
                             <div >
                               <p>Họ tên: <b>{item?.fullName}</b></p>
                               <p>Email: <b>{item?.email}</b></p>

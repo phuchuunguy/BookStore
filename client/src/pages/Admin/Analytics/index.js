@@ -257,28 +257,6 @@ function AnalyticsPage() {
             )}
           </div>
         </Col>
-        <Col xl={8}>
-          <div className={styles.chart}>
-            <h2>SỐ LƯỢNG ĐƠN HÀNG</h2>
-            {orderCountLifeTimeChartData && orderCountLifeTimeChartData.datasets && (
-              <Bar
-                options={{
-                  responsive: true,
-                  plugins: {
-                    legend: {
-                      position: "top",
-                    },
-                    title: {
-                      display: true,
-                      text: "Đơn hàng toàn thời gian",
-                    },
-                  },
-                }}
-                data={orderCountLifeTimeChartData}
-              />
-            )}
-          </div>
-        </Col>
       </Row>
     </div>
   );

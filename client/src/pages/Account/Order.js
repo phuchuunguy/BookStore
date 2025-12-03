@@ -1,4 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
+import "sweetalert2/dist/sweetalert2.min.css";
+import { swalInfo } from "../../helper/swal";
 import { useSelector } from "react-redux";
 import { Row, Col, Table, Spinner, Modal, Badge, Button } from "react-bootstrap";
 
@@ -12,6 +14,8 @@ import { v4 as uuidv4 } from 'uuid';
 import methodData from "../Checkout/methodData"
 import steps from "../../components/OrderProgress/enum";
 import orderApi from "../../api/orderApi";
+
+// const MySwal = withReactContent(Swal); // Not used anymore; helper used instead
 
 export default function Order() {
   const { userId } = useSelector((state) => state.auth);
@@ -81,7 +85,7 @@ export default function Order() {
           console.log(error)
       }
     } else {
-        alert("Tính năng đang phát triển!")
+      swalInfo("Tính năng đang phát triển!")
     }
 }
 
