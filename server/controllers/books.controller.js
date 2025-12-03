@@ -286,11 +286,29 @@ const bookController = {
     deleteById: async(req, res) => {
         try {
             const { id } = req.params
+            // Lấy thông tin sách trước khi xóa để có `publicId` (dùng cho Cloudinary)
+            const bookInfo = await bookService.getById(id)
+            if (!bookInfo) {
+                return res.status(404).json({
+                    message: `Không tìm thấy sách có id:${id}`,
+                    error: 1,
+                    data: null
+                })
+            }
+
             const isOrdered = await bookService.checkIsOrdered(id)
             if (isOrdered.length > 0) return res.status(400).json({message: 'Sản phẩm đã được mua!',error: 1})
+
             const data = await bookService.deleteById(id)
             if (data) {
-                await cloudinary.uploader.destroy(data?.publicId)
+                // Xóa file trên Cloudinary nếu có
+                if (bookInfo.publicId) {
+                    try {
+                        await cloudinary.uploader.destroy(bookInfo.publicId)
+                    } catch (err) {
+                        console.log('Cloudinary destroy error:', err.message)
+                    }
+                }
 
                 // Xóa cache khi xóa
                 const keys = await redis.keys('Book::*')

@@ -99,6 +99,8 @@ const authorController = {
     deleteById: async(req, res) => {
         try {
             const { id } = req.params
+            if (!id) return res.status(400).json({ message: 'Missing id', error: 1 })
+
             const data = await authorService.deleteById(id)
             if (data) {
                 return res.status(200).json({
@@ -115,9 +117,12 @@ const authorController = {
             }
             
         } catch (error) {
-            res.status(400).json({
+            console.error('Author delete error:', error)
+            // Return server error with stack for easier debugging locally
+            res.status(500).json({
                 message: `Có lỗi xảy ra! ${error.message}`,
                 error: 1,
+                stack: error.stack
             })
         }
     }

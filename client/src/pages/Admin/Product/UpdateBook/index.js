@@ -14,6 +14,7 @@ import genreApi from "../../../../api/genreApi";
 import bookApi from "../../../../api/bookApi";
 import publisherApi from "../../../../api/publisherApi";
 import styles from "./UpdateBook.module.css";
+import { swalSuccess, swalError } from "../../../../helper/swal";
 
 function UpdateBook() {
 
@@ -136,11 +137,11 @@ function UpdateBook() {
               publisher: publisher,
           })
         }
-        alert("Lưu thay đổi thành công!")
+        swalSuccess("Lưu thay đổi thành công!")
         navigate({ pathname: "/admin/book" });
         
       } catch (error) {
-        alert("Lưu thay đổi thất bại!")
+        swalError("Lưu thay đổi thất bại!", error?.message || String(error))
         console.log(error);
       }
     },

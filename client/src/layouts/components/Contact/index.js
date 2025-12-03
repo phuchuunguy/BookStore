@@ -1,5 +1,8 @@
-import React from "react";
-import { useForm, ValidationError } from "@formspree/react";
+import React, { useRef, useState } from "react";
+// 1. Bỏ Formspree, thay bằng EmailJS
+import emailjs from "@emailjs/browser";
+import Swal from "sweetalert2"; // Dùng lại cái popup đẹp hôm nọ
+
 import styles from "./Contact.module.css";
 // Import Icons
 import { FaEnvelope, FaLocationDot, FaPhone, FaClock } from "react-icons/fa6";
@@ -10,7 +13,7 @@ const contactInfo = [
     icon: FaLocationDot,
     title: "Địa chỉ tiệm sách",
     description: "Số 2 Vương Thừa Vũ, Thanh Xuân, Hà Nội",
-    link: "https://www.google.com/maps/place/2+P.+V%C6%B0%C6%A1ng+Th%E1%BB%ABa+V%C5%A9,+Ng%C3%A3+T%C6%B0+S%E1%BB%9F,+Thanh+Xu%C3%A2n,+H%C3%A0+N%E1%BB%99i+100000,+Vi%E1%BB%87t+Nam/@21.0017892,105.8175866,17z/data=!3m1!4b1!4m6!3m5!1s0x3135adda26c5f2f9:0x9f6636f3e6bd2def!8m2!3d21.0017843!4d105.8224575!16s%2Fg%2F11s4kcd10p?hl=vi&entry=ttu&g_ep=EgoyMDI1MTEyMy4xIKXMDSoASAFQAw%3D%3D",
+    link: "https://www.google.com/maps/place/2+P.+V%C6%B0%C6%A1ng+Th%E1%BB%ABa+V%C5%A9,+Kh%C6%B0%C6%A1ng+Trung,+Thanh+Xu%C3%A2n,+H%C3%A0+N%E1%BB%99i",
   },
   {
     icon: FaPhone,
@@ -40,16 +43,54 @@ const formFields = [
   { name: "message", type: "textarea", placeholder: "Nội dung cần tư vấn... *" },
 ];
 
-const mapUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.77175992683!2d105.8224575!3d21.001784300000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135adda26c5f2f9%3A0x9f6636f3e6bd2def!2zMiBQLiBWxrDGoW5nIFRo4burYSBWxaksIE5nw6MgVMawIFPhu58sIFRoYW5oIFh1w6JuLCBIw6AgTuG7mWkgMTAwMDAw!5e0!3m2!1svi!2s!4v1764641666542!5m2!1svi!2s";
+const mapUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.695896336494!2d105.82006137596918!3d21.004801188600055!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ac81a5c6c0e9%3A0x6b772412803730e1!2zMiBQLiBWxrDGoW5nIFRo4burYSBWxaksIEtoxrDGoW5nIFRydW5nLCBUaGFuaCBYdcOibiwgSMOgIE7huqlp!5e0!3m2!1svi!2svn!4v1701500000000!5m2!1svi!2svn";
 
 const Contact = () => {
-  // Logic Formspree
-  const [state, handleSubmit] = useForm("FORM_ID"); // Thay FORM_ID của bạn
+  const form = useRef(); // Tạo tham chiếu đến thẻ <form>
+  const [loading, setLoading] = useState(false);
+
+  const sendEmail = (e) => {
+    e.preventDefault(); // Chặn load lại trang
+    setLoading(true);
+
+    // --- CẤU HÌNH EMAILJS ---
+    // Bạn lấy 3 mã này trên trang web EmailJS điền vào đây nhé
+    const SERVICE_ID = "service_z9pnsuh";   // Ví dụ: service_x29vk4d
+    const TEMPLATE_ID = "template_qnkxuw8"; // Ví dụ: template_8dn2s9a
+    const PUBLIC_KEY = "lA4HRSJX-X6bmKfN5";   // Ví dụ: 5d8_s8d7s9d7s
+
+    emailjs
+      .sendForm(SERVICE_ID, TEMPLATE_ID, form.current, {
+        publicKey: PUBLIC_KEY,
+      })
+      .then(
+        () => {
+          setLoading(false);
+          // Gửi thành công -> Hiện Popup đẹp
+          Swal.fire({
+            title: "Đã gửi thành công!",
+            text: "BookStore đã nhận được tin nhắn và sẽ phản hồi bạn sớm nhất.",
+            icon: "success",
+            confirmButtonColor: "#28a745",
+          });
+          e.target.reset(); // Xóa trắng form sau khi gửi
+        },
+        (error) => {
+          setLoading(false);
+          console.log("FAILED...", error.text);
+          // Gửi thất bại -> Báo lỗi
+          Swal.fire({
+            title: "Opps, có lỗi rồi!",
+            text: "Vui lòng kiểm tra lại kết nối hoặc thử lại sau nhé.",
+            icon: "error",
+          });
+        }
+      );
+  };
 
   return (
     <div className={styles.pageWrapper}>
-      
-      {/* 1. HEADER PAGE (Tiêu đề trang) */}
+      {/* 1. HEADER PAGE */}
       <div className={styles.pageHeader}>
         <div className={styles.headerContent}>
           <h1 className={styles.pageTitle}>Liên hệ với D2P BookStore</h1>
@@ -62,14 +103,13 @@ const Contact = () => {
       {/* 2. MAIN CONTENT */}
       <div className={styles.container}>
         <div className={styles.contentGrid}>
-          
           {/* CỘT TRÁI: THÔNG TIN */}
           <div className={styles.leftColumn}>
             <h2 className={styles.sectionTitle}>Thông tin liên lạc</h2>
             <p className={styles.sectionDesc}>
               Đừng ngần ngại liên hệ với D2P BookStore nếu bạn cần tư vấn sách, kiểm tra đơn hàng hoặc hợp tác.
             </p>
-            
+
             <div className={styles.infoList}>
               {contactInfo.map((item, index) => (
                 <div key={index} className={styles.infoItem}>
@@ -79,7 +119,14 @@ const Contact = () => {
                   <div className={styles.infoContent}>
                     <h3 className={styles.infoTitle}>{item.title}</h3>
                     {item.link ? (
-                      <a href={item.link} className={styles.infoLink} target="_blank" rel="noopener noreferrer">{item.description}</a>
+                      <a
+                        href={item.link}
+                        className={styles.infoLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {item.description}
+                      </a>
                     ) : (
                       <p className={styles.infoText}>{item.description}</p>
                     )}
@@ -93,54 +140,57 @@ const Contact = () => {
           <div className={styles.rightColumn}>
             <div className={styles.formCard}>
               <h3 className={styles.formTitle}>Gửi tin nhắn</h3>
-              
-              {state.succeeded ? (
-                <div className={styles.successMessage}>
-                  <div className={styles.checkIcon}>✓</div>
-                  <h4>Đã gửi thành công!</h4>
-                  <p>Cảm ơn bạn, chúng mình sẽ phản hồi sớm nhất.</p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className={styles.formGroup}>
-                  {formFields.map((field, index) => (
-                    <div key={index} className={styles.inputWrapper}>
-                      {field.type === "textarea" ? (
-                        <textarea
-                          name={field.name}
-                          placeholder={field.placeholder}
-                          className={styles.formInput}
-                          rows={4}
-                          required={field.name !== "subject"}
-                        />
-                      ) : (
-                        <input
-                          type={field.type}
-                          name={field.name}
-                          placeholder={field.placeholder}
-                          className={styles.formInput}
-                          required={field.name !== "subject"}
-                        />
-                      )}
-                      <ValidationError prefix={field.name} field={field.name} errors={state.errors} />
-                    </div>
-                  ))}
 
-                  <button type="submit" disabled={state.submitting} className={styles.submitBtn}>
-                    Gửi đi
-                    <span className={styles.btnIcon}>
-                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 9L9 1M9 1H1M9 1V9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 9L9 1M9 1H1M9 1V9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </span>
-                  </button>
-                </form>
-              )}
+              <form ref={form} onSubmit={sendEmail} className={styles.formGroup}>
+                {formFields.map((field, index) => (
+                  <div key={index} className={styles.inputWrapper}>
+                    {field.type === "textarea" ? (
+                      <textarea
+                        name={field.name} // Quan trọng: Phải khớp với biến trong Template EmailJS
+                        placeholder={field.placeholder}
+                        className={styles.formInput}
+                        rows={4}
+                        required={field.name !== "subject"}
+                      />
+                    ) : (
+                      <input
+                        type={field.type}
+                        name={field.name} // Quan trọng
+                        placeholder={field.placeholder}
+                        className={styles.formInput}
+                        required={field.name !== "subject"}
+                      />
+                    )}
+                  </div>
+                ))}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={styles.submitBtn}
+                >
+                  {loading ? "Đang gửi..." : "Gửi đi"}
+                  <span className={styles.btnIcon}>
+                    <svg
+                      width="10"
+                      height="10"
+                      viewBox="0 0 10 10"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M1 9L9 1M9 1H1M9 1V9"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
+                </button>
+              </form>
             </div>
           </div>
-
         </div>
       </div>
 

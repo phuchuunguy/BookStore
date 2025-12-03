@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { toast } from 'react-toastify';
+import { swalError, swalSuccess } from "../../../../helper/swal";
 import PaginationBookStore from "../../../../components/PaginationBookStore";
 import { FaEdit, FaTrashAlt, FaSearch } from "react-icons/fa";
 
@@ -54,11 +54,11 @@ function BookList() {
     try {
       const { data: orders } = await bookApi.checkIsOrdered(bookDelete.id);
       if (orders.length > 0) {
-        toast.error('Sản phẩm đã được mua, không thể xóa!', { autoClose: 2000 });
+        swalError("Lỗi!", "Sản phẩm đã được mua, không thể xóa!");
         return;
       }
       await bookApi.delete(bookDelete.id);
-      toast.success("Xóa thành công!", { autoClose: 2000 });
+      swalSuccess("Thành công!", { text: "Xóa thành công!", confirmButtonColor: "#28a745" });
       setShowModal(false);
       setBookData((preState) => {
         const newArray = [...preState.books];
@@ -68,7 +68,7 @@ function BookList() {
         };
       });
     } catch (error) {
-      alert("Xóa thất bại!");
+      swalError("Xóa thất bại!");
       setShowModal(false);
     }
   };

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Container, Row, Col, Table, Breadcrumb, NavLink } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from 'react-toastify';
+import { swalInfo } from "../../helper/swal";
 import { useSelector, useDispatch } from "react-redux";
 
 import CartItem from "../../components/Shop/CartItem";
@@ -48,7 +48,7 @@ function Cart() {
   const handleNavigateToCheckout = (e) => {
     if (!currentUser.userId) {
       e.preventDefault()
-      alert("Bạn cần đăng nhập để thực hiện thanh toán!")
+      swalInfo("Bạn cần đăng nhập để thực hiện thanh toán!")
     }
   }
 
@@ -69,7 +69,7 @@ function Cart() {
       const { minimum, id, value, by, start, end } = voucherData
 
       if (!id) {
-        toast.info("Voucher này không tồn tại!", {autoClose: 2000})
+        swalInfo("Thông báo", { text: "Voucher này không tồn tại!", confirmButtonColor: "#17a2b8" });
         dispatch(updateVoucher({
           id: "",
           code: "",
@@ -79,14 +79,12 @@ function Cart() {
         return
       }
       if (cartData.subTotal < minimum) {
-        toast.info(
-          `Giá trị đơn hàng cần tối thiểu ${format.formatPrice(minimum)} để áp dụng!`, 
-          {autoClose: 2000})
+        swalInfo("Thông báo", { text: `Giá trị đơn hàng cần tối thiểu ${format.formatPrice(minimum)} để áp dụng!`, confirmButtonColor: "#17a2b8" });
         return
       }
       const now = new Date()
       if (!(now >= new Date(start) && now <= new Date(end))) {
-        toast.info("Thời gian không phù hợp!")
+        swalInfo("Thông báo", { text: "Thời gian không phù hợp!", confirmButtonColor: "#17a2b8" });
         return
       }
     

@@ -1,4 +1,13 @@
-const initialState = {
+const savedUser = (() => {
+    try {
+        const raw = localStorage.getItem('user');
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        return null;
+    }
+})();
+
+const initialState = savedUser || {
     email: '',
     fullName: '',
     phoneNumber: '',
@@ -10,14 +19,14 @@ const userReducer = (state = initialState, action) => {
     switch (action.type) {
 
         case "LOGIN": {
-            console.log({
-                ...state,
-                ...action.payload,
-            })
-            return {
+            const newState = {
                 ...state,
                 ...action.payload,
             };
+            try {
+                localStorage.setItem('user', JSON.stringify(newState));
+            } catch (e) {}
+            return newState;
         }
 
         case "UPDATE_FULLNAME": {
@@ -25,10 +34,12 @@ const userReducer = (state = initialState, action) => {
                 ...state,
                 fullName: action?.payload?.fullName
             })
-            return {
+            const updated = {
                 ...state,
                 fullName: action?.payload?.fullName
             };
+            try { localStorage.setItem('user', JSON.stringify(updated)); } catch(e) {}
+            return updated;
         }
 
         case "UPDATE_AVATAR": {
@@ -36,13 +47,16 @@ const userReducer = (state = initialState, action) => {
                 ...state,
                 avatar: action?.payload
             })
-            return {
+            const updated = {
                 ...state,
                 avatar: action?.payload
             };
+            try { localStorage.setItem('user', JSON.stringify(updated)); } catch(e) {}
+            return updated;
         }
 
         case "LOGOUT": {
+            try { localStorage.removeItem('user'); } catch (e) {}
             return {
                 ...state,
                 email: '',

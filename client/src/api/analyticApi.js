@@ -17,14 +17,15 @@ const analyticApi = {
         const url = `analytics/ordercount/lifetime`
         return axiosClient.get(url)
     },
+    // Alias for backward compatibility: some components call `getCountOrderLifeTime`
+    getCountOrderLifeTime: () => {
+        return analyticApi.getOrderCountLifeTime()
+    },
     getBestSeller: () => {
         const url = `analytics/product/bestseller`
         return axiosClient.get(url)
     },
-    getOrderCountLifeTime: () => {
-        const url = '/analytics/order/lifetime';
-        return axiosClient.get(url);
-    }
+    
 }
 
 export default analyticApi

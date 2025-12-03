@@ -6,6 +6,7 @@ import moment from "moment";
 import { FaSearch } from "react-icons/fa";
 
 import userApi from "../../../api/userApi"
+import { swalSuccess, swalError } from "../../../helper/swal";
 
 export default function StaffList() {
 
@@ -53,7 +54,7 @@ export default function StaffList() {
       setLoading(true)
       await userApi.createStaff(addStaff)
       setLoading(false)
-      alert("Thành công!")
+      swalSuccess("Thành công!")
       setShowAddModal(false)
       setRerender(!rerender)
     } catch (error) {
@@ -66,7 +67,7 @@ export default function StaffList() {
     const newStatus = status === 1 ? 0 : 1
     try {
       await userApi.updateStatus(id, { status: newStatus })
-      alert("Thành công!")
+      swalSuccess("Thành công!")
       setRerender(!rerender)
     } catch (error) {
       console.log(error)
@@ -156,7 +157,7 @@ export default function StaffList() {
                         <td>{(1 && page - 1) * 10 + (index + 1)}</td>
                         <td className="text-start">
                           <div className="d-flex align-items-center">
-                            <img className="avatar" src={item?.avatar?.url} alt="" />
+                            <img className="avatar" src={item?.avatar?.url || "/avatar.jpg"} alt="" />
                             <div >{item?.fullName}</div>
                           </div>
                         </td>

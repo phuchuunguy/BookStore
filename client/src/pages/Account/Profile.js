@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Form } from "react-bootstrap"
-import { toast } from 'react-toastify';
+import Swal from "sweetalert2";
 import { updateFullName } from "../../redux/actions/auth"
 import userApi from "../../api/userApi"
 import styles from "./Account.module.css"
@@ -68,7 +68,12 @@ export default function Profile() {
           fullName, gender, phoneNumber, birthday
         })
         dispatch(updateFullName({fullName: result.data.fullName}))
-        toast.success('Cập nhật thành công!', {autoClose: 2000})
+        Swal.fire({
+          title: "Thành công!",
+          text: "Cập nhật thành công!",
+          icon: "success",
+          confirmButtonColor: "#28a745",
+        });
       } catch (error) {
         console.log(error)
       }

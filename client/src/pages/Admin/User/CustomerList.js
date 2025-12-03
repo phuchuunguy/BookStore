@@ -32,13 +32,18 @@ export default function CustomerList() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const query = {
-          "$or": [
-            { fullName: { "$regex": searchString, "$options": "i" } },
-            { email: { "$regex": searchString, "$options": "i" } },
-            { phoneNumber: { "$regex": searchString, "$options": "i" } },
-          ],
-          role: 0
+              const trimmedSearch = searchString.trim();
+              // By default fetch all users (all roles/status). Only add $or search when user types.
+              let query = null;
+
+        if (trimmedSearch) {
+                query = {
+                  "$or": [
+                    { fullName: { "$regex": trimmedSearch, "$options": "i" } },
+                    { email: { "$regex": trimmedSearch, "$options": "i" } },
+                    { phoneNumber: { "$regex": trimmedSearch, "$options": "i" } },
+                  ]
+                };
         }
         const { data, pagination } = await userApi.getAll({ 
           page, 
@@ -209,7 +214,7 @@ export default function CustomerList() {
                         <td>{(1 && page - 1) * 10 + (index + 1)}</td>
                         <td className="text-start">
                           <div className="d-flex align-items-center">
-                            <img className="avatar" src={item?.avatar?.url} alt="" />
+                            <img className="avatar" src={item?.avatar?.url || "/avatar.jpg"} alt="" />
                             <div >
                               <p>Họ tên: <b>{item?.fullName}</b></p>
                               <p>Email: <b>{item?.email}</b></p>

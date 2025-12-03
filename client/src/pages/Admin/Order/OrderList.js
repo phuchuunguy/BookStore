@@ -10,6 +10,7 @@ import OrderDetail from "../../../components/OrderDetail";
 import steps from "../../../components/OrderProgress/enum";
 import orderApi from "../../../api/orderApi";
 import format from "../../../helper/format";
+import { swalSuccess, swalError } from "../../../helper/swal";
 
 export default function OrderList() {
   
@@ -108,11 +109,11 @@ export default function OrderList() {
             );
             return { ...pre, orders: updatedOrders };
           });
-          alert("Cập nhật thành công!");
+          swalSuccess("Cập nhật thành công!");
           setShowModalUpdate(false); 
       }
     } catch (error) {
-      alert("Cập nhật thất bại!");
+      swalError("Cập nhật thất bại!");
       setLoadingUpdate(false)
       console.log(error);
     }

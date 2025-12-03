@@ -1,10 +1,13 @@
 /* Container chính căn giữa trang */
 .container {
   max-width: 1140px;
-  margin: 0 auto;
+  margin: 28px auto 28px; /* space from header and footer */
   padding: 40px 20px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: #333;
+  background: #fff; /* make container background white */
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
 }
 
 /* --- Cấu trúc chung cho từng Section (Phần 1 và 2) --- */
@@ -110,6 +113,11 @@
 
 /* --- Responsive cho Mobile --- */
 @media (max-width: 768px) {
+  .container {
+    margin-top: 16px;
+    margin-bottom: 16px;
+    padding: 24px 12px;
+  }
   .section, 
   .section.reverse, 
   .benefitContainer {

@@ -4,7 +4,7 @@ import moment from "moment";
 import styles from "./DiscountItem.module.css";
 import format from "../../../helper/format";
 import logo from "../../../assets/images/logo.png";
-import { toast } from 'react-toastify';
+import Swal from "sweetalert2";
 import { useSelector, useDispatch } from "react-redux";
 import { updateVoucher } from "../../../redux/actions/cart";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +19,19 @@ const DiscountItem = ({ item }) => {
 
   const copyClipboard = (value) => {
     navigator.clipboard.writeText(value);
-    if (!copied) alert("copied");
+    
+    // --- THAY ĐỔI DUY NHẤT TẠI ĐÂY ---
+    if (!copied) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Đã sao chép!',
+        text: 'Mã giảm giá đã lưu vào bộ nhớ tạm',
+        showConfirmButton: false,
+        timer: 1200
+      });
+    }
+    // ---------------------------------
+    
     setCopied(true);
   };
 
@@ -27,7 +39,12 @@ const DiscountItem = ({ item }) => {
     try {
       const voucherId = id || "";
       if (cartData?.list.length <= 0) {
-        toast.info("Giỏ hàng của bạn đang rỗng!", { autoClose: 2000 });
+        Swal.fire({
+          title: "Thông báo",
+          text: "Giỏ hàng của bạn đang rỗng!",
+          icon: "info",
+          confirmButtonColor: "#17a2b8",
+        });
         return;
       }
       if (!code) {
@@ -48,15 +65,22 @@ const DiscountItem = ({ item }) => {
         return;
       }
       if (cartData.subTotal < minimum) {
-        toast.info(
-          `Giá trị đơn hàng cần tối thiểu ${format.formatPrice(minimum)} để áp dụng!`,
-          { autoClose: 2000 }
-        );
+        Swal.fire({
+          title: "Thông báo",
+          text: `Giá trị đơn hàng cần tối thiểu ${format.formatPrice(minimum)} để áp dụng!`,
+          icon: "info",
+          confirmButtonColor: "#17a2b8",
+        });
         return;
       }
       const now = new Date();
       if (!(now >= new Date(start) && now <= new Date(end))) {
-        toast.info("Thời gian không phù hợp!");
+        Swal.fire({
+          title: "Thông báo",
+          text: "Thời gian không phù hợp!",
+          icon: "info",
+          confirmButtonColor: "#17a2b8",
+        });
         return;
       }
       dispatch(
