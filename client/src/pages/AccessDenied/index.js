@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -32,3 +33,5 @@ function AccessDenied() {
 }
 
 export default AccessDenied
+=======
+>>>>>>> Stashed changes

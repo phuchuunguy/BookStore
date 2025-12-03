@@ -32,13 +32,15 @@ export default function CustomerList() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const query = {
-          "$or": [
-            { fullName: { "$regex": searchString, "$options": "i" } },
-            { email: { "$regex": searchString, "$options": "i" } },
-            { phoneNumber: { "$regex": searchString, "$options": "i" } },
-          ],
-          role: 0
+        const trimmedSearch = searchString.trim();
+        const query = { role: 0 };
+
+        if (trimmedSearch) {
+          query["$or"] = [
+            { fullName: { "$regex": trimmedSearch, "$options": "i" } },
+            { email: { "$regex": trimmedSearch, "$options": "i" } },
+            { phoneNumber: { "$regex": trimmedSearch, "$options": "i" } },
+          ];
         }
         const { data, pagination } = await userApi.getAll({ 
           page, 

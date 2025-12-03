@@ -1,16 +1,98 @@
 .wrapperDashboard {
-    overflow: hidden;
-    padding: 10px;
+  overflow: hidden;
+  padding: 24px;
+  background: #f4f6fb;
+  min-height: 100vh;
+}
+
+.statsRow {
+  margin-bottom: 8px;
 }
 
 .revenueSelectTime {
-    width: 300px;
+  width: 260px;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-weight: 600;
 }
 
 .chart {
-    padding: 10px;
-    border-radius: 4px;
-    background-color: white;
-    box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
-    margin-bottom: 20px;
+  padding: 20px;
+  border-radius: 16px;
+  background-color: white;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  height: 650px;
+  min-height: 260px;
+  /* overflow: hidden;  -- Loại bỏ dòng này để không cắt nội dung biểu đồ */
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.badgeSoft {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.chartContent {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  max-width: 100%;
+  /* Không đặt height ở đây */
+}
+
+.topBookList {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.topBookItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.topBookIndex {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e0e7ff;
+  color: #4338ca;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.topBookName {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  color: #0f172a;
+}
+
+.topBookCount {
+  font-size: 12px;
+  color: #475569;
 }

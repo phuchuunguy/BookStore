@@ -96,9 +96,19 @@ function AccountSideBar() {
       </Modal>
 
       <div className="d-flex align-items-center" onClick={() => setShowModal(true)} style={{ cursor: "pointer" }}>
+<<<<<<< Updated upstream
         <img 
           src={getAvatarUrl(avatar)} 
           alt="Avatar" 
+=======
+        <img
+          src={
+            file && ["image/png", "image/gif", "image/jpeg"].includes(file?.type)
+              ? URL.createObjectURL(file)
+              : avatar?.url || "/default-avatar.png"
+          }
+          alt="Avatar"
+>>>>>>> Stashed changes
           style={{ width: 50, height: 50, borderRadius: "50%", objectFit: "cover", marginRight: 10 }}
         />
         <span className={styles.sideBarTitle}>{fullName}</span>
