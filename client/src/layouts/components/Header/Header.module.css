@@ -27,6 +27,19 @@
     font-size: 36px;
 }
 
+/* make bookstore title vertically centered with the search input */
+.header .bookstoreHighlight {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
+}
+
+.headerCenter .search {
+    display: flex;
+    align-items: center;
+}
+
 .header .headerCenter {
     display: flex;
     align-items: center;
@@ -46,11 +59,41 @@
 }
 
 .headerCenter .headerIcon {
-    text-align: center;
+    /* make icon blocks align vertically with search/title */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 4px 6px;
+    height: 100%;
+    position: relative; /* container for absolute badge */
+}
+
+.headerCenter .headerIcon svg {
+    font-size: 22px;
+    vertical-align: middle;
+}
+
+.headerCenter .headerIcon p {
+    margin: 0;
+    line-height: 1;
+    font-size: 14px;
 }
 
 .headerIcon a {
-    position: relative;
+    /* for icon links (not the account dropdown), place icon above label */
+    position: static;
+}
+
+/* make plain links inside headerIcon (like cart / login) stack vertically */
+.headerCenter .headerIcon > a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-decoration: none;
+    color: inherit;
 }
 
 .header .headerBottom {
@@ -60,6 +103,13 @@
 .account {
     position: relative;
     cursor: pointer;
+}
+
+/* keep account block horizontal when user is logged in */
+.headerCenter .headerIcon .account {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .account .avatar {
@@ -98,16 +148,18 @@
     background-color: #fafafa;
 }
 
-.count {
+.headerCenter .headerIcon .count {
     position: absolute;
-    top: -15px;
-    right: 10px;
+    top: -5px;
+    right: 6px;
     background: orange;
     color: white;
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    font-size: 15px;
+    font-size: 13px;
+    display: grid;
+    place-items: center;
 }
 
 .searchMobile {
@@ -154,11 +206,11 @@
         display: block;
     }
     
-    .count {
-        top: -18px;
-        right: -5px;
+    .headerCenter .headerIcon .count {
+        top: -8px;
+        right: -6px;
         width: 18px;
         height: 18px;
-        font-size: 15px;
+        font-size: 12px;
     }
 }

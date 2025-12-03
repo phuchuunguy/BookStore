@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -12,6 +11,7 @@ function AccessDenied() {
 
     useEffect(() => {
         let isMounted = true;
+
         MySwal.fire({
             title: "Bạn không có quyền truy cập tài nguyên này!",
             icon: "error",
@@ -22,16 +22,12 @@ function AccessDenied() {
             if (isMounted) navigate("/", { replace: true });
         });
 
-        // cleanup to prevent state update after unmount
         return () => {
             isMounted = false;
         };
     }, [navigate]);
 
-    // Return null because the popup will be displayed on mount.
-    return null;
+    return null; // popup hiển thị khi component mount
 }
 
-export default AccessDenied
-=======
->>>>>>> Stashed changes
+export default AccessDenied;

@@ -8,12 +8,13 @@ import PreviewImage from "../../../components/PreviewImage";
 import { updateAvatar } from "../../../redux/actions/auth";
 import userApi from "../../../api/userApi";
 import { getAvatarUrl } from "../../../helper/avatar";
+import { roleEnum } from "./routes";
 
 import styles from "./AccountSideBar.module.css";
 
 function AccountSideBar() {
   const dispatch = useDispatch();
-  const { userId, fullName, avatar } = useSelector((state) => state.auth);
+  const { userId, fullName, avatar, role } = useSelector((state) => state.auth);
 
   const [file, setFile] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -21,12 +22,14 @@ function AccountSideBar() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file) return Swal.fire({
-      title: "Thông báo",
-      text: "Chưa chọn file!",
-      icon: "info",
-      confirmButtonColor: "#17a2b8",
-    });
+    if (!file)
+      return Swal.fire({
+        title: "Thông báo",
+        text: "Chưa chọn file!",
+        icon: "info",
+        confirmButtonColor: "#17a2b8",
+      });
+
     if (!["image/png", "image/gif", "image/jpeg"].includes(file.type)) {
       return Swal.fire({
         title: "Thông báo",
@@ -42,15 +45,15 @@ function AccountSideBar() {
       formData.append("file", file);
 
       const response = await userApi.updateAvatar(userId, formData);
-      // Response có cấu trúc: { message, error, data: user }
-      // axiosClient interceptor trả về res.data, nên response = { message, error, data: user }
-      // user có avatar: { url, publicId }
+
       const updatedAvatar = response?.data?.avatar || response?.avatar;
       if (updatedAvatar) {
         dispatch(updateAvatar(updatedAvatar));
       }
+
       setLoading(false);
       setShowModal(false);
+
       Swal.fire({
         title: "Thành công!",
         text: "Cập nhật avatar thành công!",
@@ -60,6 +63,7 @@ function AccountSideBar() {
     } catch (error) {
       setLoading(false);
       console.log("Error update avatar:", error);
+
       Swal.fire({
         title: "Lỗi!",
         text: "Cập nhật avatar thất bại!",
@@ -83,11 +87,14 @@ function AccountSideBar() {
               accept="image/png, image/gif, image/jpeg"
               onChange={(e) => setFile(e.target.files[0])}
             />
-            {file && ["image/png", "image/gif", "image/jpeg"].includes(file.type) && (
-              <div style={{ width: 200, marginTop: 10 }}>
-                <PreviewImage file={file} />
-              </div>
-            )}
+
+            {file &&
+              ["image/png", "image/gif", "image/jpeg"].includes(file.type) && (
+                <div style={{ width: 200, marginTop: 10 }}>
+                  <PreviewImage file={file} />
+                </div>
+              )}
+
             <Button disabled={loading} className="mt-2" type="submit">
               {loading ? "Đang lưu..." : "Lưu"}
             </Button>
@@ -95,25 +102,27 @@ function AccountSideBar() {
         </Modal.Body>
       </Modal>
 
-      <div className="d-flex align-items-center" onClick={() => setShowModal(true)} style={{ cursor: "pointer" }}>
-<<<<<<< Updated upstream
-        <img 
-          src={getAvatarUrl(avatar)} 
-          alt="Avatar" 
-=======
+      {/* Avatar + tên */}
+      <div
+        className="d-flex align-items-center"
+        onClick={() => setShowModal(true)}
+        style={{ cursor: "pointer" }}
+      >
         <img
-          src={
-            file && ["image/png", "image/gif", "image/jpeg"].includes(file?.type)
-              ? URL.createObjectURL(file)
-              : avatar?.url || "/default-avatar.png"
-          }
+          src={file ? URL.createObjectURL(file) : getAvatarUrl(avatar)}
           alt="Avatar"
->>>>>>> Stashed changes
-          style={{ width: 50, height: 50, borderRadius: "50%", objectFit: "cover", marginRight: 10 }}
+          style={{
+            width: 50,
+            height: 50,
+            borderRadius: "50%",
+            objectFit: "cover",
+            marginRight: 10,
+          }}
         />
         <span className={styles.sideBarTitle}>{fullName}</span>
       </div>
 
+      {/* Menu */}
       <ul className={styles.navList}>
         <li className={styles.navItem}>
           <NavLink
@@ -125,26 +134,32 @@ function AccountSideBar() {
             Thông tin tài khoản
           </NavLink>
         </li>
-        <li className={styles.navItem}>
-          <NavLink
-            className={({ isActive }) =>
-              [styles.navLink, isActive ? styles.active : null].join(" ")
-            }
-            to="/don-hang"
-          >
-            Đơn hàng
-          </NavLink>
-        </li>
-        <li className={styles.navItem}>
-          <NavLink
-            className={({ isActive }) =>
-              [styles.navLink, isActive ? styles.active : null].join(" ")
-            }
-            to="/dia-chi"
-          >
-            Địa chỉ
-          </NavLink>
-        </li>
+
+        {Number(role) === roleEnum.Customer && (
+          <>
+            <li className={styles.navItem}>
+              <NavLink
+                className={({ isActive }) =>
+                  [styles.navLink, isActive ? styles.active : null].join(" ")
+                }
+                to="/don-hang"
+              >
+                Đơn hàng
+              </NavLink>
+            </li>
+
+            <li className={styles.navItem}>
+              <NavLink
+                className={({ isActive }) =>
+                  [styles.navLink, isActive ? styles.active : null].join(" ")
+                }
+                to="/dia-chi"
+              >
+                Địa chỉ
+              </NavLink>
+            </li>
+          </>
+        )}
       </ul>
     </div>
   );

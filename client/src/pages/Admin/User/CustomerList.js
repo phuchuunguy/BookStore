@@ -32,15 +32,18 @@ export default function CustomerList() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const trimmedSearch = searchString.trim();
-        const query = { role: 0 };
+              const trimmedSearch = searchString.trim();
+              // By default fetch all users (all roles/status). Only add $or search when user types.
+              let query = null;
 
         if (trimmedSearch) {
-          query["$or"] = [
-            { fullName: { "$regex": trimmedSearch, "$options": "i" } },
-            { email: { "$regex": trimmedSearch, "$options": "i" } },
-            { phoneNumber: { "$regex": trimmedSearch, "$options": "i" } },
-          ];
+                query = {
+                  "$or": [
+                    { fullName: { "$regex": trimmedSearch, "$options": "i" } },
+                    { email: { "$regex": trimmedSearch, "$options": "i" } },
+                    { phoneNumber: { "$regex": trimmedSearch, "$options": "i" } },
+                  ]
+                };
         }
         const { data, pagination } = await userApi.getAll({ 
           page, 

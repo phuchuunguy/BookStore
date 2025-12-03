@@ -3,11 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Container, Form } from "react-bootstrap";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-<<<<<<< Updated upstream
 import { useDispatch } from "react-redux";
-=======
-import Swal from "sweetalert2"; // 1. Import SweetAlert2
->>>>>>> Stashed changes
+import Swal from "sweetalert2";
 import authApi from "../../api/authApi";
 import { logout } from "../../redux/actions/auth";
 import styles from "./Auth.module.css";
@@ -45,13 +42,8 @@ function ResetPassword() {
         
         // --- LOGIC MỚI VỚI SWEETALERT2 ---
         if (!res.error) {
-<<<<<<< Updated upstream
-          alert("Đổi mật khẩu thành công")
           localStorage.removeItem('accessToken')
           dispatch(logout())
-          navigate({ pathname: "/dang-nhap" });
-          return
-=======
           // Popup thành công
           Swal.fire({
             icon: 'success',
@@ -63,7 +55,6 @@ function ResetPassword() {
              navigate({ pathname: "/dang-nhap" });
           });
           return;
->>>>>>> Stashed changes
         } else {
           // Popup lỗi từ server trả về
           Swal.fire({

@@ -90,8 +90,10 @@ const userService = {
         await user.update({ address: addresses });
         return user;
     },
-    register: async({email, fullName, password}) => {
-        return await User.create({email, password, fullName});
+    register: async({email, fullName, password, avatar}) => {
+        const payload = { email, password, fullName };
+        if (avatar) payload.avatar = avatar;
+        return await User.create(payload);
     },
     createStaff: async({email, fullName, password, phoneNumber, role, status}) => {
         return await User.create({email, password, fullName, phoneNumber, role, status});

@@ -7,6 +7,22 @@
 
 .statsRow {
   margin-bottom: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch; /* ensure child columns stretch to equal height */
+}
+
+/* make sure bootstrap columns inside statsRow also use flex so their children can stretch */
+.statsRow > [class*="col-"] {
+  display: flex;
+  align-items: stretch; /* ensure column wrappers stretch vertically */
+}
+
+/* make the direct child (the DashboardCard wrapper) fill the column */
+.statsRow > [class*="col-"] > div {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
 }
 
 .revenueSelectTime {
@@ -34,6 +50,11 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+}
+
+/* nudge the small chart title (e.g. SÁCH BÁN CHẠY) slightly to the right */
+.chartHeader h2 {
+  margin-left: 16px; /* slightly larger nudge to the right */
 }
 
 .badgeSoft {

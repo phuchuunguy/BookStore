@@ -127,11 +127,19 @@ const authController = {
             if (checkEmail)  return res.status(400).json({ message: 'Email đã tồn tại!', error: 1,})
             
             const hashPassword = await bcrypt.hash(password, 10)
+            // determine client origin for serving the default avatar
+            // prefer explicit env var `CLIENT_ORIGIN` or `REACT_APP_URL`, fallback to request origin
+            const clientOrigin = process.env.CLIENT_ORIGIN || process.env.REACT_APP_URL || req.get('origin') || 'http://localhost:3000'
+            const defaultAvatarUrl = `${clientOrigin.replace(/\/$/, '')}/assets/images/default-avatar.svg`
 
-            const result = await userService.register({email, fullName, password: hashPassword})
+            const result = await userService.register({
+                email,
+                fullName,
+                password: hashPassword,
+                avatar: { url: defaultAvatarUrl, publicId: null }
+            })
 
             const code = generateVerifyCode({email})
-            const host = req.get('origin')
             const link = `${host}/services/user/verify?active_code=${code}`
             const resultSendMail = await transporter.sendMail({
                 from: '"BookStore" <project.php.nhncomputer@gmail.com>',

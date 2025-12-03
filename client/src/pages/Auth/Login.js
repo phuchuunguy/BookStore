@@ -22,14 +22,6 @@ function Login() {
   const navigate = useNavigate();
   const currentUser = useSelector(state => state.auth);
 
-<<<<<<< Updated upstream
-  const [loading, setLoading] = useState(false)
-  const [showModal, setShowModal] = useState(false)
-  
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-  const currentUser = useSelector((state) => state.auth)
-=======
   // --- Kiểm tra token khi load trang ---
   useEffect(() => {
     const checkToken = async () => {
@@ -54,7 +46,6 @@ function Login() {
     };
     checkToken();
   }, [dispatch, currentUser.userId]);
->>>>>>> Stashed changes
 
   // --- OAuth Google ---
   const responseSuccessGoogle = async (response) => {
@@ -97,9 +88,8 @@ function Login() {
   };
 
   const responseFailureFacebook = (response) => {
-<<<<<<< Updated upstream
-    console.log(response)
-  }
+    console.error("Facebook login failed:", response);
+  };
 
   useEffect(() => {
     const checkToken = async () => {
@@ -130,10 +120,6 @@ function Login() {
     }
     checkToken()
   }, [navigate, dispatch])
-=======
-    console.error("Facebook login failed:", response);
-  };
->>>>>>> Stashed changes
 
   // --- Form login ---
   const handleLogin = async (e) => {
@@ -225,6 +211,7 @@ function Login() {
 
             <div className="d-flex justify-content-between">
               <div className={styles.boxLoginThirdParty}>
+                <img src="https://www.freepnglogos.com/uploads/google-logo-png/google-logo-icon-png-transparent-background-osteopathy-16.png" alt="google" />
                 <OAuth2Login
                   className="bookstore-btn"
                   buttonText="Login with Google"
@@ -239,6 +226,7 @@ function Login() {
               </div>
 
               <div className={styles.boxLoginThirdParty}>
+                <img src="https://cdn.pixabay.com/photo/2015/05/17/10/51/facebook-770688_1280.png" alt="facebook" />
                 <OAuth2Login
                   className="bookstore-btn"
                   buttonText="Login with Facebook"

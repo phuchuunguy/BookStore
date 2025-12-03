@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
 
@@ -141,17 +141,24 @@ function App() {
             <Route path="/lien-he" element={<Contact />} />
           </Route>
 
-          {/* Customer Routes */}
+          {/* Account routes for any authenticated user (Customer, Staff, Admin) */}
           {currentUser && currentUser.role !== -1 && (
             <Route
               path="/"
-              element={<ProtectedRoute isAllowed={currentUser.role === roleEnum.Customer} />}
+              element={<ProtectedRoute isAllowed={currentUser.role !== -1} />}
             >
               <Route element={<DefaultLayout />}>
                 <Route element={<AccountLayout />}>
-                  <Route path="don-hang" element={<Order />} />
+                  {/* Everyone with a valid role can access profile */}
                   <Route path="tai-khoan" element={<Profile />} />
-                  <Route path="dia-chi" element={<Address />} />
+
+                  {/* Only customers see Orders and Address pages */}
+                  {currentUser.role === roleEnum.Customer && (
+                    <>
+                      <Route path="don-hang" element={<Order />} />
+                      <Route path="dia-chi" element={<Address />} />
+                    </>
+                  )}
                 </Route>
               </Route>
             </Route>
@@ -188,13 +195,21 @@ function App() {
             </Route>
           )}
 
-          {/* Access Denied */}
-          {currentUser.role === -1 && (
+          {/* Prevent non-customers (staff/admin) from accessing customer-only pages */}
+          {currentUser && currentUser.role !== -1 && currentUser.role !== roleEnum.Customer && (
             <>
-              <Route path="/admin/*" element={<AccessDenied />} />
               <Route path="/don-hang" element={<AccessDenied />} />
-              <Route path="/tai-khoan" element={<AccessDenied />} />
               <Route path="/dia-chi" element={<AccessDenied />} />
+            </>
+          )}
+
+          {/* If user is not authenticated, redirect admin/account/customer pages to login instead of showing AccessDenied */}
+          {currentUser.role === -1 && isAuthChecked && (
+            <>
+              <Route path="/admin/*" element={<Navigate to="/dang-nhap" replace />} />
+              <Route path="/don-hang" element={<Navigate to="/dang-nhap" replace />} />
+              <Route path="/tai-khoan" element={<Navigate to="/dang-nhap" replace />} />
+              <Route path="/dia-chi" element={<Navigate to="/dang-nhap" replace />} />
             </>
           )}
 

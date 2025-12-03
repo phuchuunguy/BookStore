@@ -23,28 +23,37 @@ function Footer() {
     <footer className={styles.footer}>
       <Container>
         <Row>
+          {/* --- CỘT 1: Thông tin BookStore --- */}
           <Col xl={3} xs={12}>
             <div className={styles.footerGroup}>
               <Link to='/'>
-                <h1 className={`${styles.bookstoreHighlight} me-5`}>BookStore</h1>
+                <h1 className={styles.bookstoreHighlight}>BookStore</h1>
               </Link>
               <p>Số 2 Vương Thừa Vũ - Thanh Xuân - Hà Nội</p>
               <p>Design By D2P</p>
             </div>
           </Col>
+
+          {/* --- CỘT 2: Liên kết Sản phẩm / Danh mục / Chính sách --- */}
           <Col xl={6} xs={12}>
             <div className={styles.footerGroup}>
               <Row>
+                {/* SẢN PHẨM */}
                 <Col xl={4} xs={6}>
                   <div className={styles.footerBoxLink}>
                     <p className={styles.title}>SẢN PHẨM</p>
-                    <Link to="/san-pham/the-loai/van-hoc">Văn học</Link>
-                    <Link to="/san-pham/the-loai/tam-ly-ky-nang-song">Tâm lý - Kỹ năng sống</Link>
-                    <Link to="/san-pham/the-loai/cong-nghe-thong-tin">Công nghệ thông tin</Link>
-                    <Link to="/san-pham/the-loai/kinh-te">Kinh tế</Link>
-                    <Link to="/san-pham/the-loai/sach-giao-khoa">Sách giáo khoa</Link>
+
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                      <li><Link to="/san-pham?genre=12">Văn học</Link></li>
+                      <li><Link to="/san-pham?genre=8">Tâm lý - Kỹ năng sống</Link></li>
+                      <li><Link to="/san-pham?genre=14">Công nghệ thông tin</Link></li>
+                      <li><Link to="/san-pham?genre=9">Kinh tế</Link></li>
+                    { /* <li><Link to="/san-pham?genre=10">Sách giáo khoa</Link></li> */ }
+                    </ul>
                   </div>
                 </Col>
+
+                {/* DANH MỤC */}
                 <Col xl={4} xs={4} className={styles.cateList}>
                   <div className={styles.footerBoxLink}>
                     <p className={styles.title}>DANH MỤC</p>
@@ -54,6 +63,8 @@ function Footer() {
                     <Link to="/san-pham">Danh mục sản phẩm</Link>
                   </div>
                 </Col>
+
+                {/* CHÍNH SÁCH */}
                 <Col xl={4} xs={6}>
                   <div className={styles.footerBoxLink}>
                     <p className={styles.title}>CHÍNH SÁCH</p>
@@ -66,36 +77,71 @@ function Footer() {
               </Row>
             </div>
           </Col>
+
+          {/* --- CỘT 3: Đăng ký email + social --- */}
           <Col xl={3} xs={12}>
             <div className={styles.footerGroup}>
               <p className={styles.title}>ĐĂNG KÝ</p>
               <p>Đăng ký để nhận được thông tin mới nhất từ chúng tôi.</p>
+
               <div className={`form-group ${styles.formGroup}`}>
                 <input 
                   type="text" 
                   className="form-control" 
                   placeholder="Email..." 
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)} 
+                  onChange={(e) => setEmail(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSubscribe()}
                 />
                 <button 
                   className={`bookstore-btn ${styles.subscribeBtn}`}
-                  onClick={handleSubscribe} 
+                  onClick={handleSubscribe}
                   type="button"
                 >
                   <IoPaperPlane />
                 </button>
               </div>
+
               <div className={styles.boxSocial}>
-                <button className={`bookstore-btn ${styles.bookstoreBtn}`} onClick={() => window.open("https://web.facebook.com/", "_blank")}><IoLogoFacebook /></button>
-                <button className={`bookstore-btn ${styles.bookstoreBtn}`} onClick={() => window.open("https://www.youtube.com/", "_blank")}><IoLogoYoutube /></button>
-                <button className={`bookstore-btn ${styles.bookstoreBtn}`} onClick={() => window.open("https://www.instagram.com/", "_blank")}><IoLogoInstagram /></button>
+                <button 
+                  className={`bookstore-btn ${styles.bookstoreBtn}`} 
+                  onClick={() => window.open("https://web.facebook.com/", "_blank")}
+                >
+                  <IoLogoFacebook />
+                </button>
+
+                <button 
+                  className={`bookstore-btn ${styles.bookstoreBtn}`} 
+                  onClick={() => window.open("https://www.youtube.com/", "_blank")}
+                >
+                  <IoLogoYoutube />
+                </button>
+
+                <button 
+                  className={`bookstore-btn ${styles.bookstoreBtn}`} 
+                  onClick={() => window.open("https://www.instagram.com/", "_blank")}
+                >
+                  <IoLogoInstagram />
+                </button>
               </div>
             </div>
           </Col>
         </Row>
       </Container>
+
+      {/* --- ICON MINI CUỘN LÊN --- */}
+      <button
+        className={styles.floatingMiniBook}
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        aria-label="Scroll to top"
+        title="Lên đầu trang"
+      >
+        <img
+          src="/book.png"
+          alt="Mini Book Icon"
+        />
+      </button>
+
     </footer>
   );
 }

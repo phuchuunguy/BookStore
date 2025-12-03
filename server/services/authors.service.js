@@ -1,6 +1,8 @@
 const Author = require('../models/authors.model')
 const Book = require('../models/books.model')
 const { Op } = require('sequelize');
+const Sequelize = require('sequelize');
+const { sequelize } = require('../db');
 
 const authorService = {
     getAll: async({page, limit, sort}) => {
@@ -25,13 +27,9 @@ const authorService = {
     },
     getById: async(id) => {
         const author = await Author.findByPk(id);
-        // Tìm sách có author trong authorIds JSON array
+        // Tìm sách có author trong authorIds JSON array (MySQL JSON_CONTAINS)
         const books = await Book.findAll({
-            where: {
-                authorIds: {
-                    [Op.contains]: [parseInt(id)]
-                }
-            }
+            where: Sequelize.literal(`JSON_CONTAINS(CAST(authorIds AS JSON), CAST('${parseInt(id)}' AS JSON))`)
         });
         return [author, books];
     },
@@ -47,22 +45,29 @@ const authorService = {
         return null;
     },
     deleteById: async(id) => {
-        // Khi xóa 1 tác giả => Cần update lại các sách có tác giả cần xóa
-        const books = await Book.findAll({
-            where: {
-                authorIds: {
-                    [Op.contains]: [parseInt(id)]
-                }
+        // Sử dụng transaction để đảm bảo atomic: cập nhật sách rồi xóa tác giả
+        const t = await sequelize.transaction();
+        try {
+            // Tìm tất cả sách chứa authorId
+            const books = await Book.findAll({
+                where: Sequelize.literal(`JSON_CONTAINS(CAST(authorIds AS JSON), CAST('${parseInt(id)}' AS JSON))`),
+                transaction: t,
+                lock: t.LOCK.UPDATE
+            });
+
+            for (const book of books) {
+                const authorIds = book.authorIds || [];
+                const updatedAuthorIds = authorIds.filter(aid => aid !== parseInt(id));
+                await book.update({ authorIds: updatedAuthorIds }, { transaction: t });
             }
-        });
-        
-        for (const book of books) {
-            const authorIds = book.authorIds || [];
-            const updatedAuthorIds = authorIds.filter(aid => aid !== parseInt(id));
-            await book.update({ authorIds: updatedAuthorIds });
+
+            const result = await Author.destroy({ where: { id }, transaction: t });
+            await t.commit();
+            return result;
+        } catch (error) {
+            await t.rollback();
+            throw error;
         }
-        
-        return await Author.destroy({ where: { id } });
     }
 }
 
