@@ -1,7 +1,7 @@
 const data = [
     {
         value: 0,
-        name: "Trả tiền mặt khi nhận hàng",
+        name: "Thanh toán khi nhận hàng",
     },
     {
         value: 1,

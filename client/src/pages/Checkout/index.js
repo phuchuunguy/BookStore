@@ -20,6 +20,7 @@ import orderApi from "../../api/orderApi";
 import userApi from "../../api/userApi";
 
 import methodData from "./methodData"
+import { FaMoneyBillWave } from 'react-icons/fa'
 
 import { destroy } from "../../redux/actions/cart"
 import styles from "./Payment.module.css";
@@ -404,16 +405,22 @@ export default function Checkout() {
                 )}
 
                 <h4 className="mt-4">PHƯƠNG THỨC THANH TOÁN</h4>
-                <div>
+                <div className={styles.paymentMethodList}>
                   {methodData.map(method => (
-                    <div key={method.value} className="mb-2">
+                    <label key={method.value} htmlFor={`method-${method.value}`} className={styles.paymentMethodItem}>
                       <input type="radio" name="method" value={method.value} id={`method-${method.value}`} 
                         checked={parseInt(formik.values.method) === method.value} 
                         onChange={formik.handleChange} 
-                        style={{marginRight: 8}}
-                      /> 
-                      <label htmlFor={`method-${method.value}`}>{method.name}</label>
-                    </div>
+                      />
+                      <div className={styles.paymentIcon}>
+                        {method.image ? (
+                          <img src={method.image} alt={method.name} />
+                        ) : (
+                          <FaMoneyBillWave />
+                        )}
+                      </div>
+                      <div className={styles.paymentLabel}>{method.name}</div>
+                    </label>
                   ))}
                 </div>
 

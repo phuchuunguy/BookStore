@@ -2,6 +2,8 @@ import React, { useRef, useState } from "react";
 // 1. Bỏ Formspree, thay bằng EmailJS
 import emailjs from "@emailjs/browser";
 import Swal from "sweetalert2"; // Dùng lại cái popup đẹp hôm nọ
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 import styles from "./Contact.module.css";
 // Import Icons
@@ -48,9 +50,30 @@ const mapUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.69589
 const Contact = () => {
   const form = useRef(); // Tạo tham chiếu đến thẻ <form>
   const [loading, setLoading] = useState(false);
+  const currentUser = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
   const sendEmail = (e) => {
     e.preventDefault(); // Chặn load lại trang
+
+    // Nếu chưa đăng nhập -> yêu cầu đăng nhập trước khi gửi
+    if (!currentUser || !currentUser.email) {
+      Swal.fire({
+        title: "Vui lòng đăng nhập",
+        text: "Bạn cần đăng nhập để gửi liên hệ. Đăng nhập ngay bây giờ?",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonText: "Đăng nhập",
+        cancelButtonText: "Hủy",
+        confirmButtonColor: "#539E31",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/dang-nhap");
+        }
+      });
+      return;
+    }
+
     setLoading(true);
 
     // --- CẤU HÌNH EMAILJS ---

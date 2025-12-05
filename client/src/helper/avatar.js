@@ -2,7 +2,7 @@
 const SERVER_DEFAULT_AVATAR_URL = "https://res.cloudinary.com/dbynglvwk/image/upload/v1650182653/NHANLAPTOP/istockphoto-666545204-612x612_yu3gcq.jpg";
 
 // Default avatar URL local (file trong public folder)
-const DEFAULT_AVATAR_URL = "/assets/images/default-avatar.svg";
+const DEFAULT_AVATAR_URL = "/assets/images/2.jpg";
 
 /**
  * Kiểm tra xem avatar có phải là avatar mặc định từ server không

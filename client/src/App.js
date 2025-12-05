@@ -207,9 +207,6 @@ function App() {
           {currentUser.role === -1 && isAuthChecked && (
             <>
               <Route path="/admin/*" element={<Navigate to="/dang-nhap" replace />} />
-              <Route path="/don-hang" element={<Navigate to="/dang-nhap" replace />} />
-              <Route path="/tai-khoan" element={<Navigate to="/dang-nhap" replace />} />
-              <Route path="/dia-chi" element={<Navigate to="/dang-nhap" replace />} />
             </>
           )}
 

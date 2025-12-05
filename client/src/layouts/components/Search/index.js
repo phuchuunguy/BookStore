@@ -1,5 +1,5 @@
 import { memo, useEffect, useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { BsSearch } from "react-icons/bs";
 import { IoClose } from "react-icons/io5";
 import { Spinner } from "react-bootstrap";
@@ -14,6 +14,7 @@ import styles from "./Search.module.css"
 function Search() {
 
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [key, setKey] = useState("")
   const [loading, setLoading] = useState(false)
@@ -28,7 +29,7 @@ function Search() {
           return
         }
         setLoading(true)
-        const res = await bookApi.search({key: debounced, limit: 5})
+        const res = await bookApi.search({key: debounced, limit: 5, suggest: true})
         setLoading(false)
         setSearchResult(res.data)
         setShowResult(true)
@@ -41,15 +42,22 @@ function Search() {
     fetchData()
   }, [debounced])
 
+  // Clear search input/results when the route changes
+  useEffect(() => {
+    // hide and clear when navigating to another page
+    setShowResult(false)
+    setSearchResult([])
+    setKey("")
+  }, [location.pathname])
+
   const handleSubmitSearch = (e) => {
     e.preventDefault()
     setShowResult(false)
-    if (!key.trim()) {
-      return
-    }
+    const q = key ? key.trim() : ""
+    if (!q) return
     navigate({
-      pathname: '/tim-kiem',
-      search: `key=${key}`
+      pathname: '/san-pham',
+      search: `key=${q}`
     })
    
   }

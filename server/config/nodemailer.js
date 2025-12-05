@@ -5,9 +5,9 @@ const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         // Lấy email từ file .env
-        user: process.env.GMAIL_USER, 
+        user: process.env.EMAIL_USER, 
         // Lấy mật khẩu ứng dụng (16 ký tự) từ file .env
-        pass: process.env.GMAIL_APP_PASSWORD
+        pass: process.env.EMAIL_PASSWORD
     }
 })
 
