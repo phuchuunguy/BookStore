@@ -7,7 +7,7 @@ export default function PayPal({amount, onSuccess}) {
       borderRadius: '8px',
       border: '1px solid #ddd'
     }}>
-      <h4 style={{color: '#ff6b6b', marginBottom: '10px'}}>🔄 Đang cập nhật</h4>
+      <h4 style={{color: '#ff6b6b', marginBottom: '10px'}}> Đang cập nhật</h4>
       <p style={{color: '#666', marginBottom: '10px'}}>
         Tính năng thanh toán bằng PayPal đang được phát triển.
       </p>

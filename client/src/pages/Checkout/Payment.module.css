@@ -76,3 +76,66 @@
     font-size: 22px;
 }
 
+.paymentMethodList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.paymentMethodItem {
+    display: flex;
+    align-items: center;
+    border: 1px solid #e0e0e0;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.paymentMethodItem input[type="radio"] {
+    margin-right: 12px;
+}
+
+.paymentIcon {
+    width: 48px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+}
+
+.paymentIcon img {
+    max-height: 28px;
+    max-width: 100%;
+    display: block;
+    object-fit: contain;
+}
+
+.paymentIcon {
+    background: #fff;
+    padding: 4px 6px;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: box-shadow 120ms ease, transform 120ms ease, border-color 120ms ease;
+}
+
+.paymentLabel {
+    font-size: 16px;
+}
+
+.paymentMethodItem:hover {
+    border-color: #28a745;
+    transform: translateY(-1px);
+}
+
+.paymentMethodItem input[type="radio"] {
+    width: 18px;
+    height: 18px;
+}
+
+.paymentMethodItem input[type="radio"]:checked + .paymentIcon {
+    border: 1px solid #28a745;
+    box-shadow: 0 6px 18px rgba(40,167,69,0.12);
+    transform: translateY(-2px);
+}
+

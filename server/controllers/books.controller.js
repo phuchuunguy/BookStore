@@ -201,14 +201,23 @@ const bookController = {
             const { key } = req.query
             const page = req.query.page ? parseInt(req.query.page) : 1
             const limit = req.query.limit ? parseInt(req.query.limit) : 0
-            const data = await bookService.search({key, page, limit})
+            const suggest = req.query.suggest === 'true'
 
-            res.status(200).json({
+            if (suggest) {
+                const data = await bookService.searchSuggest({ key, page, limit })
+                return res.status(200).json({ message: 'success', error: 0, data })
+            }
+
+            const [count, data] = await bookService.search({ key, page, limit })
+            const totalPage = Math.ceil(count / (limit || 1))
+            return res.status(200).json({
                 message: 'success',
                 error: 0,
-                data
+                data,
+                count,
+                pagination: { page, limit, totalPage }
             })
-          
+
         } catch (error) {
             res.status(500).json({
                 message: `Có lỗi xảy ra! ${error.message}`,

@@ -27,6 +27,12 @@ export default function Product() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const genreId = params.get("genre"); // Lấy ?genre=... trên thanh địa chỉ
+    const keyParam = params.get("key")
+
+    // Nếu có key param thì không auto-check genre (search across all products)
+    if (keyParam) {
+      setGenresChecked([])
+    }
 
     if (genreId) {
       const id = parseInt(genreId);
@@ -42,13 +48,23 @@ export default function Product() {
       try {
         const sortArr = sortString.split("|");
 
-        // Tạo query object
-        // Nếu genresChecked rỗng thì không lọc (lấy hết)
-        const queryObj = genresChecked.length > 0 ? { genre: { $in: genresChecked } } : {};
-        
-        const query = JSON.stringify(queryObj);
+        const params = new URLSearchParams(location.search)
+        const keyParam = params.get('key')
 
         setLoading(true);
+
+        if (keyParam) {
+          // Use search API when key is present (search across all products)
+          const { data, pagination } = await bookApi.search({ key: keyParam, limit: 8, page });
+          setBookData({ books: data, totalPage: pagination ? pagination.totalPage : 1 });
+          setLoading(false);
+          return;
+        }
+
+        // Tạo query object (filter by genres if selected)
+        const queryObj = genresChecked.length > 0 ? { genre: { $in: genresChecked } } : {};
+        const query = JSON.stringify(queryObj);
+
         const { data, pagination } = await bookApi.getAll({
           limit: 8,
           page: page,
@@ -66,7 +82,7 @@ export default function Product() {
     };
 
     fetchData();
-  }, [sortString, page, genresChecked]);
+  }, [sortString, page, genresChecked, location.search]);
 
   useEffect(() => {
     const fetchGenres = async () => {

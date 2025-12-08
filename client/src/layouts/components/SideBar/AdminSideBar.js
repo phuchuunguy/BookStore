@@ -52,6 +52,7 @@ function AdminSideBar() {
         <ul className={styles.navListBottom}>
           <li className={styles.navItem} onClick={handleLogout}>
             <p className={styles.navLink}>
+              <img src="/assets/images/logout.jpg" alt="logout" style={{width:20,height:20,objectFit:'cover',borderRadius:4,marginRight:8}} />
               <span>Đăng xuất</span>
             </p>
           </li>

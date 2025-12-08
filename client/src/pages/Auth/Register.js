@@ -9,6 +9,8 @@ import Swal from "sweetalert2"; // 1. Import SweetAlert2
 
 import authApi from "../../api/authApi";
 import { login } from "../../redux/actions/auth";
+import { setCart } from "../../redux/actions/cart";
+import userApi from "../../api/userApi";
 import styles from "./Auth.module.css";
 
 export default function Register() {
@@ -28,6 +30,22 @@ export default function Register() {
     localStorage.setItem("accessToken", token);
     const { email, fullName, phoneNumber, userId, avatar, role } = user;
     dispatch(login({ email, fullName, phoneNumber, avatar, userId, role }));
+    // Fetch cart after login
+    try {
+      const { data: cartData } = await userApi.getCart(userId);
+      const newList = (cartData.cart || []).map((item) => {
+        const { price, discount } = item.product || { price: 0, discount: 0 };
+        const newPrice = price - price * ((discount > 0 ? discount : 0) / 100);
+        return {
+          ...item,
+          product: { ...item.product, price: newPrice },
+          totalPriceItem: newPrice * item.quantity,
+        };
+      });
+      dispatch(setCart(newList));
+    } catch (err) {
+      console.log('Fetch cart after register/google login error:', err);
+    }
     navigate({ pathname: "/" });
   };
 
@@ -50,6 +68,22 @@ export default function Register() {
     localStorage.setItem("accessToken", token);
     const { userId, role, phoneNumber, avatar } = user;
     dispatch(login({ email, fullName: name, phoneNumber, avatar, userId, role }));
+    // Fetch cart after login
+    try {
+      const { data: cartData } = await userApi.getCart(userId);
+      const newList = (cartData.cart || []).map((item) => {
+        const { price, discount } = item.product || { price: 0, discount: 0 };
+        const newPrice = price - price * ((discount > 0 ? discount : 0) / 100);
+        return {
+          ...item,
+          product: { ...item.product, price: newPrice },
+          totalPriceItem: newPrice * item.quantity,
+        };
+      });
+      dispatch(setCart(newList));
+    } catch (err) {
+      console.log('Fetch cart after register/facebook login error:', err);
+    }
     navigate({ pathname: "/" });
   };
 

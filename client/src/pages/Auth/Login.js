@@ -5,6 +5,8 @@ import OAuth2Login from 'react-simple-oauth2-login';
 import authApi from '../../api/authApi';
 import jwtDecode from 'jwt-decode';
 import { login, logout } from '../../redux/actions/auth';
+import { setCart } from '../../redux/actions/cart';
+import userApi from '../../api/userApi';
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from "react";
@@ -56,6 +58,22 @@ function Login() {
       localStorage.setItem('accessToken', token);
       const { email, fullName, phoneNumber, userId, avatar, role } = user;
       dispatch(login({ email, fullName, phoneNumber, avatar, userId, role }));
+      // Fetch cart after login
+      try {
+        const { data: cartData } = await userApi.getCart(userId);
+        const newList = (cartData.cart || []).map((item) => {
+          const { price, discount } = item.product || { price: 0, discount: 0 };
+          const newPrice = price - price * ((discount > 0 ? discount : 0) / 100);
+          return {
+            ...item,
+            product: { ...item.product, price: newPrice },
+            totalPriceItem: newPrice * item.quantity,
+          };
+        });
+        dispatch(setCart(newList));
+      } catch (err) {
+        console.log('Fetch cart after google login error:', err);
+      }
       navigate('/');
     } catch (error) {
       console.error("Google login error:", error);
@@ -81,6 +99,22 @@ function Login() {
       localStorage.setItem('accessToken', token);
       const { userId, role, phoneNumber, avatar } = user;
       dispatch(login({ email, fullName: name, phoneNumber, avatar, userId, role }));
+      // Fetch cart after login
+      try {
+        const { data: cartData } = await userApi.getCart(userId);
+        const newList = (cartData.cart || []).map((item) => {
+          const { price, discount } = item.product || { price: 0, discount: 0 };
+          const newPrice = price - price * ((discount > 0 ? discount : 0) / 100);
+          return {
+            ...item,
+            product: { ...item.product, price: newPrice },
+            totalPriceItem: newPrice * item.quantity,
+          };
+        });
+        dispatch(setCart(newList));
+      } catch (err) {
+        console.log('Fetch cart after facebook login error:', err);
+      }
       navigate('/');
     } catch (error) {
       console.error("Facebook login error:", error);
@@ -134,6 +168,22 @@ function Login() {
 
       const { fullName, phoneNumber, userId, avatar, role } = user;
       dispatch(login({ email, fullName, phoneNumber, avatar, userId, role }));
+      // Fetch cart after login
+      try {
+        const { data: cartData } = await userApi.getCart(userId);
+        const newList = (cartData.cart || []).map((item) => {
+          const { price, discount } = item.product || { price: 0, discount: 0 };
+          const newPrice = price - price * ((discount > 0 ? discount : 0) / 100);
+          return {
+            ...item,
+            product: { ...item.product, price: newPrice },
+            totalPriceItem: newPrice * item.quantity,
+          };
+        });
+        dispatch(setCart(newList));
+      } catch (err) {
+        console.log('Fetch cart after login error:', err);
+      }
 
       navigate('/');
     } catch (error) {

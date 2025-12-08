@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { Container } from "react-bootstrap";
 import { BsPerson, BsCart2 } from "react-icons/bs";
+import { FiUser, FiSettings, FiLogOut } from "react-icons/fi";
 
 import NavBar, { NavBarMobile } from "../NavBar";
 import Search from "../Search";
@@ -83,7 +84,8 @@ function Header() {
                             className={styles.popupLink}
                             to="/tai-khoan"
                           >
-                            Tài khoản của tôi
+                            <FiUser className={styles.popupIcon} />
+                            <span>Tài khoản</span>
                           </Link>
                         </div>
                       )}
@@ -95,7 +97,8 @@ function Header() {
                             className={styles.popupLink}
                             to="/admin"
                           >
-                            Quản lý BookStore
+                            <FiSettings className={styles.popupIcon} />
+                            <span>Quản lý </span>
                           </Link>
                         </div>
                       )}
@@ -106,7 +109,8 @@ function Header() {
                           className={styles.popupLink}
                           onClick={handleLogout}
                         >
-                          Đăng xuất
+                          <FiLogOut className={styles.popupIcon} />
+                          <span>Đăng xuất</span>
                         </p>
                       </div>
 
