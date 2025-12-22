@@ -19,7 +19,7 @@ function BookItem({ item, boxShadow }) {
     <div className={`${styles.bookItem} ${boxShadow && styles.shadow}`}>
       {discount && discount > 0 ? (
         <div className={styles.discount}>
-          -{discount}%
+          -{Math.round(item.discount)}%
         </div>
       ) : null}
       

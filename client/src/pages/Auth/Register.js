@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Container, Form } from "react-bootstrap";
 import { useDispatch } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom"; 
+import { useNavigate, useLocation, Link } from "react-router-dom"; 
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import OAuth2Login from "react-simple-oauth2-login";
@@ -241,16 +241,16 @@ export default function Register() {
                 {loading ? "Đăng ký..." : "Đăng ký"}
               </button>
             </form>
+          <p style={{textAlign: 'center'}}>
+            Quay lại trang <Link to="/dang-nhap" style={{color: '#0074da'}}>đăng nhập</Link>
+          </p>
           <p style={{ color: "#ccc", textAlign: "center", marginBottom: 8 }}>HOẶC</p>
-          <div className="d-flex justify-content-between">
+          <div className={styles.socialButtons}>
             <div className={styles.boxLoginThirdParty}>
-              <img
-                src="https://www.freepnglogos.com/uploads/google-logo-png/google-logo-icon-png-transparent-background-osteopathy-16.png"
-                alt=""
-              />
+              <img src="https://www.freepnglogos.com/uploads/google-logo-png/google-logo-icon-png-transparent-background-osteopathy-16.png" alt="google" />
               <OAuth2Login
                 className="bookstore-btn"
-                buttonText="Login with Google"
+                buttonText="Login With Google"  
                 authorizationUrl="https://accounts.google.com/o/oauth2/auth"
                 responseType="token"
                 clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
@@ -258,25 +258,22 @@ export default function Register() {
                 scope="email profile"
                 onSuccess={responseSuccessGoogle}
                 onFailure={responseFailureGoogle}
-              ></OAuth2Login>
+              />
             </div>
 
             <div className={styles.boxLoginThirdParty}>
-              <img
-                src="https://cdn.pixabay.com/photo/2015/05/17/10/51/facebook-770688_1280.png"
-                alt=""
-              />
+              <img src="https://cdn.pixabay.com/photo/2015/05/17/10/51/facebook-770688_1280.png" alt="facebook" />
               <OAuth2Login
                 className="bookstore-btn"
-                buttonText="Login with Facebook"
+                buttonText="Login With Facebook" 
                 authorizationUrl="https://www.facebook.com/dialog/oauth"
                 responseType="token"
                 clientId="990086591697823"
                 redirectUri={process.env.REACT_APP_REDIRECT_LOGIN_FACEBOOK}
-                scope="public_profile"
+                scope="public_profile,email"
                 onSuccess={responseSuccessFacebook}
                 onFailure={responseFailureFacebook}
-              ></OAuth2Login>
+              />
             </div>
           </div>
         </div>

@@ -266,7 +266,18 @@ export default function OrderList() {
                           <button
                             className="btn btn-warning btn-sm me-2"
                             title="Cập nhật trạng thái"
-                            onClick={() => handleUpdateOrder(item?.id)}
+                            onClick={(e) => {
+                                e.stopPropagation(); 
+                                handleUpdateOrder(item?.id);
+                            }}
+                            // --- KHÓA NÚT TẠI ĐÂY ---
+                            // Nếu đã Giao thành công (5) hoặc Đã hủy (6) -> Khóa nút lại
+                            disabled={item?.orderStatus?.code === 5 || item?.orderStatus?.code === 6}
+                            // ------------------------
+                            style={{ 
+                                opacity: (item?.orderStatus?.code === 5 || item?.orderStatus?.code === 6) ? 0.5 : 1,
+                                cursor: (item?.orderStatus?.code === 5 || item?.orderStatus?.code === 6) ? 'not-allowed' : 'pointer'
+                            }}
                           >
                             <FaEdit />
                           </button>

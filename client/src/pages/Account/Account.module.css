@@ -6,7 +6,10 @@
 }
 
 .formControl {
-    width: 75%;
+    width: calc(100% - 200px);
+    max-width: 100%;
+    padding: 15px 20px;
+    font-size: 16px;
 }
 
 .formLabel {
@@ -15,11 +18,16 @@
 }
 
 .feedback {
-    margin-left: 150px;
+    margin-left: 170px;
 }
 
 .radioItem {
     margin-right: 36px;
+}
+
+/* Make form area visually larger by increasing wrapper padding */
+.contentWrapper {
+    padding: 40px 60px;
 }
 
 .submitBtn {

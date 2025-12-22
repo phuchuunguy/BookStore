@@ -96,24 +96,50 @@ const orderService = {
         return orderData;
     },
 
-    create: async(data) => { // Nhận cả cục data cho gọn
-        // Xử lý voucherId: Nếu là chuỗi rỗng "" hoặc undefined thì chuyển thành null
-        const voucherId = data.voucherId ? data.voucherId : null;
+    create: async (data) => {
+        const transaction = await sequelize.transaction(); // Bắt đầu giao dịch
+        try {
+            const orderData = { ...data };
+            if (!orderData.voucherId) orderData.voucherId = null;
 
-        // Đảm bảo các trường JSON được stringify nếu cần (Sequelize tự lo nhưng cẩn thận vẫn hơn)
-        // Nếu cột DB là JSON thì truyền Object/Array. Nếu là LONGTEXT thì JSON.stringify
-        
-        return await Order.create({
-            ...data,
-            voucherId: voucherId, // Gán giá trị đã xử lý
+            // 1. Lấy danh sách sản phẩm khách đặt
+            const products = orderData.products; // Mảng [{ product: ID, quantity: 2 }, ...]
             
-            // Đảm bảo các trường này là object/array (Sequelize sẽ tự stringify nếu cột là JSON)
-            products: data.products, 
-            delivery: data.delivery,
-            cost: data.cost,
-            method: data.method,
-            address: data.address
-        });
+            // 2. Vòng lặp kiểm tra và trừ kho
+            for (const item of products) {
+                // Lấy ID sách (tùy cấu trúc object của bạn là product hay id)
+                const bookId = item.product || item.id || item._id;
+                const qty = parseInt(item.quantity || item.qty || 1);
+
+                // Tìm sách trong kho
+                const book = await Book.findByPk(bookId, { transaction });
+
+                if (!book) {
+                    throw new Error(`Sách có ID ${bookId} không tồn tại!`);
+                }
+
+                // Kiểm tra xem còn đủ hàng không
+                if (book.quantity < qty) {
+                    throw new Error(`Sách "${book.name}" chỉ còn lại ${book.quantity} cuốn, không đủ để bán!`);
+                }
+
+                // --- QUAN TRỌNG: TRỪ SỐ LƯỢNG TRONG KHO ---
+                await book.decrement('quantity', { by: qty, transaction });
+                // -------------------------------------------
+            }
+
+            // 3. Tạo đơn hàng
+            const order = await Order.create(orderData, { transaction });
+
+            // 4. Nếu mọi thứ Ok -> Lưu thay đổi vào DB
+            await transaction.commit();
+            return order;
+
+        } catch (error) {
+            // Nếu có lỗi (ví dụ hết hàng) -> Hoàn tác, không trừ kho, không tạo đơn
+            await transaction.rollback();
+            throw error;
+        }
     },
 
     updatePaymentStatusByPaymentId: async(paymentId, { paymentStatus, method }) => {
@@ -126,12 +152,97 @@ const orderService = {
     },
 
     updateStatus: async(id, { orderStatus, paymentStatus }) => {
-        const order = await Order.findByPk(id);
-        if (order) {
-            await order.update({ orderStatus, paymentStatus });
+       const transaction = await sequelize.transaction();
+        try {
+            const order = await Order.findByPk(id, { transaction });
+            if (!order) throw new Error("Đơn hàng không tìm thấy!");
+
+            const oldStatus = safeParseJSON(order.orderStatus)?.code;
+            const newStatus = orderStatus.code; // Code mới từ frontend gửi lên
+            const products = safeParseArray(order.products);
+
+            // LOGIC HOÀN KHO: Nếu chuyển sang "Đã hủy" (Code 6)
+            if (newStatus === 6 && oldStatus !== 6) {
+                for (const item of products) {
+                    const bookId = item.product || item.id || item._id;
+                    const qty = parseInt(item.quantity || item.qty || 1);
+                    // Cộng lại số lượng vào kho
+                    await Book.increment('quantity', { by: qty, where: { id: bookId }, transaction });
+                }
+            }
+
+            // LOGIC TRỪ LẠI KHO: Nếu Admin lỡ tay Hủy nhầm, giờ chuyển lại trạng thái khác (Khác 6)
+            if (oldStatus === 6 && newStatus !== 6) {
+                for (const item of products) {
+                    const bookId = item.product || item.id || item._id;
+                    const qty = parseInt(item.quantity || item.qty || 1);
+                    
+                    // Kiểm tra xem còn đủ hàng để khôi phục đơn không
+                    const book = await Book.findByPk(bookId, { transaction });
+                    if (book.quantity < qty) {
+                        throw new Error(`Không thể khôi phục đơn! Sách "${book.name}" đã hết hàng.`);
+                    }
+                    // Trừ lại kho
+                    await Book.decrement('quantity', { by: qty, where: { id: bookId }, transaction });
+                }
+            }
+
+            await order.update({ orderStatus, paymentStatus }, { transaction });
+            await transaction.commit();
             return order;
+
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
         }
-        return null;
+    },
+
+    cancelOrder: async (userId, orderId) => {
+        const transaction = await sequelize.transaction();
+        try {
+            const order = await Order.findByPk(orderId, { transaction });
+            
+            if (!order) throw new Error("Đơn hàng không tồn tại!");
+            if (order.userId !== userId) throw new Error("Bạn không có quyền hủy đơn hàng này!");
+
+            const currentStatus = safeParseJSON(order.orderStatus);
+            const currentCode = currentStatus?.code || 0;
+
+            // Chỉ cho hủy khi đơn mới (0) hoặc đã xác nhận (1)
+            if (currentCode >= 3) {
+                throw new Error("Đơn hàng đang được xử lý hoặc vận chuyển, không thể hủy!");
+            }
+
+            // HOÀN KHO
+            const products = safeParseArray(order.products);
+            for (const item of products) {
+                const bookId = item.product || item.id || item._id;
+                const qty = parseInt(item.quantity || item.qty || 1);
+                await Book.increment('quantity', { by: qty, where: { id: bookId }, transaction });
+            }
+
+            // Cập nhật trạng thái
+            const cancelStatus = { code: 6, text: "Đã hủy bởi Khách hàng" };
+            
+            let tracking = safeParseArray(order.tracking);
+            tracking.push({
+                status: "Khách hàng hủy đơn",
+                time: new Date(),
+                user: userId
+            });
+
+            await order.update({ 
+                orderStatus: cancelStatus,
+                tracking: tracking
+            }, { transaction });
+
+            await transaction.commit();
+            return order;
+
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
     },
 
     updatePaymentId: async(orderId, { paymentId }) => {
@@ -175,44 +286,41 @@ const orderService = {
         const orders = await Order.findAll({ raw: true });
         const total = orders.reduce((sum, order) => {
             const cost = safeParseJSON(order.cost);
+            // Chỉ tính đơn đã thanh toán hoặc thành công (Tùy logic bạn, ở đây mình tính hết trừ đơn hủy)
+            const status = safeParseJSON(order.orderStatus);
+            if (status?.code === 6) return sum; // Bỏ qua đơn hủy
+
             return sum + (cost?.total || 0) - (cost?.shippingFee || 0);
         }, 0);
-        return [{ revenue: total }]; // Trả về mảng 1 phần tử để khớp frontend
+        return [{ revenue: total }];
     },
 
     getRevenueWeek: async(query) => {
         const { start, end } = query;
         const orders = await Order.findAll({
-            where: {
-                createdAt: { [Op.between]: [new Date(start), new Date(end)] }
-            },
+            where: { createdAt: { [Op.between]: [new Date(start), new Date(end)] } },
             raw: true
         });
-
-        // Nhóm theo ngày (YYYY-MM-DD)
         const revenueMap = {};
         orders.forEach(order => {
-            const date = order.createdAt.toISOString().split('T')[0]; // Lấy ngày YYYY-MM-DD
+            const status = safeParseJSON(order.orderStatus);
+            if (status?.code === 6) return; // Bỏ qua đơn hủy
+
+            const date = order.createdAt.toISOString().split('T')[0];
             const cost = safeParseJSON(order.cost);
             const revenue = (cost?.total || 0) - (cost?.shippingFee || 0);
-            
             revenueMap[date] = (revenueMap[date] || 0) + revenue;
         });
-
-        // Chuyển về mảng object
-        const result = Object.keys(revenueMap).map(date => ({
-            date: date,
-            revenue: revenueMap[date]
-        })).sort((a, b) => new Date(a.date) - new Date(b.date));
-
-        return result;
+        return Object.keys(revenueMap).map(date => ({ date, revenue: revenueMap[date] })).sort((a, b) => new Date(a.date) - new Date(b.date));
     },
 
     getRevenueLifeTime: async() => {
-        // Logic tương tự getRevenueWeek nhưng lấy toàn bộ
         const orders = await Order.findAll({ raw: true });
         const revenueMap = {};
         orders.forEach(order => {
+            const status = safeParseJSON(order.orderStatus);
+            if (status?.code === 6) return;
+
             const date = order.createdAt.toISOString().split('T')[0];
             const cost = safeParseJSON(order.cost);
             const revenue = (cost?.total || 0) - (cost?.shippingFee || 0);
@@ -225,6 +333,9 @@ const orderService = {
         const orders = await Order.findAll({ raw: true });
         const countMap = {};
         orders.forEach(order => {
+            const status = safeParseJSON(order.orderStatus);
+            if (status?.code === 6) return; // Có thể đếm hoặc không tùy bạn
+
             const date = order.createdAt.toISOString().split('T')[0];
             countMap[date] = (countMap[date] || 0) + 1;
         });
@@ -232,61 +343,63 @@ const orderService = {
     },
 
     getBestSeller: async() => {
-        try {
-            // 1. Lấy tất cả đơn hàng (chỉ lấy cột products)
-            const orders = await Order.findAll({
-                attributes: ['products'],
-                raw: true
-            });
-            
-            const productCounts = {};
+        const orders = await Order.findAll({ attributes: ['products', 'orderStatus'], raw: true });
+        const productCounts = {};
 
-            // 2. Duyệt qua từng đơn hàng để đếm thủ công
-            orders.forEach(row => {
-                const products = safeParseJSON(row.products); // Parse từ chuỗi sang mảng
-                
-                if (Array.isArray(products)) {
-                    products.forEach(item => {
-                        // Lấy ID sách (hỗ trợ nhiều format lưu trữ)
-                        const bookId = item.product || item.id || item._id;
-                        const qty = parseInt(item.qty || item.quantity || 1);
+        orders.forEach(row => {
+            const status = safeParseJSON(row.orderStatus);
+            if (status?.code === 6) return; // Không tính đơn hủy vào best seller
 
-                        if (bookId) {
-                            productCounts[bookId] = (productCounts[bookId] || 0) + qty;
-                        }
-                    });
-                }
+            const products = safeParseArray(row.products);
+            products.forEach(item => {
+                const bookId = item.product || item.id || item._id;
+                const qty = parseInt(item.qty || item.quantity || 1);
+                if (bookId) productCounts[bookId] = (productCounts[bookId] || 0) + qty;
             });
-            
-            // 3. Sắp xếp giảm dần
-            const sortedProducts = Object.entries(productCounts)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 5); // Lấy Top 5
-            
-            if (sortedProducts.length === 0) return [];
+        });
 
-            const topProductIds = sortedProducts.map(([id]) => parseInt(id));
-            
-            // 4. Lấy thông tin sách chi tiết
-            const books = await Book.findAll({
-                where: { id: { [Op.in]: topProductIds } },
-                raw: true
-            });
-            
-            // 5. Map kết quả trả về
-            return sortedProducts.map(([id, count]) => {
-                const book = books.find(b => b.id === parseInt(id));
-                return {
-                    id: parseInt(id),
-                    count: count,
-                    product: book ? [book] : [] // Trả về mảng chứa object sách
-                };
-            });
-        } catch (error) {
-            console.log("Service BestSeller Error:", error);
-            return [];
+        const sortedProducts = Object.entries(productCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        const topProductIds = sortedProducts.map(([id]) => parseInt(id));
+        const books = await Book.findAll({ where: { id: { [Op.in]: topProductIds } } });
+
+        // Collect all author IDs referenced by these books (authorIds is stored as JSON)
+        const allAuthorIds = new Set();
+        const bookMap = {};
+        books.forEach(b => {
+            const bookObj = b.toJSON();
+            // authorIds may be stored as array or stringified JSON
+            let aIds = [];
+            try {
+                if (Array.isArray(bookObj.authorIds)) aIds = bookObj.authorIds;
+                else if (typeof bookObj.authorIds === 'string') aIds = JSON.parse(bookObj.authorIds);
+            } catch (e) {
+                aIds = [];
+            }
+            bookMap[bookObj.id] = { book: bookObj, authorIds: aIds };
+            aIds.forEach(id => {
+                if (id) allAuthorIds.add(parseInt(id));
+            })
+        });
+
+        // Fetch all authors referenced
+        let authors = [];
+        if (allAuthorIds.size > 0) {
+            const Author = require('../models/authors.model');
+            authors = await Author.findAll({ where: { id: { [Op.in]: Array.from(allAuthorIds) } } });
         }
-    },
+        const authorMap = {};
+        authors.forEach(a => { authorMap[a.id] = a.toJSON(); });
+
+        return sortedProducts.map(([id, count]) => {
+            const parsedId = parseInt(id);
+            const entry = bookMap[parsedId];
+            if (!entry) return { id: parsedId, count, product: [] };
+            const bookData = { ...entry.book };
+            // attach author objects as `author` array to match frontend expectation
+            bookData.author = (entry.authorIds || []).map(aid => authorMap[aid]).filter(Boolean);
+            return { id: parsedId, count, product: [bookData] };
+        });
+    }
 }
 
 module.exports = orderService

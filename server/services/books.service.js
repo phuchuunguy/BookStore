@@ -24,10 +24,6 @@ const safeParseJSON = (data) => {
 };
 
 const bookService = {
-
-    // =============================
-    //           GET ALL
-    // =============================
     getAll: async ({ query = {}, page = 1, limit = 0, sort = {} }) => {
         const offset = (page - 1) * limit;
 
@@ -36,9 +32,12 @@ const bookService = {
         Object.keys(sort).forEach(key => {
             order.push([key, sort[key] === 1 ? 'ASC' : 'DESC']);
         });
-        if (order.length === 0) order.push(['createdAt', 'DESC']);
-
-        // WHERE CLEAN
+        order.push(['id', 'DESC']);
+        if (order.length === 0) order.push([
+            ['createdAt', 'DESC'],
+            ['id', 'DESC']
+        ]
+        );
         const where = { ...query };
 
         Object.keys(where).forEach(key => {
@@ -51,8 +50,6 @@ const bookService = {
                 else where[key]['$in'] = validValues;
             }
         });
-
-        // HANDLE GENRE FILTER (JSON)
         if (where.genre && where.genre['$in']) {
             const gIds = where.genre['$in'];
 
@@ -68,10 +65,26 @@ const bookService = {
             delete where.genre;
         }
 
+        // If admin/frontend passed a 'name' filter as plain string, treat it as a substring search
+        // so typing partial words (e.g., 'mắt') will match book names containing that substring.
+        if (where.name && typeof where.name === 'string') {
+            const q = where.name.trim();
+            delete where.name;
+            const slugKey = createSlug(q);
+
+            where[Op.and] = [
+                ...(where[Op.and] || []),
+                {
+                    [Op.or]: [
+                        { name: { [Op.like]: `%${q}%` } },
+                        { slug: { [Op.like]: `%${slugKey}%` } }
+                    ]
+                }
+            ];
+        }
+
         try {
             const count = await Book.count({ where });
-
-            // RAW BOOKS QUERY
             const rawBooks = await Book.findAll({
                 where,
                 include: [{ model: Publisher, as: 'publisher', required: false }],
@@ -82,8 +95,6 @@ const bookService = {
             });
 
             if (rawBooks.length === 0) return [count, []];
-
-            // COLLECT GENRE + AUTHOR IDS
             const allGenreIds = [];
             const allAuthorIds = [];
 
@@ -91,8 +102,6 @@ const bookService = {
                 allGenreIds.push(...safeParseJSON(book.genreIds));
                 allAuthorIds.push(...safeParseJSON(book.authorIds));
             });
-
-            // FETCH GENRES + AUTHORS
             const genres = await Genre.findAll({
                 where: { id: { [Op.in]: [...new Set(allGenreIds)] } },
                 raw: true
@@ -109,7 +118,6 @@ const bookService = {
             genres.forEach(g => (genreMap[g.id] = g));
             authors.forEach(a => (authorMap[a.id] = a));
 
-            // MAP BOOKS
             const processedBooks = rawBooks.map(book => {
                 const bookJson = book.toJSON();
 
@@ -129,9 +137,6 @@ const bookService = {
         }
     },
 
-    // =============================
-    //       GET BY BOOK ID
-    // =============================
     getByBookId: async (bookId) => {
         const book = await Book.findOne({
             where: { bookId },
@@ -155,9 +160,6 @@ const bookService = {
         return json;
     },
 
-    // =============================
-    //          GET BY ID
-    // =============================
     getById: async (id) => {
         const book = await Book.findByPk(id, {
             include: [{ model: Publisher, as: 'publisher', required: false }]
@@ -180,9 +182,6 @@ const bookService = {
         return json;
     },
 
-    // =============================
-    //        GET BY SLUG
-    // =============================
     getBySlug: async (slug) => {
         const book = await Book.findOne({
             where: { slug },
@@ -206,9 +205,6 @@ const bookService = {
         return json;
     },
 
-    // =============================
-    //         CHECK ORDERED
-    // =============================
     checkIsOrdered: async (id) => {
         const [results] = await sequelize.query(`
             SELECT DISTINCT JSON_EXTRACT(products, '$[*].product') AS product_ids
@@ -226,95 +222,72 @@ const bookService = {
             : [];
     },
 
-    // =============================
-    //            SEARCH
-    // =============================
-    search: async ({ key, page, limit }) => {
-        const offset = (page - 1) * limit;
-        const q = key ? key.trim() : '';
-        const normalized = q ? createSlug(q) : '';
+   search: async ({ key, page = 1, limit = 0 }) => {
+    const offset = (page - 1) * limit;
+    const q = key ? key.trim() : '';
 
-        const books = await Book.findAll({
-            where: {
-                [Op.or]: [
-                    { name: { [Op.like]: `%${q}%` } },
-                    { slug: { [Op.like]: `%${normalized}%` } }
-                ]
-            },
-            include: [{ model: Publisher, as: 'publisher', required: false }],
-            offset: limit > 0 ? offset : undefined,
-            limit: limit > 0 ? limit : undefined
-        });
+    if (!q) return [0, []];
 
-        const allAuthorIds = [];
-        books.forEach(book => {
-            allAuthorIds.push(...safeParseJSON(book.authorIds));
-        });
+    const slugKey = createSlug(q);
 
-        const authors = await Author.findAll({
-            where: {
-                id: { [Op.in]: [...new Set(allAuthorIds)] },
-                name: { [Op.like]: `%${q}%` }
-            },
-            raw: true
-        });
+    const books = await Book.findAll({
+        where: {
+            [Op.or]: [
+                { name: { [Op.like]: `%${q}%` } },          // có dấu
+                { slug: { [Op.like]: `%${slugKey}%` } }    // không dấu
+            ]
+        },
+        include: [
+            { model: Publisher, as: 'publisher', required: false }
+        ],
+        offset: limit > 0 ? offset : undefined,
+        limit: limit > 0 ? limit : undefined,
+        order: [['id', 'DESC']]
+    });
 
-        const matchAuthorIds = authors.map(a => a.id);
+    if (books.length === 0) return [0, []];
 
-        // Filter lại
-        const filtered = books.filter(book => {
-            const name = book.name || '';
-            const slug = book.slug ? book.slug : createSlug(name);
-            const aIds = safeParseJSON(book.authorIds);
+    // Lấy author + genre
+    const genreIds = [];
+    const authorIds = [];
 
-            return (
-                name.toLowerCase().includes(q.toLowerCase()) ||
-                slug.includes(normalized) ||
-                aIds.some(id => matchAuthorIds.includes(id))
-            );
-        });
+    books.forEach(book => {
+        genreIds.push(...safeParseJSON(book.genreIds));
+        authorIds.push(...safeParseJSON(book.authorIds));
+    });
 
-        const genreIds = [];
-        const authorIds = [];
-
-        filtered.forEach(book => {
-            genreIds.push(...safeParseJSON(book.genreIds));
-            authorIds.push(...safeParseJSON(book.authorIds));
-        });
-
-        const genres = await Genre.findAll({
+    const [genres, authors] = await Promise.all([
+        Genre.findAll({
             where: { id: { [Op.in]: [...new Set(genreIds)] } },
             raw: true
-        });
-
-        const allAuthors = await Author.findAll({
+        }),
+        Author.findAll({
             where: { id: { [Op.in]: [...new Set(authorIds)] } },
             raw: true
-        });
+        })
+    ]);
 
-        const genreMap = {};
-        const authorMap = {};
+    const genreMap = {};
+    const authorMap = {};
 
-        genres.forEach(g => (genreMap[g.id] = g));
-        allAuthors.forEach(a => (authorMap[a.id] = a));
+    genres.forEach(g => genreMap[g.id] = g);
+    authors.forEach(a => authorMap[a.id] = a);
 
-        const processed = filtered.map(book => {
-            const json = book.toJSON();
-            const gIds = safeParseJSON(json.genreIds);
-            const aIds = safeParseJSON(json.authorIds);
+    const processed = books.map(book => {
+        const json = book.toJSON();
 
-            json.genre = gIds.map(id => genreMap[id]).filter(Boolean);
-            json.author = aIds.map(id => authorMap[id]).filter(Boolean);
+        const gIds = safeParseJSON(json.genreIds);
+        const aIds = safeParseJSON(json.authorIds);
 
-            return json;
-        });
+        json.genre = gIds.map(id => genreMap[id]).filter(Boolean);
+        json.author = aIds.map(id => authorMap[id]).filter(Boolean);
 
-        return [processed.length, processed];
-    },
+        return json;
+    });
 
-    // =============================
-    //      SEARCH SUGGEST
-    // =============================
+    return [processed.length, processed];
+},
+
     searchSuggest: async ({ key, page, limit }) => {
         const offset = (page - 1) * limit;
         const q = key ? key.trim() : '';
@@ -343,14 +316,11 @@ const bookService = {
         }));
     },
 
-    // =============================
-    //           CREATE
-    // =============================
     create: async (body) => {
         const {
             bookId, name, year, genre, author,
             publisher, description, pages, size,
-            price, discount, imageUrl, publicId
+            price, discount, imageUrl, publicId, quantity,
         } = body;
 
         return await Book.create({
@@ -366,25 +336,24 @@ const bookService = {
             price,
             discount,
             imageUrl,
-            publicId
+            publicId,
+            quantity: parseInt(quantity) || 0,
         });
     },
 
-    // =============================
-    //           UPDATE
-    // =============================
     updateById: async (id, body) => {
         const {
             name, year, genre, author, publisher,
             description, pages, size, price, discount,
-            imageUrl, publicId
+            imageUrl, publicId, quantity,
         } = body;
 
         const book = await Book.findByPk(id);
         if (!book) return null;
 
         const updateData = {
-            name, year, description, pages, size, price, discount
+            name, year, description, pages, size, price, discount,
+            quantity: parseInt(quantity) || 0,
         };
 
         if (genre) updateData.genreIds = safeParseJSON(genre).map(g => parseInt(g));
@@ -400,9 +369,17 @@ const bookService = {
         return book;
     },
 
-    // =============================
-    //           DELETE
-    // =============================
+    sumAllStock: async () => {
+        try {
+            // Hàm sum của Sequelize giúp cộng tổng cột 'quantity'
+            const total = await Book.sum('quantity');
+            return total || 0;
+        } catch (error) {
+            console.log(error);
+            return 0;
+        }
+    },
+
     deleteById: async (id) => {
         return await Book.destroy({ where: { id } });
     },

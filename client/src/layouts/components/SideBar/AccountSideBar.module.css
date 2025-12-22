@@ -23,14 +23,21 @@
 }
 
 .navList {
-    display: block;
+    list-style: none !important;
+    padding-left: 0 !important;
     padding: 0;
     margin: 0;
     margin-top: 15px;
 }
 
+.navItem::marker {
+    content: none;
+}
+
 .navItem {
-    max-width: 200px;
+    list-style: none !important;
+    width: 100%;
+    margin-bottom: 8px;
 }
 
 .navLink {

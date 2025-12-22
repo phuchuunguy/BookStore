@@ -29,7 +29,7 @@ const AboutUs = () => {
         <div className={styles.textCol}>
           <h2 className={styles.heading}>Chúng mình là ai?</h2>
           <p className={styles.paragraph}>
-            D2P BookStore là tiệm sách ngoại văn trực tuyến được thành lập tháng 1/2024 bởi hai bà mẹ có con nhỏ cùng tình yêu với những trang sách giấy bằng tiếng Anh.
+            D2P BookStore là tiệm sách ngoại văn trực tuyến được thành lập tháng 12/2025 bởi D2P chúng mình và có tình yêu với những trang sách giấy từ mọi đất nước.
           </p>
           <p className={styles.paragraph}>
             Chúng mình luôn mong muốn tìm được những cuốn sách ngoại văn thật hay, thật đẹp và đảm bảo chất lượng chuẩn cho các con và gia đình. Chính vì vậy, tiệm sách ngoại văn  D2P BookStore đã ra đời.
@@ -50,7 +50,7 @@ const AboutUs = () => {
         <div className={styles.textCol}>
           <h2 className={styles.heading}>Sứ mệnh của chúng mình là gì?</h2>
           <p className={styles.paragraph}>
-            Với tâm niệm trao đi những gì tốt đẹp nhất,  D2P BookStore đảm bảo 100% các đầu sách ngoại văn của tiệm là sách gốc nhập khẩu từ các nhà xuất bản uy tín từ Anh và Mỹ, cam kết nói không với sách fake.
+            Với tâm niệm trao đi những gì tốt đẹp nhất,  D2P BookStore đảm bảo 100% các đầu sách ngoại văn của tiệm là sách gốc nhập khẩu từ các nhà xuất bản uy tín từ các nước trên thế giới như Anh, Mỹ, Nhật, ... cam kết nói không với sách fake.
           </p>
           <p className={styles.paragraph}>
             Chúng mình mong muốn được lan toả niềm yêu thích đọc sách ngoại văn cho trẻ em ở khắp Việt Nam, cùng các em khám phá, mở rộng nguồn tri thức vô tận của nhân loại để một ngày vững bước hội nhập vào thế giới tương lai.
@@ -82,7 +82,7 @@ const AboutUs = () => {
               <li><strong>Ưu đãi đặc biệt:</strong> Nhiều chiết khấu hấp dẫn cho các đơn hàng.</li>
               <li><strong>Đóng gói cẩn thận:</strong> Đảm bảo an toàn cho sản phẩm trong quá trình vận chuyển.</li>
               <li><strong>Giao hàng toàn quốc:</strong> Nhanh chóng và đảm bảo trong vòng 1-5 ngày làm việc.</li>
-              <li><strong>Miễn phí giao hàng:</strong> Cho đơn hàng từ 490,000 VNĐ ở Hà Nội và hỗ trợ 20,000 VNĐ cho các đơn hàng ở tỉnh thành khác.</li>
+              <li><strong>Miễn phí giao hàng:</strong> Cho đơn hàng từ 390,000 VNĐ ở Hà Nội và hỗ trợ 20,000 VNĐ cho các đơn hàng ở tỉnh thành khác.</li>
               <li><strong>Thanh toán an toàn và tiện lợi:</strong> Hệ thống bảo mật cao, đảm bảo uy tín trong mọi giao dịch.</li>
             </ul>
           </div>

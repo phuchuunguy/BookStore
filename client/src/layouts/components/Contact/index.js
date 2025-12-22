@@ -15,7 +15,7 @@ const contactInfo = [
     icon: FaLocationDot,
     title: "Địa chỉ tiệm sách",
     description: "Số 2 Vương Thừa Vũ, Thanh Xuân, Hà Nội",
-    link: "https://www.google.com/maps/place/2+P.+V%C6%B0%C6%A1ng+Th%E1%BB%ABa+V%C5%A9,+Kh%C6%B0%C6%A1ng+Trung,+Thanh+Xu%C3%A2n,+H%C3%A0+N%E1%BB%99i",
+    link: "https://www.google.com/maps/place/2+P.+V%C6%B0%C6%A1ng+Th%E1%BB%ABa+V%C5%A9,+Ng%C3%A3+T%C6%B0+S%E1%BB%9F,+Thanh+Xu%C3%A2n,+H%C3%A0+N%E1%BB%99i+100000,+Vi%E1%BB%87t+Nam/@21.0017893,105.8198826,17z/data=!3m1!4b1!4m6!3m5!1s0x3135adda26c5f2f9:0x9f6636f3e6bd2def!8m2!3d21.0017843!4d105.8224575!16s%2Fg%2F11s4kcd10p?entry=ttu&g_ep=EgoyMDI1MTIwMi4wIKXMDSoASAFQAw%3D%3D",
   },
   {
     icon: FaPhone,
@@ -45,7 +45,7 @@ const formFields = [
   { name: "message", type: "textarea", placeholder: "Nội dung cần tư vấn... *" },
 ];
 
-const mapUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.695896336494!2d105.82006137596918!3d21.004801188600055!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ac81a5c6c0e9%3A0x6b772412803730e1!2zMiBQLiBWxrDGoW5nIFRo4burYSBWxaksIEtoxrDGoW5nIFRydW5nLCBUaGFuaCBYdcOibiwgSMOgIE7huqlp!5e0!3m2!1svi!2svn!4v1701500000000!5m2!1svi!2svn";
+const mapUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.7716354229774!2d105.81988257471369!3d21.001789288705414!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135adda26c5f2f9%3A0x9f6636f3e6bd2def!2zMiBQLiBWxrDGoW5nIFRo4burYSBWxaksIE5nw6MgVMawIFPhu58sIFRoYW5oIFh1w6JuLCBIw6AgTuG7mWkgMTAwMDAwLCBWaeG7h3QgTmFt!5e0!3m2!1svi!2s!4v1764898294116!5m2!1svi!2s";
 
 const Contact = () => {
   const form = useRef(); // Tạo tham chiếu đến thẻ <form>

@@ -19,6 +19,16 @@ const redisClient = new Redis({
     // tls: true, 
 });
 
+// Try to set a default version key without using top-level await so the
+// module remains CommonJS-compatible when required from other files.
+redisClient.setnx('Book::VERSION', 1)
+    .then((wasSet) => {
+        if (wasSet) console.log('Initialized Book::VERSION in Redis');
+    })
+    .catch((err) => {
+        console.error('Failed to set Book::VERSION in Redis:', err);
+    });
+
 redisClient.on('connect', () => {
     console.log('Redis connected successfully!');
 });

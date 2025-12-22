@@ -9,15 +9,15 @@ function ReturnPolicy() {
 
       <p>
         Quý khách có thể thực hiện đổi trả hàng trong vòng <strong>03 ngày</strong> kể từ
-        ngày nhận hàng cho các sản phẩm đặt mua tại Wabooks.vn. Các sản phẩm thực hiện đổi trả
+        ngày nhận hàng cho các sản phẩm đặt mua tại D2P Store. Các sản phẩm thực hiện đổi trả
         phải không nằm trong danh mục hạn chế, không có dấu hiệu đã qua sử dụng, không bị dơ bẩn,
         trầy xước, có mùi lạ, không bị can thiệp sửa chữa và còn nguyên tem, mác, bao bì như ban đầu
         (trừ trường hợp sản phẩm bị lỗi hoặc hư hại trong quá trình vận chuyển).
       </p>
 
       <p>
-        Phiếu mua hàng là phần không thể thiếu trong quy trình đổi trả tại Wabooks.vn.
-        Sau khi nhận được yêu cầu và hàng hóa gửi tới kho, Wabooks.vn sẽ xử lý yêu cầu của quý khách
+        Phiếu mua hàng là phần không thể thiếu trong quy trình đổi trả tại D2P Store.
+        Sau khi nhận được yêu cầu và hàng hóa gửi tới kho, D2P Store sẽ xử lý yêu cầu của quý khách
         trong thời gian sớm nhất.
       </p>
 

@@ -17,7 +17,7 @@
 } */
 
 .loadingIcon {
-    animation: spinner 5s linear infinite;
+    animation: spinner 100s linear infinite;
 }
 
 @keyframes spinner {

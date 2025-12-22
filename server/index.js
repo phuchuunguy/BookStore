@@ -33,11 +33,27 @@ app.use(express.json())
 
 const routes = require('./routes')
 
+// Register routes
 routes(app)
 
 const PORT = process.env.PORT || 5000
 
+const http = require('http')
+const server = http.createServer(app)
 
-app.listen(PORT, function() {
+// Initialize socket.io and attach to server
+const socket = require('./socket')
+socket.init(server, {
+  cors: {
+    origin: function (origin, callback) {
+      const whitelist = ['http://localhost:3000', process.env.REACT_APP_URL, process.env.REACT_APP_URL_1]
+      if (!origin || whitelist.indexOf(origin) !== -1) callback(null, true)
+      else callback(new Error('Not allowed by CORS'))
+    },
+    credentials: true,
+  }
+})
+
+server.listen(PORT, function() {
     console.log(`Server đang chạy PORT ${PORT}`)
 })

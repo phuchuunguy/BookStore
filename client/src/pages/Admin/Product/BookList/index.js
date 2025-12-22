@@ -7,6 +7,7 @@ import { FaEdit, FaTrashAlt, FaSearch } from "react-icons/fa";
 import { Row, Col, Table, Spinner, Modal, Button } from "react-bootstrap";
 import bookApi from "../../../../api/bookApi";
 import format from "../../../../helper/format";
+import { io as socketIOClient } from 'socket.io-client';
 
 function BookList() {
   const [bookData, setBookData] = useState({});
@@ -45,6 +46,29 @@ function BookList() {
     };
     fetchData();
   }, [page, searchString]); // Xóa 'keyword' khỏi dependency vì không tồn tại
+
+  // Subscribe to server-sent updates for book quantity
+  useEffect(() => {
+    const serverUrl = process.env.REACT_APP_SERVER_URL || 'http://localhost:5000';
+    const socket = socketIOClient(serverUrl, { transports: ['websocket'] });
+
+    socket.on('connect', () => {
+      console.log('Socket connected (admin BookList):', socket.id);
+    });
+
+    socket.on('book:updated', ({ id, quantity }) => {
+      console.log('Received book:updated', { id, quantity });
+      setBookData((prev) => {
+        if (!prev || !prev.books) return prev;
+        const newArray = prev.books.map((b) => (b.id === id ? { ...b, quantity } : b));
+        return { ...prev, books: newArray };
+      });
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   const handleChangePage = useCallback((page) => {
     setPage(page);
@@ -129,6 +153,7 @@ function BookList() {
                   <th>Tên sách</th>
                   <th>Thể loại</th>
                   <th>Xuất bản</th>
+                  <th>Số lượng</th>
                   <th>Giá</th>
                   <th>Khuyến mãi (%)</th>
                   <th colSpan="2">Hành động</th>
@@ -167,8 +192,14 @@ function BookList() {
                         <td>
                           {item.publisher?.name} - {item.year}
                         </td>
+                        {/* --- HIỂN THỊ SỐ LƯỢNG --- */}
+                        <td>
+                            <span style={{ fontWeight: 'bold', color: item.quantity < 10 ? 'red' : 'inherit' }}>
+                                {item.quantity || 0}
+                            </span>
+                        </td>
                         <td className="price">{format.formatPrice(item.price)}</td>
-                        <td>{item.discount}</td>
+                        <td>{item.discount != null ? Number(item.discount).toString() : ""}%</td>
                         <td>
                           <Link
                             to={`/admin/book/update/${item.id}`}

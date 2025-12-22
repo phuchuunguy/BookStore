@@ -25,6 +25,10 @@ const analyticApi = {
         const url = `analytics/product/bestseller`
         return axiosClient.get(url)
     },
+    getBestSellerPublic: () => {
+        const url = `analytics/product/bestseller-public`
+        return axiosClient.get(url)
+    },
     
 }
 

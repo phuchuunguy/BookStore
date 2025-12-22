@@ -11,6 +11,65 @@
     --bs-gutter-x: 1.5rem;
 }
 
+/* Card wrapper ensures consistent vertical spacing between items */
+.cardWrapper {
+        padding-top: 8px;
+        padding-bottom: 8px;
+}
+
+/* Top sellers: display 5 items evenly spaced across the container. */
+.topSellersRow {
+    display: flex;
+    gap: 1.5rem; /* matches gutter */
+    justify-content: center; /* Thay space-between bằng center để căn giữa */
+    flex-wrap: wrap;         /* Thay nowrap bằng wrap để linh hoạt hơn */
+    align-items: stretch;
+    padding: 12px;
+}
+
+.topSellersItem {
+        /* Calculate width so 5 items + 4 gaps fit 100% */
+        flex: 0 0 calc((100% - 4 * 1.5rem) / 5);
+        max-width: calc((100% - 4 * 1.5rem) / 5);
+}
+
+@media (max-width: 1200px) {
+    .topSellersRow { flex-wrap: wrap; }
+    .topSellersItem { flex: 0 0 20%; max-width: 20%; }
+}
+
+@media (max-width: 768px) {
+    .topSellersItem { flex: 0 0 50%; max-width: 50%; }
+}
+
+/* Generic 5-column grid (wraps to multiple rows) for suggestions */
+.gridFive {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: space-between;
+    align-items: stretch;
+    flex-wrap: wrap;
+    padding: 12px;
+}
+
+.gridFiveItem {
+    flex: 0 0 calc((100% - 4 * 1.5rem) / 5);
+    max-width: calc((100% - 4 * 1.5rem) / 5);
+    box-sizing: border-box;
+}
+
+@media (max-width: 1200px) {
+    .gridFiveItem { flex: 0 0 20%; max-width: 20%; }
+}
+
+@media (max-width: 992px) {
+    .gridFiveItem { flex: 0 0 33.3333%; max-width: 33.3333%; }
+}
+
+@media (max-width: 576px) {
+    .gridFiveItem { flex: 0 0 50%; max-width: 50%; }
+}
+
 .title {
     padding: 10px;
     background-color: white;

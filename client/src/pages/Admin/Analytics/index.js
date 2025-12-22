@@ -89,7 +89,7 @@ function AnalyticsPage() {
         setCardData(pre => {
           return {
             ...pre,
-            book: resBook?.count || 0,
+            book: resBook?.totalStock || 0,
             order: resOrder?.count || 0,
             revenue: resRevenue?.data[0]?.revenue || 0
           }
@@ -351,7 +351,7 @@ function AnalyticsPage() {
             <DashboardCard
               name="Tổng sản phẩm"
               quantity={formatNumber(cardData?.book || 0)}
-              subtitle="Danh mục đang kinh doanh"
+              subtitle="Số Lượng Tồn Kho"
               accent="emerald"
               Icon={FaBook}
               trendValue={`${formatNumber(cardData?.book || 0)} SP`}

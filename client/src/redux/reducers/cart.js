@@ -175,15 +175,39 @@ const cartReducer = (state = initialState, action) => {
        }
 
        case "SET_CART": {
-            return {
-                ...state,
-                list: action.payload,
-                voucher: "",
-                subTotal: 0,
-                shippingFee: 0,
-                discount: 0,
-                total: 0,
-        }
+            try {
+                const newList = Array.isArray(action.payload) ? action.payload : [];
+                const normalized = newList.map(item => {
+                    const quantity = item.quantity || 0;
+                    const price = (item.product && (item.product.price || item.product.price === 0)) ? item.product.price : (item.price || 0);
+                    const totalPriceItem = item.totalPriceItem != null ? item.totalPriceItem : quantity * price;
+                    return { ...item, quantity, totalPriceItem };
+                });
+
+                const subTotal = normalized.reduce((sum, p) => sum + (p.totalPriceItem || 0), 0);
+                const shippingFee = state.shippingFee || 0;
+                let updateVoucher = state.voucher || {};
+                const { value = 0, by = '', minimum = 0 } = updateVoucher || {};
+                let discount = 0;
+                if (subTotal < (minimum || 0)) {
+                    updateVoucher = {};
+                } else if (value > 0) {
+                    discount = by === "percent" ? (subTotal * value / 100) : (value);
+                }
+
+                return {
+                    ...state,
+                    list: normalized,
+                    voucher: updateVoucher,
+                    subTotal: subTotal,
+                    shippingFee: shippingFee,
+                    discount: discount,
+                    total: subTotal - discount + shippingFee,
+                }
+            } catch (e) {
+                console.error('SET_CART reducer error', e);
+                return { ...state, list: action.payload };
+            }
        }
 
         default: {

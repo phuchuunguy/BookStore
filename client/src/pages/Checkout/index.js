@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Container, Row, Col, Form, Modal, NavLink, Breadcrumb, Badge } from "react-bootstrap";
@@ -17,12 +17,13 @@ import format from "../../helper/format";
 
 import axios from "axios";
 import orderApi from "../../api/orderApi";
+import { io as socketIOClient } from 'socket.io-client';
 import userApi from "../../api/userApi";
 
 import methodData from "./methodData"
 import { FaMoneyBillWave } from 'react-icons/fa'
 
-import { destroy } from "../../redux/actions/cart"
+import { destroy, setCart } from "../../redux/actions/cart"
 import styles from "./Payment.module.css";
 
 // URL API GHN Test
@@ -32,8 +33,20 @@ export default function Checkout() {
 
   const [addressList, setAddressList] = useState([]);
 
-  const cartData = useSelector((state) => state.cart);
+    const cartData = useSelector((state) => state.cart);
   const currentUser = useSelector((state) => state.auth);
+    const [shippingFee, setShippingFee] = useState(0)
+    const [leadTime, setLeadTime] = useState(0)
+
+    const checkoutItems = useMemo(() => cartData?.list?.filter(item => item.checked) || [], [cartData?.list]);
+    const calculatedSubTotal = useMemo(() => {
+      return checkoutItems.reduce((total, item) => {
+        const price = item?.product?.price || 0;
+        const qty = item?.quantity || 0;
+        return total + price * qty;
+      }, 0);
+    }, [checkoutItems]);
+    const calculatedTotal = useMemo(() => calculatedSubTotal + (shippingFee || 0) - (cartData?.discount || 0), [calculatedSubTotal, shippingFee, cartData?.discount]);
 
   const [defaultAddress, setDefaultAddress] = useState("");
   // shippingAddress là địa chỉ CHÍNH THỨC sẽ dùng để giao hàng
@@ -46,8 +59,6 @@ export default function Checkout() {
   const [loading, setLoading] = useState(false)
   const [loadingService, setLoadingService] = useState(false)
 
-  const [shippingFee, setShippingFee] = useState(0)
-  const [leadTime, setLeadTime] = useState(0)
 
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -114,13 +125,21 @@ export default function Checkout() {
       const { email, fullName, phoneNumber, method } = values;
       const { list } = cartData;
 
-      const products = list.map(item => ({
+      const selectedItems = list.filter(item => item.checked === true);
+      const remainingItems = list.filter(item => !item.checked);
+
+      const products = selectedItems.map(item => ({
         product: item?.product.id,
         imageUrl: item?.product?.imageUrl,
         name: item?.product?.name,
         quantity: item?.quantity,
         price: item?.product.price,
         totalItem: item?.totalPriceItem
+      }));
+
+      const updateCartPayload = remainingItems.map(item => ({
+        product: item.product.id,
+        quantity: item.quantity
       }));
 
       const paymentId = uuidv4();
@@ -138,8 +157,8 @@ export default function Checkout() {
         cost: {
           subTotal: cartData?.subTotal,
           shippingFee: shippingFee,
-          discount: cartData?.discount,
-          total: cartData?.total + shippingFee,
+          discount: cartData?.discount || 0,
+          total: calculatedTotal,
         },
         method: {
           code: +method,
@@ -150,23 +169,51 @@ export default function Checkout() {
 
       try {
         setLoading(true);
-        if (+method === 1) { // MoMo
-             const { payUrl } = await orderApi.getPayUrlMoMo({ amount: body.cost.total, paymentId });
-             await orderApi.create(body);
-             await userApi.updateCart(currentUser?.userId, {cart: []});
-             window.location.href = payUrl;
-        } else { // COD hoặc khác
-             await orderApi.create(body);
-             await userApi.updateCart(currentUser?.userId, {cart: []});
-             Swal.fire({
-               title: "Thành công!",
-               text: "Đặt hàng thành công!",
-               icon: "success",
-               confirmButtonColor: "#28a745",
-             });
-             dispatch(destroy());
-             navigate({ pathname: '/don-hang' });
-        }
+        setLoading(true);
+        const updateCartPayload = remainingItems.map(item => ({
+            product: item.product.id,
+            quantity: item.quantity
+        }));
+            if (+method === 1) { // MoMo
+                const { payUrl } = await orderApi.getPayUrlMoMo({ amount: body.cost.total, paymentId });
+                await orderApi.create(body);
+                // Emit immediate update via socket so admin sees new quantities faster
+                try {
+                  const serverUrl = process.env.REACT_APP_SERVER_URL || 'http://localhost:5000';
+                  const socket = socketIOClient(serverUrl, { transports: ['websocket'] });
+                  const updates = selectedItems.map(it => ({ id: it.product.id, quantity: Math.max(0, (it.product.quantity || 0) - it.quantity) }));
+                  socket.emit('book:purchased', { updates });
+                  socket.disconnect();
+                } catch (e) {
+                  console.error('Emit book:purchased error:', e);
+                }
+
+                await userApi.updateCart(currentUser?.userId, {cart: updateCartPayload});
+                dispatch(setCart(remainingItems));
+                window.location.href = payUrl;
+            } else { // COD hoặc khác
+                await orderApi.create(body);
+                // Emit immediate update via socket so admin sees new quantities faster
+                try {
+                  const serverUrl = process.env.REACT_APP_SERVER_URL || 'http://localhost:5000';
+                  const socket = socketIOClient(serverUrl, { transports: ['websocket'] });
+                  const updates = selectedItems.map(it => ({ id: it.product.id, quantity: Math.max(0, (it.product.quantity || 0) - it.quantity) }));
+                  socket.emit('book:purchased', { updates });
+                  socket.disconnect();
+                } catch (e) {
+                  console.error('Emit book:purchased error:', e);
+                }
+
+                await userApi.updateCart(currentUser?.userId, {cart: updateCartPayload});
+                dispatch(setCart(remainingItems));
+                Swal.fire({
+                  title: "Thành công!",
+                  text: "Đặt hàng thành công!",
+                  icon: "success",
+                  confirmButtonColor: "#28a745",
+                });
+                navigate({ pathname: '/don-hang' });
+            }
       } catch (error) {
         console.log(error);
         Swal.fire({
@@ -369,17 +416,17 @@ export default function Checkout() {
 
             <Col xl={5}>
               <div className={styles.payment_form}>
-                <h4>ĐƠN HÀNG CỦA BẠN</h4>
-                {/* ... (Phần hiển thị sản phẩm giữ nguyên) ... */}
-                
-                {cartData?.list.map((item) => (
+                <h4>ĐƠN HÀNG CỦA BẠN</h4>                
+                {cartData?.list
+                  .filter(item => item.checked === true)
+                  .map((item) => (
                     <PayItem item={item?.product} key={item?.product?.id} quantity={item?.quantity} totalPriceItem={item?.totalPriceItem} />
                 ))}
 
                 <div className="border-top pt-2 mt-2">
                     <div className="d-flex justify-content-between">
                         <span>Tạm tính:</span>
-                        <span>{format.formatPrice(cartData?.subTotal)}</span>
+                        <span>{format.formatPrice(calculatedSubTotal)}</span>
                     </div>
                     <div className="d-flex justify-content-between">
                         <span>Phí vận chuyển:</span>
@@ -387,7 +434,7 @@ export default function Checkout() {
                     </div>
                     <div className="d-flex justify-content-between text-danger fw-bold mt-2">
                         <span>TỔNG CỘNG:</span>
-                        <span>{format.formatPrice(cartData?.total + shippingFee)}</span>
+                        <span>{format.formatPrice(calculatedTotal)}</span>
                     </div>
                 </div>
 

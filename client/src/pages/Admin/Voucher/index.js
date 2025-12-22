@@ -128,11 +128,11 @@ function Voucher() {
               </Col>
               <Col xl={4}>
                 <label>Loại</label>
-                <input readOnly type="text" value={selectedVoucher.by === "percent" ? "Phần trăm (%)" : "Mức cố định (VNĐ)"} className="form-control" />
+                <input readOnly type="text" value={selectedVoucher.by === "percent" ? "Mức cố định (VNĐ)" : "Phần trăm (%)"} className="form-control" />
               </Col>
               <Col xl={4}>
                 <label>Mức giảm</label>
-                <input readOnly type="number" value={selectedVoucher?.value} className="form-control" />
+                <input readOnly type="number" value={parseInt(selectedVoucher?.value || 0)} className="form-control" />
               </Col>
               <Col xl={4}>
                 <label>Ngày bắt đầu</label>
@@ -148,7 +148,7 @@ function Voucher() {
               </Col>
               <Col xl={4}>
                 <label>Mức chi tối thiểu</label>
-                <input readOnly type="number" value={selectedVoucher?.minimum} className="form-control" />
+                <input readOnly type="number" value={parseInt(selectedVoucher?.minimum || 0)} className="form-control" />
               </Col>
             </Row>
             <Button type="submit" variant="danger" className="mt-2">
@@ -284,8 +284,13 @@ function Voucher() {
                         <td>{(1 && page - 1) * 10 + (index + 1)}</td>
                         <td>{item.name}</td>
                         <td>{item.code}</td>
-                        <td>{`${format.formatPrice(item.minimum)}`}</td>
-                        <td>{item.by === "percent" ? "Phần trăm (%)" : "Mức cố định (VNĐ)"} - {item.value}</td>
+                        <td>{`${format.formatNumber(item.minimum)}`}</td>
+                        <td>
+                          {item.by === "percent"
+                            ? `Phần trăm (%) - ${parseInt(item.value)}%`
+                            : `Mức cố định (VNĐ) - ${format.formatPrice(item.value)}`
+                          }
+                        </td>
                         <td>Từ {moment(item?.start).format('DD-MM-yyyy')} Đến {moment(item?.end).format('DD-MM-yyyy')}</td>
                         <td>
                           <Button

@@ -108,7 +108,7 @@ const DiscountItem = ({ item }) => {
           <div className={styles.info}>
             <h6>
               Giảm {item.by === "percent" ? (
-                `${item.value}%`
+                `${format.formatVoucher(item.value)}%`
               )
               : format.formatPrice(item.value)} Đơn tối thiểu{" "}
               {format.formatPrice(item.minimum)}

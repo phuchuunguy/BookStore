@@ -6,13 +6,13 @@ import { useFormik } from "formik";
 import { useNavigate } from "react-router-dom";
 import PreviewImage from "../../../../components/PreviewImage";
 import * as Yup from "yup";
-import styles from "./AddBook.module.css";
+import styles from "../UpdateBook/UpdateBook.module.css";
 import { useEffect, useState } from "react";
 import authorApi from "../../../../api/authorApi";
 import genreApi from "../../../../api/genreApi";
 import publisherApi from "../../../../api/publisherApi";
 import bookApi from "../../../../api/bookApi";
-import axios from "axios";
+import axiosClient from "../../../../api/axiosClient";
 import { swalSuccess, swalError } from "../../../../helper/swal";
 
 function AddBook() {
@@ -65,6 +65,7 @@ function AddBook() {
       size: "",
       price: "",
       discount: 0,
+      quantity: 100, // Logic đã có
       image: "",
       description: "",
       author: [],
@@ -77,7 +78,7 @@ function AddBook() {
     validationSchema: Yup.object({
       bookId: Yup.string()
         .required("Không được bỏ trống trường này!")
-            .test("is-use", "Mã sách đã tồn tại!", async function (value) {
+        .test("is-use", "Mã sách đã tồn tại!", async function (value) {
           try {
             const res = await bookApi.getByBookId(value);
             return res?.data?.id ? false : true;
@@ -89,27 +90,34 @@ function AddBook() {
       price: Yup.number()
         .typeError("Vui lòng nhập giá hợp lệ!")
         .required("Không được bỏ trống trường này!"),
+      quantity: Yup.number()
+        .typeError("Vui lòng nhập số!")
+        .min(0, "Số lượng không được âm")
+        .required("Không được bỏ trống trường này!"),
       image: Yup.mixed().required("Không được bỏ trống trường này!")
-      .test("FILE_SIZE", "Kích thước file quá lớn!", (value) => !value || (value && value.size < 1024 * 1024))
-      .test("FILE_FORMAT", "File không đúng định dạng!", (value) => 
-        !value || (value && ['image/png', 'image/gif', 'image/jpeg'].includes(value?.type) )
+        .test("FILE_SIZE", "Kích thước file quá lớn!", (value) => !value || (value && value.size < 1024 * 1024))
+        .test("FILE_FORMAT", "File không đúng định dạng!", (value) => 
+          !value || (value && ['image/png', 'image/gif', 'image/jpeg'].includes(value?.type) )
         )
     }),
     onSubmit: async () => {
       const { bookId, name, author, genre, publisher, description, 
-        year, pages, size, price, discount, image } = formik.values;
+        year, pages, size, price, discount, quantity, image } = formik.values;
       const genres = genre.map(item => item.value)
       const authors = author.map(item => item.value)
       try {
         const formData = new FormData();
         formData.append("file", image);
-        formData.append("upload_preset", "fti6du11");
         setLoading(true)
-        const resCloudinary = await axios.post("https://api.cloudinary.com/v1_1/dbynglvwk/image/upload", formData)
-        const { secure_url, public_id } = resCloudinary.data
+        // Upload via server endpoint which will sign and forward to Cloudinary
+        const resCloudinary = await axiosClient.post(`/upload`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        const { secure_url, public_id } = resCloudinary
         if (secure_url && public_id) {
           const res = await bookApi.create({ 
             bookId, name, year, pages, size, price, discount, description,
+            quantity: parseInt(quantity),
             author: authors,
             genre: genres,
             publisher: publisher,
@@ -145,20 +153,14 @@ function AddBook() {
                       type="text"
                       name="bookId"
                       className={`form-control ${
-                        formik.errors.bookId && formik.touched.bookId
-                          ? "is-invalid"
-                          : formik.values.bookId && "is-valid"
+                        formik.errors.bookId && formik.touched.bookId ? "is-invalid" : formik.values.bookId && "is-valid"
                       }`}
                       placeholder="Mã sách"
                       value={formik.values.bookId}
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                     />
-                    {formik.errors.bookId && (
-                      <Form.Control.Feedback type="invalid">
-                        {formik.errors.bookId}
-                      </Form.Control.Feedback>
-                    )}
+                    {formik.errors.bookId && <Form.Control.Feedback type="invalid">{formik.errors.bookId}</Form.Control.Feedback>}
                   </div>
                 </Col>
                 <Col xl={9}>
@@ -168,20 +170,14 @@ function AddBook() {
                       type="text"
                       name="name"
                       className={`form-control ${
-                        (formik.errors.name && formik.touched.name)
-                          ? "is-invalid"
-                          : formik.values.name && "is-valid"
+                        (formik.errors.name && formik.touched.name) ? "is-invalid" : formik.values.name && "is-valid"
                       }`}
                       placeholder="Tên sách"
                       value={formik.values.name}
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                     />
-                    {formik.errors.name && (
-                      <Form.Control.Feedback type="invalid">
-                        {formik.errors.name}
-                      </Form.Control.Feedback>
-                    )}
+                    {formik.errors.name && <Form.Control.Feedback type="invalid">{formik.errors.name}</Form.Control.Feedback>}
                   </div>
                 </Col>
               </Row>
@@ -221,7 +217,7 @@ function AddBook() {
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                     >
-                          {publisherList.length > 0 &&
+                      {publisherList.length > 0 &&
                         publisherList.map((publisher) => (
                           <option key={publisher.id} value={publisher.id}>
                             {publisher.name}
@@ -231,103 +227,74 @@ function AddBook() {
                   </div>
                 </Col>
               </Row>
+
+              {/* HÀNG 3: NĂM - TRANG - KÍCH THƯỚC - SỐ LƯỢNG */}
               <Row>
-                <Col xl={3}>
+                <Col xl={4}>
                   <div className="form-group">
                     <label className={styles.formLabel}>Năm xuất bản</label>
                     <input
                       type="text"
                       name="year"
-                      className={`form-control ${
-                        formik.errors.year && formik.touched.year
-                          ? "is-invalid"
-                          : formik.values.year && "is-valid"
-                      }`}
+                      className={`form-control ${formik.errors.year && formik.touched.year ? "is-invalid" : formik.values.year && "is-valid"}`}
                       placeholder="Năm xuất bản"
                       value={formik.values.year}
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                     />
-                    {formik.errors.year && (
-                      <Form.Control.Feedback type="invalid">
-                        {formik.errors.year}
-                      </Form.Control.Feedback>
-                    )}
+                    {formik.errors.year && <Form.Control.Feedback type="invalid">{formik.errors.year}</Form.Control.Feedback>}
                   </div>
                 </Col>
-                <Col xl={3}>
+                <Col xl={4}>
                   <div className="form-group">
                     <label className={styles.formLabel}>Số trang</label>
                     <input
                       type="text"
                       name="pages"
-                      className={`form-control ${
-                        formik.errors.pages && formik.touched.pages
-                          ? "is-invalid"
-                          : formik.values.pages && "is-valid"
-                      }`}
+                      className={`form-control ${formik.errors.pages && formik.touched.pages ? "is-invalid" : formik.values.pages && "is-valid"}`}
                       placeholder="Số trang"
                       value={formik.values.pages}
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                     />
-                    {formik.errors.pages && (
-                      <Form.Control.Feedback type="invalid">
-                        {formik.errors.pages}
-                      </Form.Control.Feedback>
-                    )}
+                    {formik.errors.pages && <Form.Control.Feedback type="invalid">{formik.errors.pages}</Form.Control.Feedback>}
                   </div>
                 </Col>
-                <Col xl={3}>
+                <Col xl={4}>
                   <div className="form-group">
                     <label className={styles.formLabel}>Kích thước</label>
                     <input
                       type="text"
                       name="size"
-                      className={`form-control ${
-                        formik.errors.size && formik.touched.size
-                          ? "is-invalid"
-                          : formik.values.size && "is-valid"
-                      }`}
+                      className={`form-control ${formik.errors.size && formik.touched.size ? "is-invalid" : formik.values.size && "is-valid"}`}
                       placeholder="Kích thước"
                       value={formik.values.size}
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                     />
-                    {formik.errors.size && (
-                      <Form.Control.Feedback type="invalid">
-                        {formik.errors.size}
-                      </Form.Control.Feedback>
-                    )}
+                    {formik.errors.size && <Form.Control.Feedback type="invalid">{formik.errors.size}</Form.Control.Feedback>}
                   </div>
                 </Col>
+                
               </Row>
               <Row>
-                <Col xl={3}>
+                <Col xl={4}>
                   <div className="form-group">
                     <label className={styles.formLabel}>Giá bán</label>
                     <input
                       type="number"
                       min="0"
                       name="price"
-                      className={`form-control ${
-                        formik.errors.price && formik.touched.price
-                          ? "is-invalid"
-                          : formik.values.price && "is-valid"
-                      }`}
+                      className={`form-control ${formik.errors.price && formik.touched.price ? "is-invalid" : formik.values.price && "is-valid"}`}
                       placeholder="Giá bán"
                       value={formik.values.price}
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                     />
-                    {formik.errors.price && (
-                      <Form.Control.Feedback type="invalid">
-                        {formik.errors.price}
-                      </Form.Control.Feedback>
-                    )}
+                    {formik.errors.price && <Form.Control.Feedback type="invalid">{formik.errors.price}</Form.Control.Feedback>}
                   </div>
                 </Col>
-                <Col xl={3}>
+                <Col xl={4}>
                   <div className="form-group">
                     <label className={styles.formLabel}>Giảm giá</label>
                     <input
@@ -336,82 +303,98 @@ function AddBook() {
                       min="0"
                       max="100"
                       className={`form-control ${
-                        formik.errors.discount && formik.touched.discount
-                          ? "is-invalid"
-                          : formik.values.discount && "is-valid"
-                      }`}
+                        formik.errors.discount && formik.touched.discount 
+                        ? "is-invalid" 
+                        : formik.values.discount && "is-valid"}`}
                       placeholder="Giảm giá"
                       value={formik.values.discount}
                       onBlur={formik.handleBlur}
+                      onChange={(e) => {
+                      let value = e.target.value;
+                      value = Math.round(Number(value));
+                      formik.setFieldValue("discount", value);
+                      }}
+                    />
+                    {formik.errors.discount && <Form.Control.Feedback type="invalid">{formik.errors.discount}</Form.Control.Feedback>}
+                  </div>
+                </Col>
+                <Col xl={4}>
+                   <div className="form-group">
+                    <label className={styles.formLabel}>Số lượng</label>
+                    <input
+                      type="number"
+                      name="quantity"
+                      className={`form-control ${formik.errors.quantity && formik.touched.quantity ? "is-invalid" : formik.values.quantity && "is-valid"}`}
+                      placeholder="Số lượng"
+                      value={formik.values.quantity}
+                      onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                     />
-                    {formik.errors.discount && (
-                      <Form.Control.Feedback type="invalid">
-                        {formik.errors.discount}
-                      </Form.Control.Feedback>
-                    )}
+                    {formik.errors.quantity && <Form.Control.Feedback type="invalid">{formik.errors.quantity}</Form.Control.Feedback>}
                   </div>
-                </Col>
-              </Row>
-              <Row>
-              <Col xl={12}>
-                  <label className={styles.formLabel}>Mô tả</label>
-                  <CKEditor
-                      editor={ ClassicEditor }
-                      data={formik.values.description}
-                      onReady={ editor => {
-                          // You can store the "editor" and use when it is needed.
-                          console.log( 'Editor is ready to use!', editor );
-                      } }
-                      onChange={ ( event, editor ) => {
-                          const data = editor.getData();
-                          formik.setFieldValue("description", data);
-                      } }
-                      onBlur={ ( event, editor ) => {
-                          console.log( 'Blur.', editor );
-                      } }
-                      onFocus={ ( event, editor ) => {
-                          console.log( 'Focus.', editor );
-                      } }
-                  />
-                </Col>
-              </Row>
-              <Row>
-                <Col xl={3}>
-                  <div className="form-group">
-                    <label className={styles.formLabel}>Hình ảnh</label>
-                    <input
-                      type="file"
-                      name="image"
-                      className={`form-control ${
-                        formik.errors.image && formik.touched.image
-                          ? "is-invalid"
-                          : formik.values.image && "is-valid"
-                      }`}
-                      placeholder="Hình ảnh"
-                      accept="image/png, image/gif, image/jpeg"
-                      // value={formik.values.image[0]}
-                      onBlur={(e) => formik.setFieldValue('image', e.target.files[0])}
-                      onChange={(e) => formik.setFieldValue('image', e.target.files[0])}
-                    />
-                    {formik.errors.image && (
-                      <Form.Control.Feedback type="invalid">
-                        {formik.errors.image}
-                      </Form.Control.Feedback>
-                    )}
-                  </div>
-                </Col>
-                <Col xl={3}>
-                  {formik.values.image && <PreviewImage file={formik.values.image} />}
                 </Col>
               </Row>
 
-              <div className="d-flex-center">
-                <button type="submit" className={`bookstore-btn ${styles.submitBtn}`} disabled={loading}>
-                  Thêm sách
-                </button>
-                {loading && <Spinner style={{ marginLeft: "20px" }} animation="border" variant="success" />}
-              </div>
+              {/* Description and Image Row: mimic UpdateBook layout */}
+              <Row className="mt-4">
+                <Col xl={8}>
+                  <div className="form-group mb-4">
+                    <label className={styles.formLabel}>Mô tả</label>
+                    <CKEditor
+                      editor={ClassicEditor}
+                      data={formik.values.description}
+                      onChange={(event, editor) => {
+                        formik.setFieldValue("description", editor.getData());
+                      }}
+                    />
+                  </div>
+                </Col>
+
+                <Col xl={4} className={styles.imageSection}>
+                  <div className={styles.imageContainer}>
+                    <div className="form-group">
+                      <label className={styles.formLabel}>Hình ảnh</label>
+                      <input
+                        type="file"
+                        name="image"
+                        className={`form-control ${
+                          formik.errors.image && formik.touched.image
+                            ? "is-invalid"
+                            : formik.values.image && "is-valid"
+                        }`}
+                        accept="image/png, image/gif, image/jpeg"
+                        onChange={(e) => formik.setFieldValue("image", e.target.files[0])}
+                      />
+                      {formik.errors.image && (
+                        <Form.Control.Feedback type="invalid">
+                          {formik.errors.image}
+                        </Form.Control.Feedback>
+                      )}
+                    </div>
+
+                    {formik.values.image && (
+                      <div className="mt-3">
+                        <PreviewImage file={formik.values.image} />
+                      </div>
+                    )}
+                  </div>
+                </Col>
+              </Row>
+
+              {/* Buttons row (align with UpdateBook) */}
+              <Row className="mt-2">
+                <Col xl={8} className={styles.buttonsRow}>
+                  <button
+                    type="submit"
+                    className={`bookstore-btn ${styles.submitBtn}`}
+                    disabled={loading}
+                  >
+                    Thêm sách
+                  </button>
+                  {loading && <Spinner style={{ marginLeft: "20px" }} animation="border" variant="success" />}
+                </Col>
+                <Col xl={4} />
+              </Row>
             </form>
           </div>
         </div>

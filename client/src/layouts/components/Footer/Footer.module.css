@@ -4,6 +4,14 @@
     padding: 20px 0;
 }
 
+.footer ul,
+.footer li {
+    list-style: none !important;      
+    list-style-type: none !important; 
+    padding-left: 0 !important;      
+    margin-left: 0 !important;
+}
+
 .footer .footerGroup p,
 .footer .footerGroup a {
     color: #ccc;

@@ -7,7 +7,8 @@ const bookController = {
         try {
             const page = req.query.page ? parseInt(req.query.page) : 1
             const limit = req.query.limit ? parseInt(req.query.limit) : 0
-            const sort = req.query.sort ? req.query.sort : { createdAt: -1 }
+            const sort = req.query.sort ? req.query.sort : { createdAt: -1, id: -1 }
+            const totalStock = await bookService.sumAllStock();
             
             // --- XỬ LÝ QUAN TRỌNG TẠI ĐÂY ---
             // Frontend gửi lên: ?query={"genre":{"$in":["1"]}} (Dạng chuỗi)
@@ -63,6 +64,7 @@ const bookController = {
                 error: 0,
                 data,
                 count,
+                totalStock,
                 pagination: {
                     page,
                     limit,

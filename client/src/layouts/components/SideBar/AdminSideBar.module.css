@@ -43,9 +43,27 @@
 
 .navList,
 .navListBottom {
+    list-style: none; /* remove bullets */
     flex-direction: column;
     padding: 0;
-    padding-left: 10px;
+    margin: 0;
+    padding-left: 0; /* remove extra left padding */
+}
+
+/* Ensure list markers are hidden for all list items inside the sidebar */
+.adminSideBar ul li,
+.adminSideBar li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.adminSideBar ul li::marker,
+.adminSideBar li::marker,
+.adminSideBar ul li::before,
+.adminSideBar li::before {
+    display: none !important;
+    content: none !important;
 }
 
 .navItem {
@@ -110,4 +128,36 @@
 
 .navListBottom {
     margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* center children horizontally */
+}
+
+/* Logout icon styling inside bottom list */
+.navListBottom .navLink img {
+    width: 22px;
+    height: 22px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 8px;
+}
+
+/* Style logout item as a button with rounded corners */
+.navListBottom .navLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    margin: 12px auto; /* center horizontally */
+    border: 2px solid #539E31; /* prominent green border */
+    border-radius: 20px;
+    background: rgba(83,158,49,0.06); /* subtle green tint */
+    color: #ffffff;
+    box-shadow: 0 6px 18px rgba(83,158,49,0.12);
+}
+
+.navListBottom .navLink:hover {
+    background-color: rgba(83,158,49,0.12);
+    color: #ffffff;
+    box-shadow: 0 10px 22px rgba(83,158,49,0.18);
 }

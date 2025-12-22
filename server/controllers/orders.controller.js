@@ -3,6 +3,8 @@ const axios = require('axios')
 
 const orderService = require('../services/orders.service')
 const voucherService = require('../services/vouchers.service')
+const socket = require('../socket')
+const Book = require('../models/books.model')
 
 const { paymentStatusEnum, methodEnum, orderStatusEnum } = require('../utils/enum')
 const { orderSuccess } = require('../utils/sendMail')
@@ -21,7 +23,7 @@ const orderController = {
         try {
             const page = req.query.page ? parseInt(req.query.page) : 1
             const limit = req.query.limit ? parseInt(req.query.limit) : 2
-            const sort = req.query.sort ? req.query.sort : { createdAt: -1 }
+            const sort = req.query.sort ? req.query.sort : { createdAt: -1, id: -1 }
             const userId = req.query.userId
 
             const { Op } = require('sequelize');
@@ -208,6 +210,26 @@ const orderController = {
                 await orderSuccess({ clientURL: req.get('origin'), delivery, products, method, cost })
             }
 
+            // Emit updated book quantities to connected clients (realtime update)
+            try {
+                const io = socket.getIO();
+                if (io) {
+                    // products: array of { product: id, quantity }
+                    const productIds = products.map(p => p.product || p.id || p._id).filter(Boolean);
+                    for (const bookId of productIds) {
+                        const book = await Book.findByPk(bookId);
+                        if (book) {
+                            io.emit('book:updated', { id: book.id, quantity: book.quantity });
+                            console.log(`Emitted book:updated -> id=${book.id} quantity=${book.quantity}`);
+                        }
+                    }
+                } else {
+                    console.log('Socket IO not initialized, cannot emit book updates');
+                }
+            } catch (e) {
+                console.error('Socket emit error for book updates:', e);
+            }
+
             return res.status(201).json({
                 message: 'success',
                 error: 0,
@@ -243,6 +265,23 @@ const orderController = {
             const { id } = req.params
             const { orderStatusCode } = req.body // Nhận code mới từ Frontend (ví dụ: 1, 2...)
 
+            const currentOrder = await orderService.getById(id);
+            
+            if (!currentOrder) {
+                return res.status(404).json({ message: 'Không tìm thấy đơn hàng!', error: 1 });
+            }
+
+            const currentCode = currentOrder.orderStatus?.code || 0;
+
+            // --- CHẶN CẬP NHẬT NẾU ĐƠN ĐÃ HỦY ---
+            // Nếu đơn hàng đã bị Hủy (Code 6) -> Admin cũng không được sửa
+            if (currentCode === 6) {
+                return res.status(400).json({ 
+                    message: "Đơn hàng này đã bị hủy, không thể cập nhật trạng thái nữa!", 
+                    error: 1 
+                });
+            }
+
             // 1. Tìm object trạng thái tương ứng với code
             const newStatusObj = steps.find(s => s.code === parseInt(orderStatusCode));
             
@@ -276,6 +315,31 @@ const orderController = {
         } catch (error) {
             console.log("Lỗi Update Order:", error);
             res.status(500).json({ message: error.message, error: 1 })
+        }
+    },
+
+    cancelByUser: async (req, res) => {
+        try {
+            const { id } = req.params;      // ID đơn hàng
+            const userId = req.user.id;     // ID user lấy từ Token
+
+            // Gọi Service hủy đơn
+            await orderService.cancelOrder(userId, id);
+
+            // Lấy lại dữ liệu mới nhất để trả về cho Frontend cập nhật giao diện
+            const updatedOrder = await orderService.getById(id);
+
+            res.status(200).json({
+                message: 'Hủy đơn hàng thành công!',
+                error: 0,
+                data: updatedOrder
+            });
+
+        } catch (error) {
+            res.status(400).json({ 
+                message: error.message || "Lỗi khi hủy đơn hàng", 
+                error: 1 
+            });
         }
     },
 }

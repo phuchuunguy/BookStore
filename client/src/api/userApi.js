@@ -7,6 +7,10 @@ const userApi = {
         if (query) params.query = typeof query === 'string' ? query : JSON.stringify(query)
         return axiosClient.get(url, { params })
     },
+    addToCart: (userId, data) => {
+        const url = `/users/${userId}/addtocart`;
+        return axiosClient.post(url, data);
+    },
     addAddress: (id, data) => {
         const url = `users/${id}/address`
         return axiosClient.post(url, data)

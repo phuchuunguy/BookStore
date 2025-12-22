@@ -2,6 +2,7 @@
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^35.3.0",
     "@ckeditor/ckeditor5-react": "^5.0.2",
+    "@emailjs/browser": "^4.4.1",
     "@formspree/react": "^3.0.0",
     "@greatsumini/react-facebook-login": "^3.4.0",
     "@react-oauth/google": "^0.12.2",
@@ -25,11 +26,12 @@
     "react-simple-oauth2-login": "^0.5.4",
     "react-toastify": "^9.1.1",
     "redux": "^4.2.0",
+    "socket.io-client": "^4.8.1",
+    "sweetalert2": "^11.7.3",
+    "sweetalert2-react-content": "^5.0.4",
     "uuid": "^9.0.0",
     "web-vitals": "^2.1.4",
-    "yup": "^0.32.11",
-    "sweetalert2": "^11.7.3",
-    "sweetalert2-react-content": "^5.0.4"
+    "yup": "^0.32.11"
   },
   "scripts": {
     "start": "react-scripts start",

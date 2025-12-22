@@ -4,6 +4,7 @@ import { updateQuantity, removeItem } from "../../../redux/actions/cart";
 
 import { FaTrashAlt } from "react-icons/fa"
 
+// import { Link } from 'react-router-dom'; // (Có thể bỏ nếu không dùng)
 import format from "../../../helper/format";
 import styles from "./CartItem.module.css";
 import { Button } from "react-bootstrap";
@@ -12,6 +13,8 @@ export default function CartItem(props) {
   const dispatch = useDispatch();
 
   const [quantity, setQuantity] = useState(props.quantity);
+  // Lưu ý: Việc tính toán totalPriceItem ở đây chỉ mang tính hiển thị nội bộ component
+  // Giá trị thực tế dùng để tính tổng giỏ hàng sẽ nằm ở Redux/Cart.js
   const [totalPriceItem, setTotalPriceItem] = useState(props.totalPriceItem);
 
   function increaseQuantity() {
@@ -43,6 +46,21 @@ export default function CartItem(props) {
 
   return (
     <tr>
+      {/* --- PHẦN THÊM MỚI: CỘT CHECKBOX --- */}
+      <td style={{ verticalAlign: 'middle' }}>
+         <div className="d-flex justify-content-center align-items-center">
+            <input 
+                type="checkbox" 
+                // Nhận giá trị checked từ props (truyền từ Cart.js)
+                checked={props.checked || false} 
+                // Gọi hàm onCheck (truyền từ Cart.js) khi bấm
+                onChange={(e) => props.onCheck && props.onCheck(props.productId, e.target.checked)}
+                style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+            />
+         </div>
+      </td>
+      {/* ----------------------------------- */}
+
       <td style={{maxWidth: 450, textAlign: "left"}}>
         <div className="d-flex align-items-center">
           <img src={props.imageUrl} alt={props.name} style={{width: 100}} />

@@ -5,7 +5,9 @@ function DefaultLayout() {
     return (
         <>
             <Header />
-            <Outlet />
+            <main className="app-content">
+              <Outlet />
+            </main>
             <Footer />
         </>
     )

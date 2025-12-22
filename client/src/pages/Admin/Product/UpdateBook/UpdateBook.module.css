@@ -2,14 +2,89 @@
 
 .submitBtn,
 .updateImage {
-    padding: 8px 20px;
+    padding: 6px 16px;
     background-color: #539E31;
     color: white;
     font-weight: 500;
-    font-size: 16px;
-    margin: 10px 0;
+    font-size: 14px;
+    margin: 0; /* remove vertical margins to save space */
 }
 
 .updateImage {
     background-color: #333;
+}
+
+/* Main container with form and image side by side */
+.mainContainer {
+    gap: 1rem; /* tighten horizontal gap between columns */
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+    padding: 0.25rem 0; /* reduce extra vertical spacing */
+}
+
+/* Form section takes left side */
+.formSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* tighten vertical gaps between field rows */
+    padding-right: 0.5rem;
+}
+
+/* Image section on right */
+.imageSection {
+    display: flex;
+    justify-content: flex-start; /* ensure column starts at top */
+    align-items: flex-start; /* align top edges */
+    padding: 0 0 0 0.5rem; /* small left padding to separate from form */
+}
+
+/* Image container styling */
+.imageContainer {
+    width: 100%;
+    padding: 0.25rem 0.25rem 0.5rem 0.25rem; /* keep small padding but allow tighter top */
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    text-align: center;
+    border: 1px solid #e9ecef;
+}
+
+.imageContainer img {
+    max-width: 200px;
+    max-height: 300px;
+    width: auto;
+    height: auto;
+    display: block;
+    margin: 0.25rem auto; /* reduce top margin so image aligns with description */
+}
+
+/* Ensure form controls inside image section don't add extra top margin */
+.imageSection .form-group {
+    margin: 0;
+}
+
+/* Form label styling */
+.formLabel {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: #333;
+    font-size: 14px;
+}
+
+/* Feedback styling */
+.feedback {
+    display: block;
+    margin-top: 0.25rem;
+}
+
+/* CKEditor editable area: reduce min height to avoid large empty block */
+.ck-editor__editable_inline {
+    min-height: 160px;
+}
+
+/* Buttons row spacing */
+.buttonsRow {
+    display: flex;
+    gap: 12px;
+    align-items: center;
 }

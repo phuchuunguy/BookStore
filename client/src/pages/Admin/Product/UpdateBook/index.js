@@ -86,8 +86,9 @@ function UpdateBook() {
       year: bookData.year ? bookData.year : "",
       pages: bookData.pages ? bookData.pages : "",
       size: bookData.size ? bookData.size : "",
-      price: bookData.price ? bookData.price : "",
-      discount: bookData.discount ? bookData.discount : "",
+      price: bookData.price ? Math.round(bookData.price) : "",
+      discount: bookData.discount ? Math.round(bookData.discount) : "",
+      quantity: bookData.quantity ? bookData.quantity : 0,
       description: bookData.description ? bookData.description : "",
       author: bookData.author ? bookData.author : [],
       genre: bookData?.genre ? bookData.genre : [],
@@ -102,6 +103,7 @@ function UpdateBook() {
       price: Yup.number()
         .typeError("Vui lòng nhập giá hợp lệ!")
         .required("Không được bỏ trống trường này!"),
+      quantity: Yup.number().typeError("Nhập số!").min(0).required(),
       image: updateImage && Yup.mixed().required("Không được bỏ trống trường này!")
       .test("FILE_SIZE", "Kích thước file quá lớn!", (value) => !value || (value && value.size < 1024 * 1024))
       .test("FILE_FORMAT", "File không đúng định dạng!", (value) => 
@@ -111,8 +113,18 @@ function UpdateBook() {
     onSubmit: async () => {
       console.log("kiem tra", formik.values);
       const { bookId, name, author, genre, publisher, description, 
-        year, pages, size, price, discount, image } = formik.values;
+        year, pages, size, price, discount, quantity, image } = formik.values;
       try {
+          const payload = { 
+            bookId, name, year, pages, size, description,
+            price: Math.round(price),         // Bỏ số thập phân khi gửi
+            discount: Math.round(discount),   // Bỏ số thập phân khi gửi
+            quantity: parseInt(quantity),     // Gửi số lượng
+            author: Array.isArray(author) ? author.map(a => a.value) : author,
+            genre: Array.isArray(genre) ? genre.map(g => g.value) : genre,
+            publisher: publisher,
+          }
+
           if (image) {
           const formData = new FormData();
           formData.append("file", image);
@@ -121,7 +133,9 @@ function UpdateBook() {
           const { secure_url, public_id } = resCloudinary.data
           if (secure_url && public_id) {
             await bookApi.update(id, { 
-              bookId, name, year, pages, size, price, discount, description,
+              bookId, name, year, pages, size, price, discount,
+              quantity: parseInt(quantity),
+              description,
               author: Array.isArray(author) ? author.map(a => a.value) : author,
               genre: Array.isArray(genre) ? genre.map(g => g.value) : genre,
               publisher: publisher,
@@ -131,7 +145,9 @@ function UpdateBook() {
           } 
         } else {
             await bookApi.update(id, { 
-              bookId, name, year, pages, size, price, discount, description,
+              bookId, name, year, pages, size, price, discount,
+              quantity: parseInt(quantity), 
+              description,
               author: Array.isArray(author) ? author.map(a => a.value) : author,
               genre: Array.isArray(genre) ? genre.map(g => g.value) : genre,
               publisher: publisher,
@@ -248,7 +264,7 @@ function UpdateBook() {
                 </Col>
               </Row>
               <Row>
-                <Col xl={3}>
+                <Col xl={4}>
                   <div className="form-group">
                     <label className={styles.formLabel}>Năm xuất bản</label>
                     <input
@@ -274,7 +290,7 @@ function UpdateBook() {
                     )}
                   </div>
                 </Col>
-                <Col xl={3}>
+                <Col xl={4}>
                   <div className="form-group">
                     <label className={styles.formLabel}>Số trang</label>
                     <input
@@ -300,7 +316,7 @@ function UpdateBook() {
                     )}
                   </div>
                 </Col>
-                <Col xl={3}>
+                <Col xl={4}>
                   <div className="form-group">
                     <label className={styles.formLabel}>Kích thước</label>
                     <input
@@ -328,7 +344,7 @@ function UpdateBook() {
                 </Col>
               </Row>
               <Row>
-                <Col xl={3}>
+                <Col xl={4}>
                   <div className="form-group">
                     <label className={styles.formLabel}>Giá bán</label>
                     <input
@@ -355,7 +371,7 @@ function UpdateBook() {
                     )}
                   </div>
                 </Col>
-                <Col xl={3}>
+                <Col xl={4}>
                   <div className="form-group">
                     <label className={styles.formLabel}>Giảm giá</label>
                     <input
@@ -383,41 +399,83 @@ function UpdateBook() {
                     )}
                   </div>
                 </Col>
-                <Col xl={3}>
-                  {bookData.imageUrl && <PreviewImage src={bookData.imageUrl} />}
-                </Col>
-                <Col xl={12}>
-                  <label className={styles.formLabel}>Mô tả</label>
-                  <CKEditor
-                      editor={ ClassicEditor }
-                      data={formik.values.description}
-                      onReady={ editor => {
-                          // You can store the "editor" and use when it is needed.
-                          console.log( 'Editor is ready to use!', editor );
-                      } }
-                      onChange={ ( event, editor ) => {
-                          const data = editor.getData();
-                          formik.setFieldValue("description", data);
-                      } }
-                      onBlur={ ( event, editor ) => {
-                          console.log( 'Blur.', editor );
-                      } }
-                      onFocus={ ( event, editor ) => {
-                          console.log( 'Focus.', editor );
-                      } }
-                  />
+                 <Col xl={4}>
+                  <div className="form-group">
+                    <label className={styles.formLabel}>Số Lượng</label>
+                    <input
+                      type="number"
+                      min="0"
+                      name="quantity"
+                      className={`form-control ${
+                        formik.errors.quantity
+                          ? "is-invalid"
+                          : formik.values.price && "is-valid"
+                      }`}
+                      placeholder="Số Lượng"
+                      value={formik.values.quantity}
+                      onBlur={formik.handleBlur}
+                      onChange={formik.handleChange}
+                    />
+                    {formik.errors.quantity && (
+                      <Form.Control.Feedback
+                        type="invalid"
+                        className={styles.feedback}
+                      >
+                        {formik.errors.quantity}
+                      </Form.Control.Feedback>
+                    )}
+                  </div>
                 </Col>
               </Row>
-              <div>
-                <button type="button" className={`bookstore-btn ${styles.updateImage}`}
-                  onClick={() => setUpdateImage(!updateImage)}
-                >Thay đổi hình ảnh</button>
-              </div>
+
+              {/* Description and Image Row */}
+              <Row className="mt-4">
+                <Col xl={8}>
+                  <div className="form-group mb-4">
+                    <label className={styles.formLabel}>Mô tả</label>
+                    <CKEditor
+                      editor={ClassicEditor}
+                      data={formik.values.description}
+                      onChange={(event, editor) => {
+                        formik.setFieldValue("description", editor.getData());
+                      }}
+                    />
+                  </div>
+                </Col>
+
+                <Col xl={4} className={styles.imageSection}>
+                  <div className={styles.imageContainer}>
+                    {bookData.imageUrl && <PreviewImage src={bookData.imageUrl} />}
+                  </div>
+                </Col>
+              </Row>
+
+              {/* Buttons row */}
+              <Row className="mt-2">
+                <Col xl={8} className={styles.buttonsRow}>
+                  <button
+                    type="button"
+                    className={`bookstore-btn ${styles.updateImage}`}
+                    onClick={() => setUpdateImage(!updateImage)}
+                  >
+                    Thay đổi hình ảnh
+                  </button>
+                  <button
+                    type="submit"
+                    className={`bookstore-btn ${styles.submitBtn}`}
+                  >
+                    Lưu thay đổi
+                  </button>
+                </Col>
+                <Col xl={4} />
+              </Row>
+
+              {/* Update image form - shown when button is clicked */}
               {updateImage && (
-                <Row>
-                  <Col xl={3}>
+                <Row className="mt-3">
+                  <Col xl={8}>
                     <div className="form-group">
-                      <label className={styles.formLabel}>Thay đổi hình ảnh</label>
+                      <label className={styles.formLabel}>Chọn hình ảnh mới</label>
                       <input
                         type="file"
                         name="image"
@@ -426,17 +484,20 @@ function UpdateBook() {
                             ? "is-invalid"
                             : formik.values.image && "is-valid"
                         }`}
-                        placeholder="Hình ảnh"
                         accept="image/png, image/gif, image/jpeg"
-                        // value={formik.values.image[0]}
-                        onChange={(e) => formik.setFieldValue('image', e.target.files[0])}
+                        onChange={(e) =>
+                          formik.setFieldValue("image", e.target.files[0])
+                        }
                       />
-                    {formik.values.image && <PreviewImage file={formik.values.image} />}
+
+                      {formik.values.image && (
+                        <div className="mt-3">
+                          <PreviewImage file={formik.values.image} />
+                        </div>
+                      )}
+
                       {formik.errors.image && (
-                        <Form.Control.Feedback
-                          type="invalid"
-                          className={styles.feedback}
-                        >
+                        <Form.Control.Feedback type="invalid">
                           {formik.errors.image}
                         </Form.Control.Feedback>
                       )}
@@ -445,12 +506,7 @@ function UpdateBook() {
                 </Row>
               )}
 
-              <button
-                type="submit"
-                className={`bookstore-btn ${styles.submitBtn}`}
-              >
-                Lưu thay đổi
-              </button>
+              {/* Submit moved above into the buttons row to reduce whitespace */}
             </form>
           </div>
         </div>

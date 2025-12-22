@@ -259,12 +259,13 @@ function Login() {
             </p>
             <p style={{color: '#ccc', textAlign: 'center'}}>HOẶC</p>
 
-            <div className="d-flex justify-content-between">
+            {/* --- PHẦN SỬA ĐỔI: Dùng class styles.socialButtons thay vì bootstrap d-flex --- */}
+            <div className={styles.socialButtons}>
               <div className={styles.boxLoginThirdParty}>
                 <img src="https://www.freepnglogos.com/uploads/google-logo-png/google-logo-icon-png-transparent-background-osteopathy-16.png" alt="google" />
                 <OAuth2Login
                   className="bookstore-btn"
-                  buttonText="Login with Google"
+                  buttonText="Login With Google"  
                   authorizationUrl="https://accounts.google.com/o/oauth2/auth"
                   responseType="token"
                   clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
@@ -279,7 +280,7 @@ function Login() {
                 <img src="https://cdn.pixabay.com/photo/2015/05/17/10/51/facebook-770688_1280.png" alt="facebook" />
                 <OAuth2Login
                   className="bookstore-btn"
-                  buttonText="Login with Facebook"
+                  buttonText="Login With Facebook" 
                   authorizationUrl="https://www.facebook.com/dialog/oauth"
                   responseType="token"
                   clientId="990086591697823"
@@ -290,6 +291,7 @@ function Login() {
                 />
               </div>
             </div>
+            {/* --- HẾT PHẦN SỬA ĐỔI --- */}
           </div>
         </Container>
       </div>

@@ -37,6 +37,11 @@ const Book = sequelize.define('Book', {
         type: DataTypes.STRING,
         allowNull: true
     },
+    quantity: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+    },
     price: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false

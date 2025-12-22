@@ -20,11 +20,12 @@
     "googleapis": "^100.0.0",
     "ioredis": "^5.3.2",
     "jsonwebtoken": "^8.5.1",
+    "multer": "^1.4.5-lts.1",
     "mysql2": "^3.15.3",
     "nodemailer": "^6.7.5",
     "sequelize": "^6.37.7",
+    "socket.io": "^4.8.1",
     "sqlite3": "^5.1.7",
-    "multer": "^1.4.5-lts.1",
     "streamifier": "^0.1.1"
   }
 }

@@ -25,6 +25,7 @@ router.put('/:id/order-status', verifyTokenAndStaff, orderController.updateOrder
 // 6. Cập nhật Payment ID (Khi thanh toán xong) -> Khách hàng hoặc System gọi
 router.put('/:id/paymentid', verifyToken, orderController.updatePaymentId)
 
+router.put('/:id/cancel', verifyToken, orderController.cancelByUser);
 // router.delete('/:id', orderController.deleteById)
 
 module.exports = router;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
 
@@ -62,13 +62,34 @@ function App() {
   const currentUser = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
+  const navigate = useNavigate();
 
   // --- INIT APP: Fetch user + cart ---
   useEffect(() => {
     const initApp = async () => {
+      // In development, clear any stored credentials by default so
+      // the app opens to the login page instead of auto-signing-in an admin.
+      // To re-enable the previous behaviour during local dev set:
+      // REACT_APP_AUTO_LOGIN=true in your .env
+      try {
+        if (process.env.NODE_ENV === 'development' && process.env.REACT_APP_AUTO_LOGIN !== 'true') {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('user');
+        }
+      } catch (e) {}
+
       const token = localStorage.getItem("accessToken");
       if (!token) {
         setIsAuthChecked(true);
+        try {
+          // One-time startup redirect: if this is the first app session view,
+          // navigate to login so the developer sees the login page when the
+          // project is started. Do not block access to Home afterwards.
+          if (!sessionStorage.getItem('initialLoginRedirectDone')) {
+            sessionStorage.setItem('initialLoginRedirectDone', 'true');
+            navigate('/dang-nhap', { replace: true });
+          }
+        } catch (e) {}
         return;
       }
 
@@ -119,7 +140,7 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<DefaultLayout />}>
-            <Route path="/" element={<Home />} />
+            <Route index element={<Home />} />
             <Route path="/gio-hang" element={<Cart />} />
             <Route path="/khuyen-mai" element={<Discount />} />
             <Route path="/dang-nhap" element={<Login />} />

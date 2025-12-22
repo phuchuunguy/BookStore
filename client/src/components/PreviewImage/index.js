@@ -11,8 +11,8 @@ function PreviewImage({file, src}) {
     }
    }
     return (
-        <div style={{margin: 10}}>
-           {src ? <img src={src} alt="" /> : <img src={preview} alt="" />}
+        <div>
+           {src ? <img src={src} alt="preview" style={{maxWidth: '100%', height: 'auto', display: 'block', margin: '0 auto'}} /> : <img src={preview} alt="preview" style={{maxWidth: '100%', height: 'auto', display: 'block', margin: '0 auto'}} />}
         </div>
     )
 }

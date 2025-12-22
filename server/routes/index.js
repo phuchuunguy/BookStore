@@ -22,6 +22,8 @@ function routes(app) {
     app.use('/api/v1/orders', orderRouter)
     app.use('/api/v1/vouchers', voucherRouter)
     app.use('/api/v1/analytics', analyticRouter)
+    const uploadRouter = require('./upload')
+    app.use('/api/v1/upload', uploadRouter)
 
 
     app.use('*', function(req, res) {

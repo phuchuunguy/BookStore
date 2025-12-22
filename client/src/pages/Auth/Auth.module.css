@@ -11,28 +11,53 @@
     margin: 10px 0;
 }
 
+/* --- PHẦN MỚI THÊM: Container chứa 2 nút --- */
+.socialButtons {
+    display: flex;
+    gap: 10px; /* Khoảng cách giữa 2 nút gần lại (10px) */
+    margin-bottom: 20px;
+}
+
+/* --- PHẦN CHỈNH SỬA: Style từng nút cho giống Shopee --- */
 .boxLoginThirdParty {
+    /* flex: 1 giúp 2 nút tự động giãn đều bằng nhau */
+    flex: 1; 
     display: flex;
     justify-content: center;
-    border: 1px solid #ccc;
-    width: 220px;
-    padding: 6px;
-    border-radius: 4px;
+    align-items: center;
+    
+    /* Viền mảnh màu xám nhạt */
+    border: 1px solid rgba(0, 0, 0, 0.26); 
+    border-radius: 2px; /* Bo góc nhẹ */
+    
+    padding: 0;
+    height: 40px; /* Chiều cao cố định chuẩn */
+    background-color: white;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
 .boxLoginThirdParty:hover {
-    background-color: #f3f2f2;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.4);
 }
 
+/* Chỉnh nút bấm bên trong thư viện OAuth */
 .boxLoginThirdParty button {
     margin-left: 8px;
-    font-size: 15px;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 400;
+    color: #000;
+    background: transparent !important; /* Bỏ màu nền mặc định của nút thư viện */
+    border: none !important; /* Bỏ viền mặc định của nút thư viện */
+    padding: 0;
+    cursor: pointer;
 }
 
 .boxLoginThirdParty img {
-    width: 30px;
-    height: 30px;
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
 }
 
 .forgotPassword {
@@ -47,23 +72,14 @@
     font-weight: 500;
 }
 
+/* Responsive cho màn hình nhỏ */
 @media (max-width: 576px) {
-
-    .boxLoginThirdParty {
-        border: 1px solid #ccc;
-        width: calc(50% - 10px);
-        padding: 6px 2px;
+    .socialButtons {
+        flex-direction: column; /* Xếp chồng nếu màn hình quá nhỏ */
+        gap: 10px;
     }
     
-   
     .boxLoginThirdParty button {
-        margin-left: 4px;
-        font-size: 12px;
+        font-size: 14px;
     }
-    
-    .boxLoginThirdParty img {
-        width: 20px;
-        height: 20px;
-    }
-    
-  }
+}
