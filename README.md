@@ -1,9 +1,9 @@
 
 # BookStore: Website quản lý cửa hàng bán sách
 
-## [Deploy: https://bookstore-v2.vercel.app/](https://bookstore-v2.vercel.app/) 
+<!-- ## [Deploy: https://bookstore.vercel.app/](https://bookstore.vercel.app/)  -->
 
-![](https://res.cloudinary.com/dbynglvwk/image/upload/v1674651494/ie213/Capture_qrtibt.png)
+![](client/src/assets/images/image.png)
 
 
 ## CÔNG NGHỆ SỬ DỤNG
@@ -24,10 +24,6 @@
 - Quản lý khách hàng, hóa đơn
 - Tạo tài khoản, khóa - kích hoạt tài khoản nhân viên
 - Thống kê
-
-### Tài khoản nhân viên
-- Email: nhanvien01@gmail.com
-- Password: 123
 
 ## API bên thứ 3
 

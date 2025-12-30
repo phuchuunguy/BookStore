@@ -32,7 +32,7 @@ const AboutUs = () => {
             D2P BookStore là tiệm sách ngoại văn trực tuyến được thành lập tháng 12/2025 bởi D2P chúng mình và có tình yêu với những trang sách giấy từ mọi đất nước.
           </p>
           <p className={styles.paragraph}>
-            Chúng mình luôn mong muốn tìm được những cuốn sách ngoại văn thật hay, thật đẹp và đảm bảo chất lượng chuẩn cho các con và gia đình. Chính vì vậy, tiệm sách ngoại văn  D2P BookStore đã ra đời.
+            Chúng mình luôn mong muốn tìm được những cuốn sách ngoại văn thật hay, thật đẹp và đảm bảo chất lượng chuẩn cho các con và gia đình. Chính vì vậy, tiệm sách ngoại văn D2P BookStore đã ra đời.
           </p>
         </div>
       </section>

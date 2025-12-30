@@ -21,12 +21,15 @@ const redisClient = new Redis({
 
 // Try to set a default version key without using top-level await so the
 // module remains CommonJS-compatible when required from other files.
+// Try to initialise Book::VERSION but do not print noisy errors when Redis
+// is unavailable (e.g., local dev without Redis). Non-fatal, so suppress
+// the error output to avoid spamming the console with timeouts.
 redisClient.setnx('Book::VERSION', 1)
     .then((wasSet) => {
         if (wasSet) console.log('Initialized Book::VERSION in Redis');
     })
-    .catch((err) => {
-        console.error('Failed to set Book::VERSION in Redis:', err);
+    .catch(() => {
+        // suppressed: initialization failure is non-fatal
     });
 
 redisClient.on('connect', () => {
